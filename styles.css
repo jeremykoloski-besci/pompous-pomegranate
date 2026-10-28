@@ -57,17 +57,21 @@ h1, h2, h3, h4, .article-headline {
     margin-left: 5px;
 }
 
-/* Header */
+/* Sticky Header */
 .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 999;
     background-color: var(--header-bg);
     color: var(--header-text);
     border-bottom: 3px solid var(--accent-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .header-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 15px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -98,23 +102,69 @@ h1, h2, h3, h4, .article-headline {
     color: #aaaaaa;
 }
 
+/* Stylized Logo Area & Clickable Title */
 .logo-area {
     text-align: center;
     flex: 2;
 }
 
-.site-title {
+.site-title-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+}
+
+.brand-logo-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.pomegranate-icon {
+    filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.3));
+    transition: transform 0.2s ease;
+}
+
+.site-title-link:hover .pomegranate-icon {
+    transform: scale(1.08) rotate(-5deg);
+}
+
+.brand-title-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 0.9;
+    text-align: left;
+}
+
+.title-prefix {
+    font-family: 'Zilla Slab', 'Georgia', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #dddddd;
+}
+
+.title-main {
+    font-family: 'Zilla Slab', 'Impact', serif;
     font-size: 2.2rem;
     font-weight: 900;
     letter-spacing: -0.5px;
     color: #ffffff;
+    text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+}
+
+.site-title-link:hover .title-main {
+    color: var(--gold-color);
 }
 
 .site-tagline {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #d4af37;
     font-style: italic;
-    margin-top: 2px;
+    margin-top: 4px;
 }
 
 .theme-toggle {
