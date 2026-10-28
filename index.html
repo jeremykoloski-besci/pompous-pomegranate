@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Pompous Pomegranate - Fake news to cure the blues</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Google Fonts for Editorial Serif Look -->
+    <!-- Google Fonts for Editorial Serif & Zilla Slab Title -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400&family=Zilla+Slab:wght@700;900&display=swap" rel="stylesheet">
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -27,8 +27,31 @@
                 <div class="current-date" id="currentDate"></div>
             </div>
             
+            <!-- Branded Logo & Clickable Title -->
             <div class="logo-area">
-                <h1 class="site-title">The Pompous Pomegranate</h1>
+                <a href="#" class="site-title-link" onclick="location.reload(); return false;">
+                    <div class="brand-logo-wrapper">
+                        <!-- Custom Stylized Pomegranate Icon -->
+                        <svg class="pomegranate-icon" viewBox="0 0 100 100" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Crown / Sepal top -->
+                            <path d="M40 18 L50 6 L60 18 L68 12 L64 24 L36 24 L32 12 Z" fill="#8B0000" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round"/>
+                            <!-- Main Pomegranate Body -->
+                            <circle cx="50" cy="56" r="36" fill="#8B0000" stroke="#1A1A1A" stroke-width="4"/>
+                            <!-- Inner Stylized Cutout / Crown Detail -->
+                            <path d="M35 48 C35 40, 65 40, 65 48 C65 65, 35 65, 35 48 Z" fill="#D4AF37" opacity="0.9"/>
+                            <!-- Internal Seeds Accent -->
+                            <circle cx="44" cy="48" r="3" fill="#600000"/>
+                            <circle cx="54" cy="48" r="3" fill="#600000"/>
+                            <circle cx="49" cy="56" r="3.5" fill="#600000"/>
+                        </svg>
+
+                        <!-- Stylized Brand Title -->
+                        <div class="brand-title-text">
+                            <span class="title-prefix">The</span>
+                            <span class="title-main">Pompous Pomegranate</span>
+                        </div>
+                    </div>
+                </a>
                 <p class="site-tagline">Fake news to cure the blues</p>
             </div>
 
@@ -155,7 +178,7 @@
 
             </div>
 
-            <!-- Pitch Submission Section (Interactive Community Feature) -->
+            <!-- Pitch Submission Section -->
             <section class="pitch-section card" id="pitchSection">
                 <div class="pitch-header">
                     <h2><i class="fa-solid fa-lightbulb"></i> Submit Your Own Satirical Headline</h2>
@@ -227,9 +250,7 @@
     <div class="modal-overlay" id="articleModal">
         <div class="modal-container">
             <button class="modal-close" id="closeModalBtn"><i class="fa-solid fa-xmark"></i></button>
-            <div class="modal-body" id="modalBodyContent">
-                <!-- Dynamically injected article details -->
-            </div>
+            <div class="modal-body" id="modalBodyContent"></div>
         </div>
     </div>
 
