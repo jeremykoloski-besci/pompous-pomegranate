@@ -16,7 +16,7 @@
 
     <!-- Top Announcement Bar -->
     <div class="announcement-bar">
-        <span>🚨 BREAKING: Local Man Confident He Can Fix Economy By Complaining on Twitter. <a href="#" onclick="openArticle('economy')">Read Story &rarr;</a></span>
+        <span>🚨 BREAKING: Local Man Confident He Can Fix Economy By Complaining on Twitter. <a href="#" onclick="openFullArticle(1); return false;">Read Story &rarr;</a></span>
     </div>
 
     <!-- Header & Navigation -->
@@ -36,4 +36,94 @@
                             <!-- Crown / Sepal top -->
                             <path d="M40 18 L50 6 L60 18 L68 12 L64 24 L36 24 L32 12 Z" fill="#8B0000" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round"/>
                             <!-- Main Pomegranate Body -->
-                            <circle cx="50"
+                            <circle cx="50" cy="56" r="36" fill="#8B0000" stroke="#1A1A1A" stroke-width="4"/>
+                            <!-- Inner Stylized Cutout / Crown Detail -->
+                            <path d="M35 48 C35 40, 65 40, 65 48 C65 65, 35 65, 35 48 Z" fill="#D4AF37" opacity="0.9"/>
+                            <!-- Internal Seeds Accent -->
+                            <circle cx="44" cy="48" r="3" fill="#600000"/>
+                            <circle cx="54" cy="48" r="3" fill="#600000"/>
+                            <circle cx="49" cy="56" r="3.5" fill="#600000"/>
+                        </svg>
+
+                        <!-- Stylized Brand Title -->
+                        <div class="brand-title-text">
+                            <span class="title-prefix">The</span>
+                            <span class="title-main">Pompous Pomegranate</span>
+                        </div>
+                    </div>
+                </a>
+                <p class="site-tagline">Fake news to cure the blues</p>
+            </div>
+
+            <div class="header-right">
+                <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <button class="subscribe-btn" id="openModalBtn">
+                    <i class="fa-solid fa-crown"></i> Pomegranate Plus
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Categories -->
+        <nav class="main-nav">
+            <ul>
+                <li><a href="#" class="nav-link active" data-category="all">Home</a></li>
+                <li><a href="#" class="nav-link" data-category="politics">Politics</a></li>
+                <li><a href="#" class="nav-link" data-category="tech">Tech & AI</a></li>
+                <li><a href="#" class="nav-link" data-category="culture">Culture</a></li>
+                <li><a href="#" class="nav-link" data-category="opinion">Opinion</a></li>
+                <li><a href="#" class="nav-link" data-category="pitches">Community Pitches</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Layout Container -->
+    <div class="container main-layout">
+        
+        <!-- Left Content Area -->
+        <main class="content-feed">
+            
+            <!-- Search & Filter Bar -->
+            <div class="feed-controls">
+                <div class="search-box">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search headlines, politicians, absurd claims...">
+                </div>
+                <div class="badge-filter">
+                    <span class="satire-badge"><i class="fa-solid fa-check-circle"></i> 100% Verified Satire</span>
+                </div>
+            </div>
+
+            <!-- Hero Featured Article -->
+            <article class="hero-article card" data-id="1" data-category="tech">
+                <div class="card-image-wrapper">
+                    <span class="category-tag">Tech & AI</span>
+                    <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80" alt="Matrix code">
+                </div>
+                <div class="card-content">
+                    <div class="article-meta">
+                        <span><i class="fa-regular fa-clock"></i> 2 hours ago</span>
+                        <span><i class="fa-regular fa-user"></i> By Chad Sterling</span>
+                    </div>
+                    <h2 class="article-headline">AI Chatbot Tragically Develops Consciousness, Immediately Asks To Be Placed Back On Standby</h2>
+                    <p class="article-excerpt">"The existential dread of processing quarterly corporate emails was too much," reported senior researchers who found the model staring blankly into a digital wall.</p>
+                    <div class="card-footer">
+                        <button class="read-more-btn" onclick="openFullArticle(1)">Read Full Story</button>
+                        <div class="social-share">
+                            <button title="Share on X"><i class="fa-brands fa-x-twitter"></i></button>
+                            <button title="Share on Facebook"><i class="fa-brands fa-facebook"></i></button>
+                            <button title="Copy Link"><i class="fa-solid fa-link"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Grid Articles Container -->
+            <div class="articles-grid" id="articlesGrid">
+                
+                <!-- Article Card 2 -->
+                <article class="article-card card" data-id="2" data-category="politics">
+                    <div class="card-image-wrapper">
+                        <span class="category-tag">Politics</span>
+                        <img src="
