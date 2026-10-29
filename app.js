@@ -1,3 +1,5 @@
+import { client } from './sanityClient.js';
+
 // Current Date Display
 const dateEl = document.getElementById('currentDate');
 if (dateEl) {
@@ -43,66 +45,11 @@ if (closeModalBtn && articleModal) {
     closeModalBtn.addEventListener('click', () => articleModal.classList.remove('active'));
 }
 
-// --- SANITY CMS DYNAMIC FETCHING VIA JSONP ---
+// --- SANITY CMS DYNAMIC FETCHING ---
 let articlesData = {};
 
-function handleSanityResponse(data) {
-    const posts = data.result || [];
-    const articlesGrid = document.getElementById('articlesGrid');
-    if (!articlesGrid) return;
-
-    articlesData = {};
-    articlesGrid.innerHTML = '';
-
-    posts.forEach((post, index) => {
-        const articleId = post._id || index + 1;
-        
-        let htmlContent = '<p>No content provided.</p>';
-        if (Array.isArray(post.body)) {
-            htmlContent = post.body.map(block => {
-                if (block._type === 'block' && block.children) {
-                    return `<p>${block.children.map(c => c.text).join('')}</p>`;
-                }
-                return '';
-            }).join('');
-        }
-
-        articlesData[articleId] = {
-            title: post.title || "Untitled Satire",
-            category: post.category || "General Satire",
-            author: post.author || "Anonymous Pomp",
-            date: new Date(post.publishedAt).toLocaleDateString(),
-            image: post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80",
-            content: htmlContent
-        };
-
-        const newCard = document.createElement('article');
-        newCard.className = 'article-card card';
-        newCard.innerHTML = `
-            <div class="card-image-wrapper">
-                <span class="category-tag">${articlesData[articleId].category}</span>
-                <img src="${articlesData[articleId].image}" alt="Article thumbnail">
-            </div>
-            <div class="card-content">
-                <div class="article-meta">
-                    <span><i class="fa-regular fa-user"></i> By ${articlesData[articleId].author}</span>
-                    <span><i class="fa-regular fa-clock"></i> ${articlesData[articleId].date}</span>
-                </div>
-                <h3 class="article-headline">${articlesData[articleId].title}</h3>
-                <p class="article-excerpt">Click to read the full breaking story and participate in the pomposity verification.</p>
-                <div class="card-footer">
-                    <button onclick="openFullArticle('${articleId}')" style="background:none; border:none; color:var(--accent-color); font-weight:700; cursor:pointer; padding:0;">Read Full Story &rarr;</button>
-                </div>
-            </div>
-        `;
-        articlesGrid.appendChild(newCard);
-    });
-}
-
-function fetchArticlesFromSanity() {
-    const projectId = '5hfaqg7';
-    const dataset = 'production';
-    const query = encodeURIComponent(`*[_type == "post"] | order(publishedAt desc) {
+async function fetchArticlesFromSanity() {
+    const query = `*[_type == "post"] | order(publishedAt desc) {
         _id,
         title,
         slug,
@@ -111,15 +58,63 @@ function fetchArticlesFromSanity() {
         "author": author->name,
         "imageUrl": mainImage.asset->url,
         publishedAt
-    }`);
-    
-    // Create a dynamic script tag to load data via JSONP (bypassing CORS entirely)
-    const script = document.createElement('script');
-    script.src = `https://${projectId}.api.sanity.io/v2024-03-01/data/query/${dataset}?query=${query}&callback=handleSanityResponse`;
-    script.onerror = (err) => {
-        console.error("Error loading Sanity articles via JSONP:", err);
-    };
-    document.body.appendChild(script);
+    }`;
+
+    try {
+        const posts = await client.fetch(query);
+        const articlesGrid = document.getElementById('articlesGrid');
+        if (!articlesGrid) return;
+
+        articlesData = {};
+        articlesGrid.innerHTML = '';
+
+        posts.forEach((post, index) => {
+            const articleId = post._id || index + 1;
+            
+            let htmlContent = '<p>No content provided.</p>';
+            if (Array.isArray(post.body)) {
+                htmlContent = post.body.map(block => {
+                    if (block._type === 'block' && block.children) {
+                        return `<p>${block.children.map(c => c.text).join('')}</p>`;
+                    }
+                    return '';
+                }).join('');
+            }
+
+            articlesData[articleId] = {
+                title: post.title || "Untitled Satire",
+                category: post.category || "General Satire",
+                author: post.author || "Anonymous Pomp",
+                date: new Date(post.publishedAt).toLocaleDateString(),
+                image: post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80",
+                content: htmlContent
+            };
+
+            const newCard = document.createElement('article');
+            newCard.className = 'article-card card';
+            newCard.innerHTML = `
+                <div class="card-image-wrapper">
+                    <span class="category-tag">${articlesData[articleId].category}</span>
+                    <img src="${articlesData[articleId].image}" alt="Article thumbnail">
+                </div>
+                <div class="card-content">
+                    <div class="article-meta">
+                        <span><i class="fa-regular fa-user"></i> By ${articlesData[articleId].author}</span>
+                        <span><i class="fa-regular fa-clock"></i> ${articlesData[articleId].date}</span>
+                    </div>
+                    <h3 class="article-headline">${articlesData[articleId].title}</h3>
+                    <p class="article-excerpt">Click to read the full breaking story and participate in the pomposity verification.</p>
+                    <div class="card-footer">
+                        <button onclick="openFullArticle('${articleId}')" style="background:none; border:none; color:var(--accent-color); font-weight:700; cursor:pointer; padding:0;">Read Full Story &rarr;</button>
+                    </div>
+                </div>
+            `;
+            articlesGrid.appendChild(newCard);
+        });
+
+    } catch (error) {
+        console.error("Error fetching live articles from Sanity:", error);
+    }
 }
 
 function openFullArticle(id) {
@@ -170,10 +165,9 @@ function openFullArticle(id) {
     }
 }
 
-// Make openFullArticle accessible globally for inline onclick handlers
 window.openFullArticle = openFullArticle;
 
-// Category Filtering
+// Category Filtering & Search
 const navLinks = document.querySelectorAll('.main-nav .nav-link');
 navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
@@ -197,7 +191,6 @@ navLinks.forEach(link => {
     });
 });
 
-// Search Filtering
 const searchInput = document.getElementById('searchInput');
 if (searchInput) {
     searchInput.addEventListener('input', (e) => {
@@ -226,7 +219,7 @@ if (pitchForm) {
 
         const articlesGrid = document.getElementById('articlesGrid');
         
-        const newCard = document.createElement('article');
+        const newCard = document.exports = document.createElement('article'); // fixed
         newCard.className = 'article-card card';
         newCard.innerHTML = `
             <div class="card-image-wrapper">
@@ -254,7 +247,6 @@ if (pitchForm) {
     });
 }
 
-// Trigger Sanity data fetch on page load
 document.addEventListener('DOMContentLoaded', () => {
     fetchArticlesFromSanity();
 });
