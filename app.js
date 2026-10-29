@@ -49,7 +49,9 @@ if (closeModalBtn && articleModal) {
 let articlesData = {};
 
 async function fetchArticlesFromSanity() {
-    const query = `*[_type == "post"] | order(publishedAt desc) {
+    const projectId = '5hfaqg7';
+    const dataset = 'production';
+    const query = encodeURIComponent(`*[_type == "post"] | order(publishedAt desc) {
         _id,
         title,
         slug,
@@ -58,17 +60,20 @@ async function fetchArticlesFromSanity() {
         "author": author->name,
         "imageUrl": mainImage.asset->url,
         publishedAt
-    }`;
+    }`);
+    const url = `https://${projectId}.api.sanity.io/v2024-03-01/data/query/${dataset}?query=${query}`;
 
     try {
-        const posts = await client.fetch(query);
+        const response = await fetch(url);
+        const data = await response.json();
+        const posts = data.result || [];
+        
         const articlesGrid = document.getElementById('articlesGrid');
         if (!articlesGrid) return;
 
         articlesData = {};
         articlesGrid.innerHTML = '';
 
-        posts.exports = posts || []; // safeguard
         posts.forEach((post, index) => {
             const articleId = post._id || index + 1;
             
