@@ -7,20 +7,23 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const projectId = '5hfaqg7';
+  // CORRECTED PROJECT ID WITH TWO 'q's
+  const projectId = '5hfaqqg7';
   const dataset = 'production';
   const apiVersion = '2026-10-29';
 
-  // Let's query ALL documents of any type to inspect what is actually stored
-  const query = encodeURIComponent(`*[] {
+  const query = encodeURIComponent(`*[_type == "post"] | order(publishedAt desc) {
       _id,
-      _type,
       title,
       slug,
+      body,
+      "category": categories[0]->title,
+      "author": author->name,
+      "imageUrl": mainImage.asset->url,
       publishedAt
   }`);
 
-  const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${query}&perspective=previewDrafts`;
+  const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${query}`;
   const token = 'skUaP8VnZYnUOJV7kpwTHWWBwpORkNkhEuAmO3idhBkNOl4APE5bwRBtpUisdgQiIpgXaxBpQV1Or7FKCUlnHzSHb7hQG9rFUYzVfA7XWD8mkLLMGlbCMIZFsMV9sUD1mXrHLRkP7o7Up8OInPFfGNee1KbOqHBkRE6xkrrLnJrWEPBy4fX6';
 
   try {
