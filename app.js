@@ -1,4 +1,4 @@
-import { client } from './sanityClient.js';
+
 
 // Current Date Display
 const dateEl = document.getElementById('currentDate');
