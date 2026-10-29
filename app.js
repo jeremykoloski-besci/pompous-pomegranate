@@ -49,7 +49,9 @@ if (closeModalBtn && articleModal) {
 let articlesData = {};
 
 async function fetchArticlesFromSanity() {
-    const query = `*[_type == "post"] | order(publishedAt desc) {
+    const projectId = '5hfaqg7';
+    const dataset = 'production';
+    const query = encodeURIComponent(`*[_type == "post"] | order(publishedAt desc) {
         _id,
         title,
         slug,
@@ -58,21 +60,23 @@ async function fetchArticlesFromSanity() {
         "author": author->name,
         "imageUrl": mainImage.asset->url,
         publishedAt
-    }`;
+    }`);
+    const url = `https://${projectId}.api.sanity.io/v2024-03-01/data/query/${dataset}?query=${query}`;
 
     try {
-        const posts = await client.fetch(query);
+        const response = await fetch(url);
+        const data = await response.json();
+        const posts = data.result || [];
+        
         const articlesGrid = document.getElementById('articlesGrid');
         if (!articlesGrid) return;
 
-        // Reset data map & clear grid
         articlesData = {};
         articlesGrid.innerHTML = '';
 
         posts.forEach((post, index) => {
             const articleId = post._id || index + 1;
             
-            // Format body content blocks into HTML
             let htmlContent = '<p>No content provided.</p>';
             if (Array.isArray(post.body)) {
                 htmlContent = post.body.map(block => {
@@ -83,7 +87,6 @@ async function fetchArticlesFromSanity() {
                 }).join('');
             }
 
-            // Map into local lookup object for the reader modal
             articlesData[articleId] = {
                 title: post.title || "Untitled Satire",
                 category: post.category || "General Satire",
@@ -93,7 +96,6 @@ async function fetchArticlesFromSanity() {
                 content: htmlContent
             };
 
-            // Build article card HTML
             const newCard = document.createElement('article');
             newCard.className = 'article-card card';
             newCard.innerHTML = `
@@ -120,7 +122,6 @@ async function fetchArticlesFromSanity() {
         console.error("Error fetching live articles from Sanity:", error);
     }
 }
-
 function openFullArticle(id) {
     const article = articlesData[id];
     if (!article) return;
