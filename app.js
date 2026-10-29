@@ -47,7 +47,7 @@ if (closeModalBtn && articleModal) {
 let articlesData = {};
 
 async function fetchArticlesFromSanity() {
-    // Fetch locally through your Vercel serverless proxy route
+    // This MUST point to your Vercel serverless proxy route, NOT sanity.io directly
     const url = '/api/posts';
 
     try {
