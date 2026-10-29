@@ -9,6 +9,10 @@ export default async function handler(req, res) {
 
   const projectId = '5hfaqg7';
   const dataset = 'production';
+  
+  // Updated API version to match your current Sanity Studio release/version
+  const apiVersion = '2026-10-29'; 
+
   const query = encodeURIComponent(`*[_type == "post"] | order(publishedAt desc) {
       _id,
       title,
@@ -20,10 +24,8 @@ export default async function handler(req, res) {
       publishedAt
   }`);
 
-  const url = `https://${projectId}.api.sanity.io/v2024-03-01/data/query/${dataset}?query=${query}`;
-  
-  // REPLACE THIS STRING WITH YOUR NEWLY GENERATED SANITY API TOKEN
-  const token = 'skmWxT7MDzSxirEYkPFljqd0cwVFHDSomO3lMLsNnxQafb4zsIrEXDKexNJFD3X0Jy6Oc6hROAtPFmvyeH0YlFHfqwoXPjIbEy9Cts6QuPsMBNITTleY2shKptpxFu7m2Z5tstIV3QhhalNxq942uI1yA32ZJEMLZIFblm2mBizwY722y60S';
+  const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${query}`;
+  const token = 'skUaP8VnZYnUOJV7kpwTHWWBwpORkNkhEuAmO3idhBkNOl4APE5bwRBtpUisdgQiIpgXaxBpQV1Or7FKCUlnHzSHb7hQG9rFUYzVfA7XWD8mkLLMGlbCMIZFsMV9sUD1mXrHLRkP7o7Up8OInPFfGNee1KbOqHBkRE6xkrrLnJrWEPBy4fX6';
 
   try {
     const response = await fetch(url, {
