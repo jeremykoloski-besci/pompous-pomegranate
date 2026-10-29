@@ -9,11 +9,10 @@ export default async function handler(req, res) {
 
   const projectId = '5hfaqg7';
   const dataset = 'production';
-  
-  // Updated API version to match your current Sanity Studio release/version
-  const apiVersion = '2026-10-29'; 
+  const apiVersion = '2026-10-29';
 
-  const query = encodeURIComponent(`*[_type == "post"] | order(publishedAt desc) {
+  // Exact query matching what Vision used
+  const query = encodeURIComponent(`*[_type == "post"] {
       _id,
       title,
       slug,
