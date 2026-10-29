@@ -49,9 +49,7 @@ if (closeModalBtn && articleModal) {
 let articlesData = {};
 
 async function fetchArticlesFromSanity() {
-    const projectId = '5hfaqg7';
-    const dataset = 'production';
-    const query = encodeURIComponent(`*[_type == "post"] | order(publishedAt desc) {
+    const query = `*[_type == "post"] | order(publishedAt desc) {
         _id,
         title,
         slug,
@@ -60,27 +58,17 @@ async function fetchArticlesFromSanity() {
         "author": author->name,
         "imageUrl": mainImage.asset->url,
         publishedAt
-    }`);
-    const url = `https://${projectId}.api.sanity.io/v2024-03-01/data/query/${dataset}?query=${query}`;
-    
-    // Your actual Sanity viewer/editor token
-    const token = 'skUaP8VnZYnUOJV7kpwTHWWBwpORkNkhEuAmO3idhBkNOl4APE5bwRBtpUisdgQiIpgXaxBpQV1Or7FKCUlnHzSHb7hQG9rFUYzVfA7XWD8mkLLMGlbCMIZFsMV9sUD1mXrHLRkP7o7Up8OInPFfGNee1KbOqHBkRE6xkrrLnJrWEPBy4fX6';
+    }`;
 
     try {
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        const data = await response.json();
-        const posts = data.result || [];
-        
+        const posts = await client.fetch(query);
         const articlesGrid = document.getElementById('articlesGrid');
         if (!articlesGrid) return;
 
         articlesData = {};
         articlesGrid.innerHTML = '';
 
+        posts.exports = posts || []; // safeguard
         posts.forEach((post, index) => {
             const articleId = post._id || index + 1;
             
