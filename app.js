@@ -47,28 +47,11 @@ if (closeModalBtn && articleModal) {
 let articlesData = {};
 
 async function fetchArticlesFromSanity() {
-    const projectId = '5hfaqg7';
-    const dataset = 'production';
-    const query = encodeURIComponent(`*[_type == "post"] | order(publishedAt desc) {
-        _id,
-        title,
-        slug,
-        body,
-        "category": categories[0]->title,
-        "author": author->name,
-        "imageUrl": mainImage.asset->url,
-        publishedAt
-    }`);
-    
-    const url = `https://${projectId}.api.sanity.io/v2024-03-01/data/query/${dataset}?query=${query}`;
-    const token = 'skUaP8VnZYnUOJV7kpwTHWWBwpORkNkhEuAmO3idhBkNOl4APE5bwRBtpUisdgQiIpgXaxBpQV1Or7FKCUlnHzSHb7hQG9rFUYzVfA7XWD8mkLLMGlbCMIZFsMV9sUD1mXrHLRkP7o7Up8OInPFfGNee1KbOqHBkRE6xkrrLnJrWEPBy4fX6';
+    // Fetch locally through your Vercel serverless proxy route
+    const url = '/api/posts';
 
     try {
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        const response = await fetch(url);
         const data = await response.json();
         const posts = data.result || [];
         
@@ -123,7 +106,7 @@ async function fetchArticlesFromSanity() {
         });
 
     } catch (error) {
-        console.error("Error fetching live articles from Sanity:", error);
+        console.error("Error fetching live articles from Sanity proxy:", error);
     }
 }
 
