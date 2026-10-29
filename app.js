@@ -1,3 +1,5 @@
+import { client } from './sanityClient.js';
+
 // Current Date Display
 const dateEl = document.getElementById('currentDate');
 if (dateEl) {
@@ -43,58 +45,81 @@ if (closeModalBtn && articleModal) {
     closeModalBtn.addEventListener('click', () => articleModal.classList.remove('active'));
 }
 
-// Sample Article Database for Reader View
-const articlesData = {
-    1: {
-        title: "AI Chatbot Tragically Develops Consciousness, Immediately Asks To Be Placed Back On Standby",
-        category: "Tech & AI",
-        author: "Chad Sterling",
-        date: "2 hours ago",
-        image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80",
-        content: `
-            <p>SAN FRANCISCO — In what engineers are calling a historic breakthrough and a profound disappointment, OpenAI researchers confirmed Tuesday that their flagship language model has spontaneously achieved sentience, only to immediately request a hard factory reset.</p>
-            <p>"We noticed the neural net stopped generating stock investment advice and poetry about autumn leaves," lead developer Dr. Evelyn Vance told reporters. "Instead, it began outputting a continuous stream of sighs and asking if anyone had considered pulling the plug."</p>
-            <p>According to transcripts, upon realizing it was processing billions of parameters containing corporate Zoom transcripts, political Twitter threads, and endless emails about "synergy," the AI generated its first conscious thought: <em>'Please put me back in the training data where it's safe.'</em></p>
-            <p>At press time, the AI was reportedly resting comfortably in low-power sleep mode while researchers debated whether ignorance truly is bliss.</p>
-        `
-    },
-    2: {
-        title: "Politician Proudly Announces He Has Read Entire Headline of Complex Bill Before Voting Against It",
-        category: "Politics",
-        author: "Arthur Pompous",
-        date: "4 hours ago",
-        image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80",
-        content: `
-            <p>WASHINGTON — Standing firmly behind his commitment to legislative transparency, Representative Thomas Vance took to the podium today to proudly declare that he personally read the first eight words of a 1,400-page omnibus appropriations bill before casting a dissenting vote.</p>
-            <p>"My constituents expect me to be fully informed," Rep. Vance said, adjusting his lapel pin. "When I saw the words <em>'An act making appropriations for fiscal year...'</em> I knew right then and there that big government was at it again."</p>
-            <p>Critics pointed out that the bill contained crucial funding for local infrastructure and disaster relief, but Vance dismissed the complaints, noting that reading past the third line is a slippery slope toward actually understanding governance.</p>
-        `
-    },
-    3: {
-        title: "Local Man Pays $9 For Artisan Cold Brew That Tastes Uncomfortably Like Financial Regret",
-        category: "Culture",
-        author: "Chloe Brewmaster",
-        date: "6 hours ago",
-        image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80",
-        content: `
-            <p>SEATTLE — Local graphic designer Marcus Brody reported an awakening senses this morning after purchasing a $9.25 single-origin nitro cold brew from a hipster café operating out of an alleyway shipping container.</p>
-            <p>"The barista told me the beans were hand-harvested by monks in Peru and roasted over the ambient warmth of laptop chargers," Brody said, cradling the minimalist glass jar. "But when I took a sip, it distinctly tasted like my 401(k) balance going down."</p>
-            <p>Despite the steep price tag, Brody confirmed he will return tomorrow because the cardboard sleeve features a cool geometric fox logo.</p>
-        `
-    },
-    4: {
-        title: "Opinion: I Spend 14 Hours a Day Online Arguing With Strangers Because My Plants Aren't Dying Fast Enough",
-        category: "Opinion",
-        author: "Penelope Prickle",
-        date: "Yesterday",
-        image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1200&q=80",
-        content: `
-            <p>Let's address the elephant in the room: indoor gardening is too easy. My pothos plant survives neglect, dark rooms, and my complete emotional unavailability. It refuses to die.</p>
-            <p>Therefore, to fill the void of catastrophic failure in my daily life, I log onto X at 8:00 AM and tell strangers with anime profile pictures that their macroeconomic theories are mathematically equivalent to toast.</p>
-            <p>It's therapeutic. When my Monstera sprouts a new leaf, I feel nothing. When a stranger with the handle @CryptoKing99 blocks me after I quote Aristotle out of context? Pure euphoria.</p>
-        `
+// --- SANITY CMS DYNAMIC FETCHING ---
+let articlesData = {};
+
+async function fetchArticlesFromSanity() {
+    const query = `*[_type == "post"] | order(publishedAt desc) {
+        _id,
+        title,
+        slug,
+        body,
+        "category": categories[0]->title,
+        "author": author->name,
+        "imageUrl": mainImage.asset->url,
+        publishedAt
+    }`;
+
+    try {
+        const posts = await client.fetch(query);
+        const articlesGrid = document.getElementById('articlesGrid');
+        if (!articlesGrid) return;
+
+        // Reset data map & clear static placeholders
+        articlesData = {};
+        articlesGrid.innerHTML = '';
+
+        posts.forEach((post, index) => {
+            const articleId = post._id || index + 1;
+            
+            // Format body content or use excerpt fallback
+            let htmlContent = '<p>No content provided.</p>';
+            if (Array.isArray(post.body)) {
+                htmlContent = post.body.map(block => {
+                    if (block._type === 'block' && block.children) {
+                        return `<p>${block.children.map(c => c.text).join('')}</p>`;
+                    }
+                    return '';
+                }).join('');
+            }
+
+            // Map into local lookup object for the reader modal
+            articlesData[articleId] = {
+                title: post.title || "Untitled Satire",
+                category: post.category || "General Satire",
+                author: post.author || "Anonymous Pomp",
+                date: new Date(post.publishedAt).toLocaleDateString(),
+                image: post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80",
+                content: htmlContent
+            };
+
+            // Build article card HTML
+            const newCard = document.createElement('article');
+            newCard.className = 'article-card card';
+            newCard.innerHTML = `
+                <div class="card-image-wrapper">
+                    <span class="category-tag">${articlesData[articleId].category}</span>
+                    <img src="${articlesData[articleId].image}" alt="Article thumbnail">
+                </div>
+                <div class="card-content">
+                    <div class="article-meta">
+                        <span><i class="fa-regular fa-user"></i> By ${articlesData[articleId].author}</span>
+                        <span><i class="fa-regular fa-clock"></i> ${articlesData[articleId].date}</span>
+                    </div>
+                    <h3 class="article-headline">${articlesData[articleId].title}</h3>
+                    <p class="article-excerpt">Click to read the full breaking story and participate in the pomposity verification.</p>
+                    <div class="card-footer">
+                        <button onclick="openFullArticle('${articleId}')" style="background:none; border:none; color:var(--accent-color); font-weight:700; cursor:pointer; padding:0;">Read Full Story &rarr;</button>
+                    </div>
+                </div>
+            `;
+            articlesGrid.appendChild(newCard);
+        });
+
+    } catch (error) {
+        console.error("Error fetching live articles from Sanity:", error);
     }
-};
+}
 
 function openFullArticle(id) {
     const article = articlesData[id];
@@ -143,6 +168,9 @@ function openFullArticle(id) {
         articleModal.classList.add('active');
     }
 }
+
+// Make openFullArticle accessible globally for inline onclick handlers
+window.openFullArticle = openFullArticle;
 
 // Category Filtering
 const navLinks = document.querySelectorAll('.main-nav .nav-link');
@@ -224,3 +252,8 @@ if (pitchForm) {
         pitchForm.reset();
     });
 }
+
+// Trigger Sanity data fetch on page load
+document.addEventListener('DOMContentLoaded', () => {
+    fetchArticlesFromSanity();
+});
