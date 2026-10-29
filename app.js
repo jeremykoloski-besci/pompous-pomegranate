@@ -1,5 +1,3 @@
-import { client } from './sanityClient.js';
-
 // Current Date Display
 const dateEl = document.getElementById('currentDate');
 if (dateEl) {
@@ -45,11 +43,13 @@ if (closeModalBtn && articleModal) {
     closeModalBtn.addEventListener('click', () => articleModal.classList.remove('active'));
 }
 
-// --- SANITY CMS DYNAMIC FETCHING ---
+// --- SANITY CMS DYNAMIC FETCHING VIA DIRECT FETCH ---
 let articlesData = {};
 
 async function fetchArticlesFromSanity() {
-    const query = `*[_type == "post"] | order(publishedAt desc) {
+    const projectId = '5hfaqg7';
+    const dataset = 'production';
+    const query = encodeURIComponent(`*[_type == "post"] | order(publishedAt desc) {
         _id,
         title,
         slug,
@@ -58,10 +58,20 @@ async function fetchArticlesFromSanity() {
         "author": author->name,
         "imageUrl": mainImage.asset->url,
         publishedAt
-    }`;
+    }`);
+    
+    const url = `https://${projectId}.api.sanity.io/v2024-03-01/data/query/${dataset}?query=${query}`;
+    const token = 'skUaP8VnZYnUOJV7kpwTHWWBwpORkNkhEuAmO3idhBkNOl4APE5bwRBtpUisdgQiIpgXaxBpQV1Or7FKCUlnHzSHb7hQG9rFUYzVfA7XWD8mkLLMGlbCMIZFsMV9sUD1mXrHLRkP7o7Up8OInPFfGNee1KbOqHBkRE6xkrrLnJrWEPBy4fX6';
 
     try {
-        const posts = await client.fetch(query);
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const data = await response.json();
+        const posts = data.result || [];
+        
         const articlesGrid = document.getElementById('articlesGrid');
         if (!articlesGrid) return;
 
@@ -219,7 +229,7 @@ if (pitchForm) {
 
         const articlesGrid = document.getElementById('articlesGrid');
         
-        const newCard = document.exports = document.createElement('article'); // fixed
+        const newCard = document.createElement('article');
         newCard.className = 'article-card card';
         newCard.innerHTML = `
             <div class="card-image-wrapper">
