@@ -59,17 +59,11 @@ async function fetchArticlesFromSanity() {
         "imageUrl": mainImage.asset->url,
         publishedAt
     }`);
-    const url = `https://${projectId}.api.sanity.io/v2024-03-01/data/query/${dataset}?query=${query}`;
-    
-    // Your Sanity API Viewer token to bypass the 403 block
-    const token = 'skUaP8VnZYnUOJV7kpwTHWWBwpORkNkhEuAmO3idhBkNOl4APE5bwRBtpUisdgQiIpgXaxBpQV1Or7FKCUlnHzSHb7hQG9rFUYzVfA7XWD8mkLLMGlbCMIZFsMV9sUD1mXrHLRkP7o7Up8OInPFfGNee1KbOqHBkRE6xkrrLnJrWEPBy4fX6';
+    // Use apicdn.sanity.io instead of api.sanity.io for public unauthenticated reads
+    const url = `https://${projectId}.apicdn.sanity.io/v2024-03-01/data/query/${dataset}?query=${query}`;
 
     try {
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        const response = await fetch(url); // No custom headers = No preflight CORS blocks!
         const data = await response.json();
         const posts = data.result || [];
         
