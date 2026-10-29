@@ -65,14 +65,14 @@ async function fetchArticlesFromSanity() {
         const articlesGrid = document.getElementById('articlesGrid');
         if (!articlesGrid) return;
 
-        // Reset data map & clear static placeholders
+        // Reset data map & clear grid
         articlesData = {};
         articlesGrid.innerHTML = '';
 
         posts.forEach((post, index) => {
             const articleId = post._id || index + 1;
             
-            // Format body content or use excerpt fallback
+            // Format body content blocks into HTML
             let htmlContent = '<p>No content provided.</p>';
             if (Array.isArray(post.body)) {
                 htmlContent = post.body.map(block => {
