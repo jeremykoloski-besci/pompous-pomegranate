@@ -11,15 +11,12 @@ export default async function handler(req, res) {
   const dataset = 'production';
   const apiVersion = '2026-10-29';
 
-  // Using perspective=previewDrafts so it fetches both published and draft posts
-  const query = encodeURIComponent(`*[_type == "post"] | order(_updatedAt desc) {
+  // Let's query ALL documents of any type to inspect what is actually stored
+  const query = encodeURIComponent(`*[] {
       _id,
+      _type,
       title,
       slug,
-      body,
-      "category": categories[0]->title,
-      "author": author->name,
-      "imageUrl": mainImage.asset->url,
       publishedAt
   }`);
 
