@@ -240,7 +240,7 @@ navLinks.forEach(link => {
             return;
         }
 
-        // Show standard feed layout for other categories
+        // Show standard feed layout for home or other categories
         if (heroArticle) heroArticle.style.display = 'block';
         if (articlesGrid) articlesGrid.style.display = 'grid';
 
@@ -249,6 +249,7 @@ navLinks.forEach(link => {
             const tagEl = card.querySelector('.category-tag');
             const cardCategory = tagEl ? tagEl.textContent.trim().toLowerCase() : '';
             
+            // If Home is clicked, show EVERYTHING (both standard posts and community pitches)
             if (categoryAttr === 'home' || !categoryAttr) {
                 card.style.display = 'block';
             } else {
