@@ -22,11 +22,12 @@ const query = encodeURIComponent(`{
       "imageUrl": mainImage.asset->url,
       publishedAt
     },
-    "pitches": *[_type == "pitch" && status == "approved"] | order(submittedAt desc) {
+"pitches": *[_type == "pitch" && status == "approved"] | order(submittedAt desc) {
       _id,
       author,
       headline,
-      submittedAt
+      submittedAt,
+      "imageUrl": image.asset->url
     },
     "factCheck": *[_type == "factCheck"] | order(publishedAt desc)[0] {
       claim,
