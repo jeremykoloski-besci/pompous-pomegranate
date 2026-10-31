@@ -47,15 +47,14 @@ if (closeModalBtn && articleModal) {
 let articlesData = {};
 
 async function fetchArticlesFromSanity() {
-    // This points to your Vercel serverless proxy route
     const url = '/api/posts';
 
     try {
         const response = await fetch(url);
         const data = await response.json();
         const posts = data.result || [];
-        const approvedPitches = data.pitches || []; // Grab approved community pitches
-        const factCheckData = data.factCheck; // Grab the live fact check object
+        const approvedPitches = data.pitches || []; 
+        const factCheckData = data.factCheck; 
 
         // Populate the Fact Check sidebar widget dynamically
         const factCheckContainer = document.getElementById('factCheckContainer');
@@ -228,7 +227,6 @@ navLinks.forEach(link => {
             if (heroArticle) heroArticle.style.display = 'none';
             if (articlesGrid) {
                 articlesGrid.style.display = 'grid';
-                // Show ONLY cards that are Community Pitches, hide everything else
                 const cards = articlesGrid.querySelectorAll('.article-card');
                 cards.forEach(card => {
                     const tagEl = card.querySelector('.category-tag');
@@ -244,7 +242,6 @@ navLinks.forEach(link => {
         if (heroArticle) heroArticle.style.display = 'block';
         if (articlesGrid) articlesGrid.style.display = 'grid';
 
-        // Filter the rendered article cards by category text matching
         const cards = document.querySelectorAll('.article-card');
         cards.forEach(card => {
             const tagEl = card.querySelector('.category-tag');
@@ -290,13 +287,12 @@ function showToast(message) {
     if (toastMsg) toastMsg.textContent = message;
     toast.classList.add('show');
 
-    // Automatically hide after 4 seconds
     setTimeout(() => {
         toast.classList.remove('show');
     }, 4000);
 }
 
-// Community Pitch Form Submission (Sends securely to Sanity as pending review)
+// Community Pitch Form Submission
 const pitchForm = document.getElementById('pitchForm');
 if (pitchForm) {
     pitchForm.addEventListener('submit', async (e) => {
