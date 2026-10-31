@@ -56,7 +56,39 @@ h1, h2, h3, h4, .article-headline {
     text-decoration: underline;
     margin-left: 5px;
 }
+/* Custom Toast Notification */
+.toast-notification {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--card-bg, #fff);
+    color: var(--text-primary, #1a1a1a);
+    border: 2px solid var(--accent-color, #8B0000);
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
 
+.toast-notification.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.toast-notification i {
+    color: var(--accent-color, #8B0000);
+    font-size: 1.2rem;
+}
 /* Sticky Header */
 .site-header {
     position: sticky;
