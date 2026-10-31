@@ -54,6 +54,18 @@ async function fetchArticlesFromSanity() {
         const response = await fetch(url);
         const data = await response.json();
         const posts = data.result || [];
+        const factCheckData = data.factCheck; // <--- Grab the fact check object
+
+        // Populate the Fact Check sidebar widget dynamically
+        const factCheckContainer = document.getElementById('factCheckContainer');
+        if (factCheckContainer && factCheckData) {
+            factCheckContainer.innerHTML = `
+                <p><strong>Claim:</strong> "${factCheckData.claim}"</p>
+                <p style="margin-top: 8px;"><strong>Verdict:</strong> <span style="color:var(--accent-color); font-weight:bold;">${factCheckData.verdict}</span></p>
+            `;
+        } else if (factCheckContainer) {
+            factCheckContainer.innerHTML = `<p>No fact checks published yet.</p>`;
+        }
         
         const articlesGrid = document.getElementById('articlesGrid');
         if (!articlesGrid) return;
