@@ -168,19 +168,40 @@ navLinks.forEach(link => {
         navLinks.forEach(l => l.classList.remove('active'));
         link.classList.add('active');
 
-        const category = link.getAttribute('data-category');
+        const categoryAttr = link.getAttribute('data-category');
         const heroArticle = document.querySelector('.hero-article');
         const articlesGrid = document.getElementById('articlesGrid');
         const pitchSection = document.getElementById('pitchSection');
 
-        if (category === 'pitches') {
+        if (categoryAttr === 'pitches') {
             if (heroArticle) heroArticle.style.display = 'none';
             if (articlesGrid) articlesGrid.style.display = 'none';
             if (pitchSection) pitchSection.scrollIntoView({ behavior: 'smooth' });
-        } else {
-            if (heroArticle) heroArticle.style.display = 'block';
-            if (articlesGrid) articlesGrid.style.display = 'grid';
+            return;
         }
+
+        // Show standard feed layout
+        if (heroArticle) heroArticle.style.display = 'block';
+        if (articlesGrid) articlesGrid.style.display = 'grid';
+
+        // Filter the rendered article cards by category text matching
+        const cards = document.querySelectorAll('.article-card');
+        cards.forEach(card => {
+            const tagEl = card.querySelector('.category-tag');
+            const cardCategory = tagEl ? tagEl.textContent.trim().toLowerCase() : '';
+            
+            if (categoryAttr === 'home' || !categoryAttr) {
+                card.style.display = 'block';
+            } else {
+                // Check if the card's category matches the selected tab
+                // (e.g. comparing "Tech & AI" with categoryAttr)
+                if (cardCategory.includes(categoryAttr.toLowerCase())) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            }
+        });
     });
 });
 
