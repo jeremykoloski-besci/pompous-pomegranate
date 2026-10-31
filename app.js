@@ -73,7 +73,7 @@ async function fetchArticlesFromSanity() {
         articlesData = {};
         articlesGrid.innerHTML = '';
 
-        // 1. Render approved community pitches first (using custom Sanity image or fallback)
+        // 1. Render approved community pitches first
         approvedPitches.forEach((pitch) => {
             const pitchId = pitch._id;
             const cardId = `pitch_${pitchId}`;
@@ -220,7 +220,7 @@ navLinks.forEach(link => {
         navLinks.forEach(l => l.classList.remove('active'));
         link.classList.add('active');
 
-        const categoryAttr = link.getAttribute('data-category');
+        const categoryAttr = (link.getAttribute('data-category') || '').trim().toLowerCase();
         const heroArticle = document.querySelector('.hero-article');
         const articlesGrid = document.getElementById('articlesGrid');
         const pitchSection = document.getElementById('pitchSection');
@@ -249,11 +249,11 @@ navLinks.forEach(link => {
             const tagEl = card.querySelector('.category-tag');
             const cardCategory = tagEl ? tagEl.textContent.trim().toLowerCase() : '';
             
-            // If Home is clicked, show EVERYTHING (both standard posts and community pitches)
-            if (categoryAttr === 'home' || !categoryAttr) {
+            // Show all articles if Home, All, or empty category is clicked
+            if (categoryAttr === 'home' || categoryAttr === 'all' || categoryAttr === '') {
                 card.style.display = 'block';
             } else {
-                if (cardCategory.includes(categoryAttr.toLowerCase())) {
+                if (cardCategory.includes(categoryAttr)) {
                     card.style.display = 'block';
                 } else {
                     card.style.display = 'none';
