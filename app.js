@@ -241,4 +241,91 @@ navLinks.forEach(link => {
         }
 
         // Show standard feed layout for other categories
-        if (
+        if (heroArticle) heroArticle.style.display = 'block';
+        if (articlesGrid) articlesGrid.style.display = 'grid';
+
+        // Filter the rendered article cards by category text matching
+        const cards = document.querySelectorAll('.article-card');
+        cards.forEach(card => {
+            const tagEl = card.querySelector('.category-tag');
+            const cardCategory = tagEl ? tagEl.textContent.trim().toLowerCase() : '';
+            
+            if (categoryAttr === 'home' || !categoryAttr) {
+                card.style.display = 'block';
+            } else {
+                if (cardCategory.includes(categoryAttr.toLowerCase())) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            }
+        });
+    });
+});
+
+const searchInput = document.getElementById('searchInput');
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.article-card');
+        
+        cards.forEach(card => {
+            const headline = card.querySelector('.article-headline').textContent.toLowerCase();
+            const excerpt = card.querySelector('.article-excerpt') ? card.querySelector('.article-excerpt').textContent.toLowerCase() : '';
+            if (headline.includes(term) || excerpt.includes(term)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+}
+
+// Custom Toast Notification Helper
+function showToast(message) {
+    const toast = document.getElementById('toastNotification');
+    const toastMsg = document.getElementById('toastMessage');
+    if (!toast) return;
+
+    if (toastMsg) toastMsg.textContent = message;
+    toast.classList.add('show');
+
+    // Automatically hide after 4 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 4000);
+}
+
+// Community Pitch Form Submission (Sends securely to Sanity as pending review)
+const pitchForm = document.getElementById('pitchForm');
+if (pitchForm) {
+    pitchForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const author = document.getElementById('pitchAuthor').value;
+        const headline = document.getElementById('pitchHeadline').value;
+
+        try {
+            const response = await fetch('/api/submit-pitch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ author, headline })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showToast('Your headline pitch has been submitted to the editors for peer review!');
+                pitchForm.reset();
+            } else {
+                showToast('Error submitting pitch: ' + (result.error || 'Please try again.'));
+            }
+        } catch (err) {
+            console.error('Submission error:', err);
+            showToast('Something went wrong. Please try again later.');
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchArticlesFromSanity();
+});
