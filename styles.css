@@ -86,7 +86,7 @@ h1, h2, h3, h4, .article-headline {
 }
 
 .toast-notification i {
-    color: var(--accent-color, #8B0000);
+    color: #10b981; /* A fresh green color for success */
     font-size: 1.2rem;
 }
 /* Sticky Header */
