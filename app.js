@@ -47,14 +47,14 @@ if (closeModalBtn && articleModal) {
 let articlesData = {};
 
 async function fetchArticlesFromSanity() {
-    // This MUST point to your Vercel serverless proxy route, NOT sanity.io directly
+    // This points to your Vercel serverless proxy route
     const url = '/api/posts';
 
     try {
         const response = await fetch(url);
         const data = await response.json();
         const posts = data.result || [];
-        const factCheckData = data.factCheck; // <--- Grab the fact check object
+        const factCheckData = data.factCheck; // Grab the live fact check object
 
         // Populate the Fact Check sidebar widget dynamically
         const factCheckContainer = document.getElementById('factCheckContainer');
@@ -205,8 +205,6 @@ navLinks.forEach(link => {
             if (categoryAttr === 'home' || !categoryAttr) {
                 card.style.display = 'block';
             } else {
-                // Check if the card's category matches the selected tab
-                // (e.g. comparing "Tech & AI" with categoryAttr)
                 if (cardCategory.includes(categoryAttr.toLowerCase())) {
                     card.style.display = 'block';
                 } else {
@@ -235,41 +233,33 @@ if (searchInput) {
     });
 }
 
-// Community Pitch Form Submission
+// Community Pitch Form Submission (Sends securely to Sanity as pending review)
 const pitchForm = document.getElementById('pitchForm');
 if (pitchForm) {
-    pitchForm.addEventListener('submit', (e) => {
+    pitchForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const author = document.getElementById('pitchAuthor').value;
         const headline = document.getElementById('pitchHeadline').value;
 
-        const articlesGrid = document.getElementById('articlesGrid');
-        
-        const newCard = document.createElement('article');
-        newCard.className = 'article-card card';
-        newCard.innerHTML = `
-            <div class="card-image-wrapper">
-                <span class="category-tag">Community Pitch</span>
-                <img src="https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80" alt="Pitch">
-            </div>
-            <div class="card-content">
-                <div class="article-meta">
-                    <span><i class="fa-regular fa-user"></i> Submitted by ${author}</span>
-                    <span><i class="fa-regular fa-clock"></i> Just now</span>
-                </div>
-                <h3 class="article-headline">${headline}</h3>
-                <p class="article-excerpt">A fresh satirical submission from our readers currently under peer review for maximum pomposity.</p>
-                <div class="card-footer">
-                    <span style="color:var(--gold-color); font-weight:700;"><i class="fa-solid fa-star"></i> Community Favorite</span>
-                </div>
-            </div>
-        `;
+        try {
+            const response = await fetch('/api/submit-pitch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ author, headline })
+            });
 
-        if (articlesGrid) {
-            articlesGrid.prepend(newCard);
+            const result = await response.json();
+
+            if (response.ok) {
+                alert('Your headline pitch has been submitted to the editors for peer review!');
+                pitchForm.reset();
+            } else {
+                alert('Error submitting pitch: ' + (result.error || 'Please try again.'));
+            }
+        } catch (err) {
+            console.error('Submission error:', err);
+            alert('Something went wrong. Please try again later.');
         }
-        alert('Your headline pitch has been published to the feed!');
-        pitchForm.reset();
     });
 }
 
