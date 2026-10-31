@@ -54,6 +54,7 @@ async function fetchArticlesFromSanity() {
         const response = await fetch(url);
         const data = await response.json();
         const posts = data.result || [];
+        const approvedPitches = data.pitches || []; // Grab approved community pitches
         const factCheckData = data.factCheck; // Grab the live fact check object
 
         // Populate the Fact Check sidebar widget dynamically
@@ -73,6 +74,44 @@ async function fetchArticlesFromSanity() {
         articlesData = {};
         articlesGrid.innerHTML = '';
 
+        // 1. Render approved community pitches first
+        approvedPitches.forEach((pitch) => {
+            const pitchId = pitch._id;
+            const cardId = `pitch_${pitchId}`;
+
+            articlesData[cardId] = {
+                title: pitch.headline,
+                category: "Community Pitch",
+                author: pitch.author || "Anonymous Reader",
+                date: new Date(pitch.submittedAt).toLocaleDateString(),
+                image: "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80",
+                content: `<p>${pitch.headline}</p><p style="margin-top:20px; font-style:italic; color:var(--text-secondary);">This headline was pitched by a reader and peer-reviewed by the editorial board.</p>`
+            };
+
+            const pitchCard = document.createElement('article');
+            pitchCard.className = 'article-card card';
+            pitchCard.innerHTML = `
+                <div class="card-image-wrapper">
+                    <span class="category-tag">Community Pitch</span>
+                    <img src="${articlesData[cardId].image}" alt="Pitch thumbnail">
+                </div>
+                <div class="card-content">
+                    <div class="article-meta">
+                        <span><i class="fa-regular fa-user"></i> Submitted by ${articlesData[cardId].author}</span>
+                        <span><i class="fa-regular fa-clock"></i> ${articlesData[cardId].date}</span>
+                    </div>
+                    <h3 class="article-headline">${articlesData[cardId].title}</h3>
+                    <p class="article-excerpt">A reader-submitted satirical pitch approved by the editors.</p>
+                    <div class="card-footer">
+                        <span style="color:var(--gold-color); font-weight:700;"><i class="fa-solid fa-star"></i> Community Favorite</span>
+                        <button onclick="openFullArticle('${cardId}')" style="background:none; border:none; color:var(--accent-color); font-weight:700; cursor:pointer; padding:0; float:right;">Read Story &rarr;</button>
+                    </div>
+                </div>
+            `;
+            articlesGrid.appendChild(pitchCard);
+        });
+
+        // 2. Render standard regular posts
         posts.forEach((post, index) => {
             const articleId = post._id || index + 1;
             
@@ -277,6 +316,7 @@ if (pitchForm) {
         }
     });
 }
+
 document.addEventListener('DOMContentLoaded', () => {
     fetchArticlesFromSanity();
 });
