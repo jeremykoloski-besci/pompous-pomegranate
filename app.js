@@ -233,6 +233,21 @@ if (searchInput) {
     });
 }
 
+// Custom Toast Notification Helper
+function showToast(message) {
+    const toast = document.getElementById('toastNotification');
+    const toastMsg = document.getElementById('toastMessage');
+    if (!toast) return;
+
+    if (toastMsg) toastMsg.textContent = message;
+    toast.classList.add('show');
+
+    // Automatically hide after 4 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 4000);
+}
+
 // Community Pitch Form Submission (Sends securely to Sanity as pending review)
 const pitchForm = document.getElementById('pitchForm');
 if (pitchForm) {
@@ -251,18 +266,17 @@ if (pitchForm) {
             const result = await response.json();
 
             if (response.ok) {
-                alert('Your headline pitch has been submitted to the editors for peer review!');
+                showToast('Your headline pitch has been submitted to the editors for peer review!');
                 pitchForm.reset();
             } else {
-                alert('Error submitting pitch: ' + (result.error || 'Please try again.'));
+                showToast('Error submitting pitch: ' + (result.error || 'Please try again.'));
             }
         } catch (err) {
             console.error('Submission error:', err);
-            alert('Something went wrong. Please try again later.');
+            showToast('Something went wrong. Please try again later.');
         }
     });
 }
-
 document.addEventListener('DOMContentLoaded', () => {
     fetchArticlesFromSanity();
 });
