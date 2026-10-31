@@ -11,8 +11,7 @@ export default async function handler(req, res) {
   const dataset = 'production';
   const apiVersion = '2026-10-29';
 
-  // Query fetching posts AND the latest fact check document
-  const query = encodeURIComponent(`{
+const query = encodeURIComponent(`{
     "posts": *[_type == "post"] | order(publishedAt desc) {
       _id,
       title,
@@ -22,6 +21,12 @@ export default async function handler(req, res) {
       "author": author->name,
       "imageUrl": mainImage.asset->url,
       publishedAt
+    },
+    "pitches": *[_type == "pitch" && status == "approved"] | order(submittedAt desc) {
+      _id,
+      author,
+      headline,
+      submittedAt
     },
     "factCheck": *[_type == "factCheck"] | order(publishedAt desc)[0] {
       claim,
@@ -40,6 +45,7 @@ export default async function handler(req, res) {
     const data = await response.json();
     return res.status(200).json({ 
       result: data.result?.posts || [], 
+      pitches: data.result?.pitches || [],
       factCheck: data.result?.factCheck || null 
     });
   } catch (error) {
