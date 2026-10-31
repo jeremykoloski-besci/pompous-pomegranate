@@ -7,12 +7,13 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // CORRECTED PROJECT ID WITH TWO 'q's
   const projectId = '5hfaqqg7';
   const dataset = 'production';
   const apiVersion = '2026-10-29';
 
-  const query = encodeURIComponent(`*[_type == "post"] | order(publishedAt desc) {
+  // Query fetching posts AND the latest fact check document
+  const query = encodeURIComponent(`{
+    "posts": *[_type == "post"] | order(publishedAt desc) {
       _id,
       title,
       slug,
@@ -21,6 +22,11 @@ export default async function handler(req, res) {
       "author": author->name,
       "imageUrl": mainImage.asset->url,
       publishedAt
+    },
+    "factCheck": *[_type == "factCheck"] | order(publishedAt desc)[0] {
+      claim,
+      verdict
+    }
   }`);
 
   const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${query}`;
@@ -28,13 +34,14 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+      headers: { 'Authorization': `Bearer ${token}` }
     });
     
     const data = await response.json();
-    return res.status(200).json({ result: data.result || [] });
+    return res.status(200).json({ 
+      result: data.result?.posts || [], 
+      factCheck: data.result?.factCheck || null 
+    });
   } catch (error) {
     return res.status(500).json({ error: 'Failed to fetch from Sanity', details: error.message });
   }
