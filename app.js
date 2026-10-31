@@ -73,17 +73,19 @@ async function fetchArticlesFromSanity() {
         articlesData = {};
         articlesGrid.innerHTML = '';
 
-        // 1. Render approved community pitches first
+        // 1. Render approved community pitches first (using custom Sanity image or fallback)
         approvedPitches.forEach((pitch) => {
             const pitchId = pitch._id;
             const cardId = `pitch_${pitchId}`;
+            
+            const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
 
             articlesData[cardId] = {
                 title: pitch.headline,
                 category: "Community Pitch",
                 author: pitch.author || "Anonymous Reader",
                 date: new Date(pitch.submittedAt).toLocaleDateString(),
-                image: "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80",
+                image: pitchImage,
                 content: `<p>${pitch.headline}</p><p style="margin-top:20px; font-style:italic; color:var(--text-secondary);">This headline was pitched by a reader and peer-reviewed by the editorial board.</p>`
             };
 
