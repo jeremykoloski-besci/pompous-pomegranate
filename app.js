@@ -240,7 +240,7 @@ navLinks.forEach(link => {
             return;
         }
 
-        // Show standard feed layout for home or other categories
+        // Show standard feed layout for home/all or other categories
         if (heroArticle) heroArticle.style.display = 'block';
         if (articlesGrid) articlesGrid.style.display = 'grid';
 
@@ -249,8 +249,8 @@ navLinks.forEach(link => {
             const tagEl = card.querySelector('.category-tag');
             const cardCategory = tagEl ? tagEl.textContent.trim().toLowerCase() : '';
             
-            // Show all articles if Home, All, or empty category is clicked
-            if (categoryAttr === 'home' || categoryAttr === 'all' || categoryAttr === '') {
+            // Explicitly match 'all', 'home', or empty attributes to show everything
+            if (categoryAttr === 'all' || categoryAttr === 'home' || categoryAttr === '') {
                 card.style.display = 'block';
             } else {
                 if (cardCategory.includes(categoryAttr)) {
