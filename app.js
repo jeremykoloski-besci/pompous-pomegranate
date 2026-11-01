@@ -326,5 +326,12 @@ if (pitchForm) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    fetchArticlesFromSanity();
+    fetchArticlesFromSanity().then(() => {
+        // Automatically open shared article modal if navigated from social link redirect
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedArticleId = urlParams.get('article');
+        if (sharedArticleId && typeof openFullArticle === 'function') {
+            openFullArticle(sharedArticleId);
+        }
+    });
 });
