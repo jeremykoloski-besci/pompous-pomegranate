@@ -3,24 +3,32 @@ let allPosts = [];
 let allPitches = [];
 let currentCategory = 'all';
 
-// Force browser scroll restoration to manual immediately to stop any auto-scrolling flash
-if ('scrollRestoration' in history) {
-    history.scrollRestoration = 'manual';
-}
-
 // Current Date Display
-const dateEl = document.getElementById('currentDate');
-if (dateEl) {
-    dateEl.textContent = new Date().toLocaleDateString('en-US', { 
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-    });
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const dateEl = document.getElementById('currentDate');
+    if (dateEl) {
+        dateEl.textContent = new Date().toLocaleDateString('en-US', { 
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+        });
+    }
 
-// Dark/Light Theme Toggle
-const themeToggle = document.getElementById('themeToggle');
-const body = document.body;
+    // Initialize UI listeners
+    initThemeToggle();
+    initModals();
+    initSearch();
+    initHeaderLinks();
+    initPitchForm();
 
-if (themeToggle) {
+    // Fetch data from Sanity
+    fetchArticlesFromSanity();
+});
+
+// --- THEME TOGGLE ---
+function initThemeToggle() {
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    if (!themeToggle) return;
+
     themeToggle.addEventListener('click', () => {
         if (body.getAttribute('data-theme') === 'dark') {
             body.removeAttribute('data-theme');
@@ -32,59 +40,84 @@ if (themeToggle) {
     });
 }
 
-// Subscriptions & Modals
-const subModal = document.getElementById('subModal');
-const openModalBtn = document.getElementById('openModalBtn');
-const closeSubModalBtn = document.getElementById('closeSubModalBtn');
+// --- MODALS ---
+function initModals() {
+    const subModal = document.getElementById('subModal');
+    const openModalBtn = document.getElementById('openModalBtn');
+    const closeSubModalBtn = document.getElementById('closeSubModalBtn');
 
-if (openModalBtn && subModal) {
-    openModalBtn.addEventListener('click', () => subModal.classList.add('active'));
-}
-if (closeSubModalBtn && subModal) {
-    closeSubModalBtn.addEventListener('click', () => subModal.classList.remove('active'));
+    if (openModalBtn && subModal) {
+        openModalBtn.addEventListener('click', () => subModal.classList.add('active'));
+    }
+    if (closeSubModalBtn && subModal) {
+        closeSubModalBtn.addEventListener('click', () => subModal.classList.remove('active'));
+    }
 }
 
-// --- CSS STYLING FOR BADGE & CARD ---
-const dynamicStyle = document.createElement('style');
-dynamicStyle.textContent = `
-    .card-image-wrapper {
-        position: relative;
-        overflow: hidden;
+// --- SEARCH ---
+function initSearch() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            renderFeed(e.target.value.toLowerCase());
+        });
     }
-    .card-image-wrapper .category-tag {
-        position: absolute !important;
-        bottom: 12px !important;
-        left: 12px !important;
-        top: auto !important;
-        right: auto !important;
-        z-index: 2;
-        margin-bottom: 0 !important;
-        width: auto !important;
-        height: auto !important;
-        display: inline-block !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    }
-    .article-card.card {
-        cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .article-card.card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
-    .card-footer {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-    }
-`;
-document.head.appendChild(dynamicStyle);
+}
+
+// --- HEADER LINKS ---
+function initHeaderLinks() {
+    const headerLinks = document.querySelectorAll('header a.site-title-link, .logo-area a');
+    headerLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
+            if (homeNav) {
+                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
+                homeNav.classList.add('active');
+            }
+            currentCategory = 'all';
+            renderFeed();
+        });
+    });
+}
+
+// --- PITCH FORM ---
+function initPitchForm() {
+    const pitchForm = document.getElementById('pitchForm');
+    if (!pitchForm) return;
+
+    pitchForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const author = document.getElementById('pitchAuthor').value;
+        const headline = document.getElementById('pitchHeadline').value;
+
+        try {
+            const response = await fetch('/api/submit-pitch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ author, headline })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showToast('Your headline pitch has been submitted to the editors for peer review!');
+                pitchForm.reset();
+            } else {
+                showToast('Error submitting pitch: ' + (result.error || 'Please try again.'));
+            }
+        } catch (err) {
+            console.error('Submission error:', err);
+            showToast('Something went wrong. Please try again later.');
+        }
+    });
+}
 
 // --- RENDER FEED FUNCTION ---
 function renderFeed(searchTerm = '') {
     const articlesGrid = document.getElementById('articlesGrid');
     const heroArticle = document.querySelector('.hero-article');
-    const pitchSection = document.getElementById('pitchSection');
     
     if (!articlesGrid) return;
     articlesGrid.innerHTML = '';
@@ -136,7 +169,6 @@ function renderFeed(searchTerm = '') {
             });
             articlesGrid.appendChild(pitchCard);
         });
-
         return;
     }
 
@@ -261,8 +293,6 @@ async function fetchArticlesFromSanity() {
         }
         
         renderFeed();
-        // Force scroll to top again after dynamic cards populate to counteract height shifting
-        window.scrollTo(0, 0);
     } catch (error) {
         console.error("Error fetching live articles from Sanity proxy:", error);
     }
@@ -278,83 +308,13 @@ document.addEventListener('click', (e) => {
         navLink.classList.add('active');
 
         const catAttr = navLink.getAttribute('data-category');
-        if (catAttr) {
-            currentCategory = catAttr.trim().toLowerCase();
-        } else {
-            currentCategory = 'all';
-        }
+        currentCategory = catAttr ? catAttr.trim().toLowerCase() : 'all';
         
         const searchInput = document.getElementById('searchInput');
         const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
         
         renderFeed(searchTerm);
     }
-});
-
-// --- INITIALIZATION ---
-window.addEventListener('beforeunload', () => {
-    window.scrollTo(0, 0);
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-    window.scrollTo(0, 0);
-    
-    if (window.location.hash) {
-        history.replaceState(null, null, window.location.pathname + window.location.search);
-    }
-
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            renderFeed(e.target.value.toLowerCase());
-        });
-    }
-
-    const headerLinks = document.querySelectorAll('header a.site-title-link, .logo-area a');
-    headerLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
-            if (homeNav) {
-                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-                homeNav.classList.add('active');
-            }
-            currentCategory = 'all';
-            renderFeed();
-        });
-    });
-
-    const pitchForm = document.getElementById('pitchForm');
-    if (pitchForm) {
-        pitchForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const author = document.getElementById('pitchAuthor').value;
-            const headline = document.getElementById('pitchHeadline').value;
-
-            try {
-                const response = await fetch('/api/submit-pitch', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ author, headline })
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    showToast('Your headline pitch has been submitted to the editors for peer review!');
-                    pitchForm.reset();
-                } else {
-                    showToast('Error submitting pitch: ' + (result.error || 'Please try again.'));
-                }
-            } catch (err) {
-                console.error('Submission error:', err);
-                showToast('Something went wrong. Please try again later.');
-            }
-        });
-    }
-
-    fetchArticlesFromSanity();
 });
 
 function showToast(message) {
