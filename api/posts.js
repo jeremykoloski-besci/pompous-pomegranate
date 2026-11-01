@@ -26,6 +26,7 @@ export default async function handler(req, res) {
       _id,
       author,
       headline,
+      body,
       submittedAt,
       "imageUrl": image.asset->url
     },
