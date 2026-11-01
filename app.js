@@ -34,19 +34,24 @@ if (closeSubModalBtn && subModal) {
     closeSubModalBtn.addEventListener('click', () => subModal.classList.remove('active'));
 }
 
-// --- CSS STYLING OVERRIDE FOR BOTTOM-LEFT CATEGORY BADGE ---
-// Ensures category tag sits neatly inside the bottom-left of the image wrapper across all cards
+// --- CORRECTED CSS STYLING FOR BADGE & CARD ---
 const dynamicStyle = document.createElement('style');
 dynamicStyle.textContent = `
     .card-image-wrapper {
         position: relative;
+        overflow: hidden;
     }
     .card-image-wrapper .category-tag {
-        position: absolute;
-        bottom: 12px;
-        left: 12px;
+        position: absolute !important;
+        bottom: 12px !important;
+        left: 12px !important;
+        top: auto !important;
+        right: auto !important;
         z-index: 2;
-        margin-bottom: 0;
+        margin-bottom: 0 !important;
+        width: auto !important;
+        height: auto !important;
+        display: inline-block !important;
         box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
     .article-card.card {
@@ -95,7 +100,6 @@ async function fetchArticlesFromSanity() {
         // Helper function to attach full card click navigation
         function attachCardClick(cardElement, targetUrl) {
             cardElement.addEventListener('click', (e) => {
-                // Prevent double navigation if clicking explicitly on links/buttons
                 if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
                 window.location.href = targetUrl;
             });
