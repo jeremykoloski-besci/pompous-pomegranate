@@ -31,68 +31,50 @@ module.exports = async function handler(req, res) {
   const apiVersion = '2026-10-29';
 
   try {
-    // Query both standard posts and pitches, matching either exact IDs, slugs, or partial strings
-    const sanityQuery = `{
-      "post": *[_type == "post" && (slug.current == "${id}" || slug.current match "*${id}*" || _id == "${id}")][0]{
-        title, 
-        "imageUrl": mainImage.asset->url, 
-        body, 
-        author->name, 
-        publishedAt, 
-        "category": categories[0]->title
-      },
-      "pitches": *[_type == "pitch"]{
-        _id,
-        headline,
-        "imageUrl": mainImage.asset->url,
-        author,
-        submittedAt
-      }
+    // Single robust query searching both standard posts and pitches for matching slugs or IDs
+    const sanityQuery = `*[_type in ["post", "pitch"] && (slug.current == "${id}" || slug.current match "*${id}*" || _id == "${id}" || lower(headline) match "*${id.replace(/-/g, ' ')}*")][0]{
+      title,
+      headline,
+      "imageUrl": mainImage.asset->url,
+      body,
+      author,
+      "authorName": author->name,
+      publishedAt,
+      submittedAt,
+      "category": categories[0]->title
     }`;
 
     const encodedQuery = encodeURIComponent(sanityQuery);
     const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${encodedQuery}`;
 
-    const data = await fetchJson(url);
-    let post = data.result?.post;
+    const data = rawData = await fetchJson(url);
+    const doc = data.result;
 
-    // If not found in standard posts, check if it matches a community pitch via id or generated slug
-    if (!post && data.result?.pitches) {
-      const matchedPitch = data.result.pitches.find(p => {
-        const generatedSlug = p.headline.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-        return p._id === id || generatedSlug === id || generatedSlug.includes(id) || id.includes(p._id);
-      });
-
-      if (matchedPitch) {
-        post = {
-          title: matchedPitch.headline,
-          imageUrl: matchedPitch.imageUrl,
-          author: matchedPitch.author || "Anonymous Reader",
-          publishedAt: matchedPitch.submittedAt,
-          category: "Community Pitch"
-        };
-      }
-    }
-
-    if (!post) {
+    if (!doc) {
       return res.status(404).send(`Article not found for: ${id}`);
     }
 
+    // Normalize fields between posts and pitches
+    const title = doc.title || doc.headline || 'Satire Article';
+    const author = doc.authorName || doc.author || 'Staff';
+    const publishedAt = doc.publishedAt || doc.submittedAt;
+    const category = doc.category || (doc.headline ? 'Community Pitch' : 'Satire');
+
     let htmlContent = '<p>No content provided.</p>';
-    if (Array.isArray(post.body)) {
-      htmlContent = post.body.map(block => {
+    if (Array.isArray(doc.body)) {
+      htmlContent = doc.body.map(block => {
         if (block._type === 'block' && block.children) {
           return `<p>${block.children.map(c => c.text).join('')}</p>`;
         }
         return '';
       }).join('');
-    } else if (post.title) {
-      htmlContent = `<p>${post.title}</p>`;
+    } else if (title) {
+      htmlContent = `<p>${title}</p>`;
     }
 
     const articleUrl = `https://pompous-pomegranate.vercel.app/article/${id}`;
     const encodedUrl = encodeURIComponent(articleUrl);
-    const encodedTitle = encodeURIComponent(post.title || 'Satire Article');
+    const encodedTitle = encodeURIComponent(title);
 
     const html = `
       <!DOCTYPE html>
@@ -100,11 +82,11 @@ module.exports = async function handler(req, res) {
       <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>${post.title || 'Article'} - The Pompous Pomegranate</title>
+          <title>${title} - The Pompous Pomegranate</title>
           <meta property="og:type" content="article">
-          <meta property="og:title" content="${post.title || 'Article'}">
+          <meta property="og:title" content="${title}">
           <meta property="og:description" content="Fake news to cure the blues.">
-          <meta property="og:image" content="${post.imageUrl || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80'}">
+          <meta property="og:image" content="${doc.imageUrl || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80'}">
           <meta property="og:url" content="${articleUrl}">
           <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
           <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400&family=Zilla+Slab:wght@700;900&display=swap" rel="stylesheet">
@@ -128,10 +110,10 @@ module.exports = async function handler(req, res) {
       <body>
           <header><a href="/">The Pompous Pomegranate</a></header>
           <div class="container">
-              <span class="category-tag">${post.category || 'Satire'}</span>
-              <h1>${post.title}</h1>
-              <div class="meta"><span>By ${post.author || 'Staff'}</span> • <span>${post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : 'Recent'}</span></div>
-              <img src="${post.imageUrl || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80'}" alt="Article Image" class="hero-img">
+              <span class="category-tag">${category}</span>
+              <h1>${title}</h1>
+              <div class="meta"><span>By ${author}</span> • <span>${publishedAt ? new Date(publishedAt).toLocaleDateString() : 'Recent'}</span></div>
+              <img src="${doc.imageUrl || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80'}" alt="Article Image" class="hero-img">
               
               <!-- Social Share Bar with X & TikTok -->
               <div class="share-bar">
