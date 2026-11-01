@@ -340,12 +340,13 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const author = document.getElementById('pitchAuthor').value;
             const headline = document.getElementById('pitchHeadline').value;
+            const body = document.getElementById('pitchBody').value; // Grab pitch body/excerpt
 
             try {
                 const response = await fetch('/api/submit-pitch', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ author, headline })
+                    body: JSON.stringify({ author, headline, body }) // Send body along
                 });
 
                 const result = await response.json();
