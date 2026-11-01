@@ -76,16 +76,19 @@ dynamicStyle.textContent = `
 `;
 document.head.appendChild(dynamicStyle);
 
-// --- HELPER TO EXTRACT & TRUNCATE TEXT FROM SANITY PORTABLE TEXT ---
-function extractTextFromPortableText(body, maxLength = 160) {
+// --- HELPER TO EXTRACT & TRUNCATE TEXT FROM SANITY PORTABLE TEXT OR STRINGS ---
+function extractTextFromPortableText(item, maxLength = 160) {
     let plainText = "";
     
-    if (!body) {
-        plainText = "Local sources confirmed Friday that the situation has escalated far beyond initial expectations...";
-    } else if (typeof body === 'string') {
-        plainText = body;
-    } else if (Array.isArray(body)) {
-        plainText = body
+    // Check all potential keys where the text/body might reside
+    const raw = item?.body || item?.excerpt || item?.text || item?.description || item;
+
+    if (!raw) {
+        plainText = "A reader-submitted satirical pitch approved by the editors...";
+    } else if (typeof raw === 'string') {
+        plainText = raw;
+    } else if (Array.isArray(raw)) {
+        plainText = raw
             .map(block => {
                 if (block._type === 'block' && block.children) {
                     return block.children.map(child => child.text || '').join('');
@@ -97,7 +100,7 @@ function extractTextFromPortableText(body, maxLength = 160) {
     }
 
     if (!plainText) {
-        plainText = "Local sources confirmed Friday that the situation has escalated far beyond initial expectations...";
+        plainText = "A reader-submitted satirical pitch approved by the editors...";
     }
 
     // Truncate to clean excerpt length with ellipses
@@ -130,12 +133,12 @@ function renderFeed(searchTerm = '') {
         }
 
         filteredPitches.forEach((pitch) => {
-            const pitchSlug = pitch.headline.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
+            const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
             const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
             const pitchTitle = pitch.headline || "Untitled Pitch";
-            const pitchDate = new Date(pitch.submittedAt).toLocaleDateString();
+            const pitchDate = pitch.submittedAt ? new Date(pitch.submittedAt).toLocaleDateString() : 'Recently';
             const articleUrl = `/article/${pitchSlug}`;
-            const pitchExcerpt = extractTextFromPortableText(pitch.body || pitch.excerpt);
+            const pitchExcerpt = extractTextFromPortableText(pitch);
 
             const pitchCard = document.createElement('article');
             pitchCard.className = 'article-card card';
@@ -188,7 +191,7 @@ function renderFeed(searchTerm = '') {
         const postDate = post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : 'Recently';
         const postImage = post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
         const articleUrl = `/article/${articleSlug}`;
-        const postExcerpt = extractTextFromPortableText(post.body || post.excerpt);
+        const postExcerpt = extractTextFromPortableText(post);
 
         const newCard = document.createElement('article');
         newCard.className = 'article-card card';
@@ -220,12 +223,12 @@ function renderFeed(searchTerm = '') {
         });
 
         filteredPitches.forEach((pitch) => {
-            const pitchSlug = pitch.headline.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
+            const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
             const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
             const pitchTitle = pitch.headline || "Untitled Pitch";
-            const pitchDate = new Date(pitch.submittedAt).toLocaleDateString();
+            const pitchDate = pitch.submittedAt ? new Date(pitch.submittedAt).toLocaleDateString() : 'Recently';
             const articleUrl = `/article/${pitchSlug}`;
-            const pitchExcerpt = extractTextFromPortableText(pitch.body || pitch.excerpt);
+            const pitchExcerpt = extractTextFromPortableText(pitch);
 
             const pitchCard = document.createElement('article');
             pitchCard.className = 'article-card card';
