@@ -92,7 +92,7 @@ async function fetchArticlesFromSanity() {
             articlesGrid.appendChild(pitchCard);
         });
 
-        // 2. Render standard regular posts using clean URL slugs
+        // 2. Render standard regular posts using clean slugs
         posts.forEach((post, index) => {
             const articleSlug = post.slug?.current || post._id || index + 1;
             const postTitle = post.title || "Untitled Satire";
