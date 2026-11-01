@@ -201,7 +201,7 @@ navLinks.forEach(link => {
             return;
         }
 
-        // Show standard feed layout for home/all or other categories
+        // Show standard feed layout for home/all or other categories (like Culture, Politics, etc.)
         if (heroArticle) heroArticle.style.display = 'block';
         if (articlesGrid) articlesGrid.style.display = 'grid';
 
@@ -285,24 +285,22 @@ if (pitchForm) {
     });
 }
 
-// Prevent logo / header link anchor jumps and force clean top scroll
+// Initialization and Top-Scroll enforcement
 document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
     
-    // Clear out any hash fragments on load that might cause browser jumping
     if (window.location.hash) {
         history.replaceState(null, null, window.location.pathname + window.location.search);
     }
 
-    // Intercept logo / header home links to scroll smoothly to the top instead of jumping
     const headerLinks = document.querySelectorAll('header a, .logo a');
     headerLinks.forEach(link => {
         link.addEventListener('click', (e) => {
-            if (link.getAttribute('href') === '/' || link.getAttribute('href') === '#') {
+            const href = link.getAttribute('href');
+            if (href === '/' || href === '#' || href === window.location.pathname) {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                // Reset any active category filters back to home/all
-                const homeNav = document.querySelector('.main-nav .nav-link[data-category="home"]') || document.querySelector('.main-nav .nav-link');
+                const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
                 if (homeNav) homeNav.click();
             }
         });
