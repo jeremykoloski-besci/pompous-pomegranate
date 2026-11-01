@@ -132,6 +132,7 @@ function renderFeed(searchTerm = '') {
             articlesGrid.appendChild(pitchCard);
         });
 
+        // NOTE: scrollIntoView completely removed to prevent auto-scrolling
         return;
     }
 
@@ -286,7 +287,9 @@ document.addEventListener('click', (e) => {
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
+    // Force window to top immediately on load
     window.scrollTo(0, 0);
+    setTimeout(() => window.scrollTo(0, 0), 10);
     
     if (window.location.hash) {
         history.replaceState(null, null, window.location.pathname + window.location.search);
@@ -359,7 +362,7 @@ function showToast(message) {
     }, 4000);
 }
 
-// Expose state and functions globally for console inspection and debugging
+// Expose state globally for debugging
 window.allPosts = allPosts;
 window.allPitches = allPitches;
 window.renderFeed = renderFeed;
