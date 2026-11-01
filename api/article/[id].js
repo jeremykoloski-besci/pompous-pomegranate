@@ -21,10 +21,11 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
 
-  const { id } = req.query;
+  // Capture whatever parameter Vercel passes from the route
+  const identifier = req.query.id || req.query.slug;
 
-  if (!id) {
-    return res.status(400).send('Article slug missing');
+  if (!identifier) {
+    return res.status(400).send('Article identifier missing');
   }
 
   const projectId = '5hfaqqg7';
@@ -34,9 +35,8 @@ module.exports = async function handler(req, res) {
   try {
     let sanityQuery;
 
-    // Handle community pitches vs standard articles
-    if (id.startsWith('pitch_')) {
-      const realPitchId = id.replace('pitch_', '');
+    if (identifier.startsWith('pitch_')) {
+      const realPitchId = identifier.replace('pitch_', '');
       sanityQuery = `*[_id == "${realPitchId}"][0]{
         "title": headline, 
         "imageUrl": mainImage.asset->url, 
@@ -44,9 +44,9 @@ module.exports = async function handler(req, res) {
         "publishedAt": submittedAt, 
         "category": "Community Pitch"
       }`;
-} else {
-      // Flexible match so any portion of the slug or id will find the post
-      sanityQuery = `*[_type == "post" && (slug.current match "*${id}*" || _id == "${id}")][0]{
+    } else {
+      // Ultra-resilient query: checks exact slug, partial match, OR database _id
+      sanityQuery = `*[_type == "post" && (slug.current == "${identifier}" || slug.current match "*${identifier}*" || _id == "${identifier}")][0]{
         title, 
         "imageUrl": mainImage.asset->url, 
         body, 
@@ -63,7 +63,7 @@ module.exports = async function handler(req, res) {
     const post = data.result;
 
     if (!post) {
-      return res.status(404).send(`Article not found for slug: ${id}`);
+      return res.status(404).send(`Article not found for identifier: ${identifier}`);
     }
 
     let htmlContent = '<p>No content provided.</p>';
@@ -74,11 +74,11 @@ module.exports = async function handler(req, res) {
         }
         return '';
       }).join('');
-    } else if (post.title && id.startsWith('pitch_')) {
+    } else if (post.title && identifier.startsWith('pitch_')) {
       htmlContent = `<p>${post.title}</p>`;
     }
 
-    const articleUrl = `https://pompous-pomegranate.vercel.app/article/${id}`;
+    const articleUrl = `https://pompous-pomegranate.vercel.app/article/${identifier}`;
     const encodedUrl = encodeURIComponent(articleUrl);
     const encodedTitle = encodeURIComponent(post.title || 'Satire Article');
 
