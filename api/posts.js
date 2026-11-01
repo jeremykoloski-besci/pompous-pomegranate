@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   const dataset = 'production';
   const apiVersion = '2026-10-29';
 
-const query = encodeURIComponent(`{
+  const query = encodeURIComponent(`{
     "posts": *[_type == "post"] | order(publishedAt desc) {
       _id,
       title,
@@ -22,7 +22,7 @@ const query = encodeURIComponent(`{
       "imageUrl": mainImage.asset->url,
       publishedAt
     },
-"pitches": *[_type == "pitch" && status == "approved"] | order(submittedAt desc) {
+    "pitches": *[_type == "pitch"] | order(submittedAt desc) {
       _id,
       author,
       headline,
