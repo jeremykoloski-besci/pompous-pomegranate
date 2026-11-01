@@ -34,6 +34,37 @@ if (closeSubModalBtn && subModal) {
     closeSubModalBtn.addEventListener('click', () => subModal.classList.remove('active'));
 }
 
+// --- CSS STYLING OVERRIDE FOR BOTTOM-LEFT CATEGORY BADGE ---
+// Ensures category tag sits neatly inside the bottom-left of the image wrapper across all cards
+const dynamicStyle = document.createElement('style');
+dynamicStyle.textContent = `
+    .card-image-wrapper {
+        position: relative;
+    }
+    .card-image-wrapper .category-tag {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+        z-index: 2;
+        margin-bottom: 0;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .article-card.card {
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .article-card.card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    .card-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+`;
+document.head.appendChild(dynamicStyle);
+
 // --- SANITY CMS DYNAMIC FETCHING VIA DIRECT FETCH ---
 async function fetchArticlesFromSanity() {
     const url = '/api/posts';
@@ -61,14 +92,23 @@ async function fetchArticlesFromSanity() {
 
         articlesGrid.innerHTML = '';
 
-        // 1. Render approved community pitches using clean generated slugs
+        // Helper function to attach full card click navigation
+        function attachCardClick(cardElement, targetUrl) {
+            cardElement.addEventListener('click', (e) => {
+                // Prevent double navigation if clicking explicitly on links/buttons
+                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+                window.location.href = targetUrl;
+            });
+        }
+
+        // 1. Render approved community pitches
         approvedPitches.forEach((pitch) => {
-            // Generate clean slug from headline dynamically
             const pitchSlug = pitch.headline.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
             const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
             const pitchTitle = pitch.headline;
             const pitchAuthor = pitch.author || "Anonymous Reader";
             const pitchDate = new Date(pitch.submittedAt).toLocaleDateString();
+            const articleUrl = `/article/${pitchSlug}`;
 
             const pitchCard = document.createElement('article');
             pitchCard.className = 'article-card card';
@@ -85,15 +125,15 @@ async function fetchArticlesFromSanity() {
                     <h3 class="article-headline">${pitchTitle}</h3>
                     <p class="article-excerpt">A reader-submitted satirical pitch approved by the editors.</p>
                     <div class="card-footer">
-                        <span style="color:var(--gold-color); font-weight:700;"><i class="fa-solid fa-star"></i> Community Favorite</span>
-                        <a href="/article/${pitchSlug}" style="text-decoration:none; color:var(--accent-color); font-weight:700; float:right;">Read Story &rarr;</a>
+                        <a href="${articleUrl}" style="text-decoration:none; color:var(--accent-color); font-weight:700;">Read Story &rarr;</a>
                     </div>
                 </div>
             `;
+            attachCardClick(pitchCard, articleUrl);
             articlesGrid.appendChild(pitchCard);
         });
 
-        // 2. Render standard regular posts using clean URL slugs
+        // 2. Render standard regular posts
         posts.forEach((post, index) => {
             const articleSlug = post.slug?.current || post._id || index + 1;
             const postTitle = post.title || "Untitled Satire";
@@ -101,6 +141,7 @@ async function fetchArticlesFromSanity() {
             const postAuthor = post.author || "Anonymous Pomp";
             const postDate = new Date(post.publishedAt).toLocaleDateString();
             const postImage = post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
+            const articleUrl = `/article/${articleSlug}`;
 
             const newCard = document.createElement('article');
             newCard.className = 'article-card card';
@@ -117,10 +158,11 @@ async function fetchArticlesFromSanity() {
                     <h3 class="article-headline">${postTitle}</h3>
                     <p class="article-excerpt">Click to read the full breaking story and participate in the pomposity verification.</p>
                     <div class="card-footer">
-                        <a href="/article/${articleSlug}" style="text-decoration:none; color:var(--accent-color); font-weight:700;">Read Full Story &rarr;</a>
+                        <a href="${articleUrl}" style="text-decoration:none; color:var(--accent-color); font-weight:700;">Read Full Story &rarr;</a>
                     </div>
                 </div>
             `;
+            attachCardClick(newCard, articleUrl);
             articlesGrid.appendChild(newCard);
         });
 
