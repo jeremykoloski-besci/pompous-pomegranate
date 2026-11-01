@@ -1,6 +1,6 @@
-/* Prevent any layout jumps or scroll flickering on initial load */
+/* Prevent browser scroll restoration flashes on reload */
 html {
-    scroll-behavior: auto !important;
+    scroll-restoration: manual;
 }
 :root {
     --bg-color: #fdfbf7;
