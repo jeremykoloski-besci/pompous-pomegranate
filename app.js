@@ -61,9 +61,10 @@ async function fetchArticlesFromSanity() {
 
         articlesGrid.innerHTML = '';
 
-        // 1. Render approved community pitches first
+        // 1. Render approved community pitches using clean generated slugs
         approvedPitches.forEach((pitch) => {
-            const pitchId = `pitch_${pitch._id}`;
+            // Generate clean slug from headline dynamically
+            const pitchSlug = pitch.headline.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
             const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
             const pitchTitle = pitch.headline;
             const pitchAuthor = pitch.author || "Anonymous Reader";
@@ -85,7 +86,7 @@ async function fetchArticlesFromSanity() {
                     <p class="article-excerpt">A reader-submitted satirical pitch approved by the editors.</p>
                     <div class="card-footer">
                         <span style="color:var(--gold-color); font-weight:700;"><i class="fa-solid fa-star"></i> Community Favorite</span>
-                        <a href="/article/${pitchId}" style="text-decoration:none; color:var(--accent-color); font-weight:700; float:right;">Read Story &rarr;</a>
+                        <a href="/article/${pitchSlug}" style="text-decoration:none; color:var(--accent-color); font-weight:700; float:right;">Read Story &rarr;</a>
                     </div>
                 </div>
             `;
@@ -156,6 +157,7 @@ navLinks.forEach(link => {
             return;
         }
 
+        // Show standard feed layout for home/all or other categories
         if (heroArticle) heroArticle.style.display = 'block';
         if (articlesGrid) articlesGrid.style.display = 'grid';
 
