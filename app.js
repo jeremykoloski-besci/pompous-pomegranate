@@ -224,13 +224,19 @@ async function fetchArticlesFromSanity() {
 // --- UNIVERSAL EVENT DELEGATION FOR TABS ---
 document.addEventListener('click', (e) => {
     const navLink = e.target.closest('.main-nav .nav-link, nav a');
-    if (navLink) {
+    if (navLink && navLink.closest('.main-nav')) {
         e.preventDefault();
         
-        document.querySelectorAll('.main-nav .nav-link, nav a').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
         navLink.classList.add('active');
 
-        currentCategory = (navLink.getAttribute('data-category') || navLink.textContent || 'all').trim().toLowerCase();
+        // Explicitly check data-category attribute
+        const catAttr = navLink.getAttribute('data-category');
+        if (catAttr) {
+            currentCategory = catAttr.trim().toLowerCase();
+        } else {
+            currentCategory = 'all';
+        }
         
         const searchInput = document.getElementById('searchInput');
         const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
