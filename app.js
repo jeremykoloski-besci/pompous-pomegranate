@@ -3,13 +3,10 @@ let allPosts = [];
 let allPitches = [];
 let currentCategory = 'all';
 
-// Force manual scroll restoration immediately
+// Force browser scroll restoration to manual immediately to stop any auto-scrolling flash
 if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
 }
-
-// Force top scroll immediately on script execution
-window.scrollTo(0, 0);
 
 // Current Date Display
 const dateEl = document.getElementById('currentDate');
@@ -264,6 +261,7 @@ async function fetchArticlesFromSanity() {
         }
         
         renderFeed();
+        // Force scroll to top again after dynamic cards populate to counteract height shifting
         window.scrollTo(0, 0);
     } catch (error) {
         console.error("Error fetching live articles from Sanity proxy:", error);
@@ -294,6 +292,10 @@ document.addEventListener('click', (e) => {
 });
 
 // --- INITIALIZATION ---
+window.addEventListener('beforeunload', () => {
+    window.scrollTo(0, 0);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
     
