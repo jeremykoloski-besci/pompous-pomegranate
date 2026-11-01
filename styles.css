@@ -2,7 +2,9 @@
 html {
     scroll-restoration: manual;
 }
-
+html {
+    scroll-behavior: auto !important;
+}
 :root {
     --bg-color: #fdfbf7;
     --card-bg: #ffffff;
