@@ -34,7 +34,7 @@ if (closeSubModalBtn && subModal) {
     closeSubModalBtn.addEventListener('click', () => subModal.classList.remove('active'));
 }
 
-// --- CORRECTED CSS STYLING FOR BADGE & CARD ---
+// --- CSS STYLING FOR BADGE & CARD ---
 const dynamicStyle = document.createElement('style');
 dynamicStyle.textContent = `
     .card-image-wrapper {
@@ -70,8 +70,49 @@ dynamicStyle.textContent = `
 `;
 document.head.appendChild(dynamicStyle);
 
-// Global filter state
-let activeCategory = 'all';
+// --- CORE FILTERING LOGIC ---
+function filterArticles(categoryAttr) {
+    const heroArticle = document.querySelector('.hero-article');
+    const articlesGrid = document.getElementById('articlesGrid');
+    const pitchSection = document.getElementById('pitchSection');
+
+    const cleanCat = (categoryAttr || 'all').trim().toLowerCase();
+
+    if (cleanCat === 'pitches') {
+        if (heroArticle) heroArticle.style.display = 'none';
+        if (articlesGrid) {
+            articlesGrid.style.display = 'grid';
+            const cards = articlesGrid.querySelectorAll('.article-card');
+            cards.forEach(card => {
+                const tagEl = card.querySelector('.category-tag');
+                const cardText = tagEl ? tagEl.textContent.trim().toLowerCase() : '';
+                card.style.display = (cardText === 'community pitch') ? 'block' : 'none';
+            });
+        }
+        if (pitchSection) pitchSection.scrollIntoView({ behavior: 'smooth' });
+        return;
+    }
+
+    // Standard feed layout
+    if (heroArticle) heroArticle.style.display = (cleanCat === 'all' || cleanCat === 'home') ? 'block' : 'none';
+    if (articlesGrid) articlesGrid.style.display = 'grid';
+
+    const cards = document.querySelectorAll('.article-card');
+    cards.forEach(card => {
+        const tagEl = card.querySelector('.category-tag');
+        const cardCategory = tagEl ? tagEl.textContent.trim().toLowerCase() : '';
+        
+        if (cleanCat === 'all' || cleanCat === 'home' || cleanCat === '') {
+            card.style.display = 'block';
+        } else {
+            if (cardCategory.includes(cleanCat)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        }
+    });
+}
 
 // --- SANITY CMS DYNAMIC FETCHING VIA DIRECT FETCH ---
 async function fetchArticlesFromSanity() {
@@ -100,7 +141,6 @@ async function fetchArticlesFromSanity() {
 
         articlesGrid.innerHTML = '';
 
-        // Helper function to attach full card click navigation
         function attachCardClick(cardElement, targetUrl) {
             cardElement.addEventListener('click', (e) => {
                 if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
@@ -173,55 +213,33 @@ async function fetchArticlesFromSanity() {
             articlesGrid.appendChild(newCard);
         });
 
-        // Apply current category filter immediately after rendering
-        applyFilter(activeCategory);
+        // Re-apply current active filter after cards are loaded
+        const activeLink = document.querySelector('.main-nav .nav-link.active');
+        if (activeLink) {
+            filterArticles(activeLink.getAttribute('data-category'));
+        }
 
     } catch (error) {
         console.error("Error fetching live articles from Sanity proxy:", error);
     }
 }
 
-// Unified filtering function that evaluates cards dynamically at runtime
-function applyFilter(categoryAttr) {
-    activeCategory = categoryAttr;
-    const heroArticle = document.querySelector('.hero-article');
-    const articlesGrid = document.getElementById('articlesGrid');
-
-    if (heroArticle) heroArticle.style.display = (categoryAttr === 'pitches' || categoryAttr !== 'all') ? 'none' : 'block';
-    if (articlesGrid) articlesGrid.style.display = 'grid';
-
-    const cards = document.querySelectorAll('.article-card');
-    cards.forEach(card => {
-        const tagEl = card.querySelector('.category-tag');
-        const cardCategory = tagEl ? tagEl.textContent.trim().toLowerCase() : '';
-        
-        if (categoryAttr === 'all' || categoryAttr === 'home' || !categoryAttr) {
-            card.style.display = 'block';
-        } else if (categoryAttr === 'pitches') {
-            card.style.display = (cardCategory === 'community pitch') ? 'block' : 'none';
-        } else {
-            if (cardCategory.includes(categoryAttr.toLowerCase())) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        }
-    });
-}
-
-// Category Filtering & Search Listeners
-const navLinks = document.querySelectorAll('.main-nav .nav-link');
-navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
+// --- EVENT DELEGATION FOR NAVIGATION TABS ---
+document.addEventListener('click', (e) => {
+    const navLink = e.target.closest('.main-nav a, .nav-link');
+    if (navLink) {
         e.preventDefault();
-        navLinks.forEach(l => l.classList.remove('active'));
-        link.classList.add('active');
+        
+        // Update active class on all nav links
+        document.querySelectorAll('.main-nav .nav-link, nav a').forEach(l => l.classList.remove('active'));
+        navLink.classList.add('active');
 
-        const categoryAttr = (link.getAttribute('data-category') || 'all').trim().toLowerCase();
-        applyFilter(categoryAttr);
-    });
+        const categoryAttr = navLink.getAttribute('data-category') || navLink.textContent.trim();
+        filterArticles(categoryAttr);
+    }
 });
 
+// Search input listener
 const searchInput = document.getElementById('searchInput');
 if (searchInput) {
     searchInput.addEventListener('input', (e) => {
@@ -301,9 +319,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
                 if (homeNav) {
-                    navLinks.forEach(l => l.classList.remove('active'));
+                    document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
                     homeNav.classList.add('active');
-                    applyFilter('all');
+                    filterArticles('all');
                 }
             }
         });
