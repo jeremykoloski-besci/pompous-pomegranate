@@ -76,12 +76,16 @@ dynamicStyle.textContent = `
 `;
 document.head.appendChild(dynamicStyle);
 
-// --- HELPER TO EXTRACT TEXT FROM SANITY PORTABLE TEXT ---
-function extractTextFromPortableText(body) {
-    if (!body) return "Local sources confirmed Friday that the situation has escalated far beyond initial expectations...";
-    if (typeof body === 'string') return body;
-    if (Array.isArray(body)) {
-        return body
+// --- HELPER TO EXTRACT & TRUNCATE TEXT FROM SANITY PORTABLE TEXT ---
+function extractTextFromPortableText(body, maxLength = 160) {
+    let plainText = "";
+    
+    if (!body) {
+        plainText = "Local sources confirmed Friday that the situation has escalated far beyond initial expectations...";
+    } else if (typeof body === 'string') {
+        plainText = body;
+    } else if (Array.isArray(body)) {
+        plainText = body
             .map(block => {
                 if (block._type === 'block' && block.children) {
                     return block.children.map(child => child.text || '').join('');
@@ -89,9 +93,19 @@ function extractTextFromPortableText(body) {
                 return '';
             })
             .join(' ')
-            .trim() || "Local sources confirmed Friday that the situation has escalated far beyond initial expectations...";
+            .trim();
     }
-    return "Local sources confirmed Friday that the situation has escalated far beyond initial expectations...";
+
+    if (!plainText) {
+        plainText = "Local sources confirmed Friday that the situation has escalated far beyond initial expectations...";
+    }
+
+    // Truncate to clean excerpt length with ellipses
+    if (plainText.length > maxLength) {
+        return plainText.substring(0, maxLength).trim() + '...';
+    }
+    
+    return plainText;
 }
 
 // --- RENDER FEED FUNCTION ---
@@ -206,166 +220,4 @@ function renderFeed(searchTerm = '') {
         });
 
         filteredPitches.forEach((pitch) => {
-            const pitchSlug = pitch.headline.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
-            const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
-            const pitchTitle = pitch.headline || "Untitled Pitch";
-            const pitchDate = new Date(pitch.submittedAt).toLocaleDateString();
-            const articleUrl = `/article/${pitchSlug}`;
-            const pitchExcerpt = extractTextFromPortableText(pitch.body || pitch.excerpt);
-
-            const pitchCard = document.createElement('article');
-            pitchCard.className = 'article-card card';
-            pitchCard.innerHTML = `
-                <div class="card-image-wrapper">
-                    <span class="category-tag">Community Pitch</span>
-                    <img src="${pitchImage}" alt="Pitch thumbnail">
-                </div>
-                <div class="card-content">
-                    <div class="article-meta">
-                        <span><i class="fa-regular fa-clock"></i> ${pitchDate}</span>
-                    </div>
-                    <h3 class="article-headline">${pitchTitle}</h3>
-                    <p class="article-excerpt">${pitchExcerpt}</p>
-                </div>
-            `;
-            pitchCard.addEventListener('click', (e) => {
-                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-                window.location.href = articleUrl;
-            });
-            articlesGrid.appendChild(pitchCard);
-        });
-    }
-
-    if (filteredPosts.length === 0 && allPitches.length === 0) {
-        articlesGrid.innerHTML = `<p style="padding: 20px; color: var(--text-secondary);">No articles found.</p>`;
-    }
-}
-
-// --- SANITY CMS DYNAMIC FETCHING ---
-async function fetchArticlesFromSanity() {
-    try {
-        const response = await fetch('/api/posts');
-        const data = await response.json();
-        allPosts = data.result || [];
-        allPitches = data.pitches || []; 
-        const factCheckData = data.factCheck; 
-
-        const factCheckContainer = document.getElementById('factCheckContainer');
-        if (factCheckContainer && factCheckData) {
-            factCheckContainer.innerHTML = `
-                <p><strong>Claim:</strong> "${factCheckData.claim}"</p>
-                <p style="margin-top: 8px;"><strong>Verdict:</strong> <span style="color:var(--accent-color); font-weight:bold;">${factCheckData.verdict}</span></p>
-            `;
-        } else if (factCheckContainer) {
-            factCheckContainer.innerHTML = `<p>No fact checks published yet.</p>`;
-        }
-        
-        renderFeed();
-        window.scrollTo(0, 0);
-    } catch (error) {
-        console.error("Error fetching live articles from Sanity proxy:", error);
-    }
-}
-
-// --- UNIVERSAL EVENT DELEGATION FOR TABS ---
-document.addEventListener('click', (e) => {
-    const navLink = e.target.closest('.main-nav .nav-link, nav a');
-    if (navLink && navLink.closest('.main-nav')) {
-        e.preventDefault();
-        
-        document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-        navLink.classList.add('active');
-
-        const catAttr = navLink.getAttribute('data-category');
-        if (catAttr) {
-            currentCategory = catAttr.trim().toLowerCase();
-        } else {
-            currentCategory = 'all';
-        }
-        
-        const searchInput = document.getElementById('searchInput');
-        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-        
-        renderFeed(searchTerm);
-    }
-});
-
-// --- INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', () => {
-    window.scrollTo(0, 0);
-    
-    if (window.location.hash) {
-        history.replaceState(null, null, window.location.pathname + window.location.search);
-    }
-
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            renderFeed(e.target.value.toLowerCase());
-        });
-    }
-
-    const headerLinks = document.querySelectorAll('header a.site-title-link, .logo-area a');
-    headerLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
-            if (homeNav) {
-                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-                homeNav.classList.add('active');
-            }
-            currentCategory = 'all';
-            renderFeed();
-        });
-    });
-
-    const pitchForm = document.getElementById('pitchForm');
-    if (pitchForm) {
-        pitchForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const author = document.getElementById('pitchAuthor').value;
-            const headline = document.getElementById('pitchHeadline').value;
-
-            try {
-                const response = await fetch('/api/submit-pitch', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ author, headline })
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    showToast('Your headline pitch has been submitted to the editors for peer review!');
-                    pitchForm.reset();
-                } else {
-                    showToast('Error submitting pitch: ' + (result.error || 'Please try again.'));
-                }
-            } catch (err) {
-                console.error('Submission error:', err);
-                showToast('Something went wrong. Please try again later.');
-            }
-        });
-    }
-
-    fetchArticlesFromSanity();
-});
-
-function showToast(message) {
-    const toast = document.getElementById('toastNotification');
-    const toastMsg = document.getElementById('toastMessage');
-    if (!toast) return;
-
-    if (toastMsg) toastMsg.textContent = message;
-    toast.classList.add('show');
-
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 4000);
-}
-
-// Expose state globally for debugging
-window.allPosts = allPosts;
-window.allPitches = allPitches;
-window.renderFeed = renderFeed;
+            const pitch
