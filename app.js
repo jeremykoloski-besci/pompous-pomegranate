@@ -299,6 +299,9 @@ window.addEventListener('beforeunload', () => {
 document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
     
+    // Reveal body once scroll position is locked at the top
+    document.body.classList.add('loaded');
+
     if (window.location.hash) {
         history.replaceState(null, null, window.location.pathname + window.location.search);
     }
