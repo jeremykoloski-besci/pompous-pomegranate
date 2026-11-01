@@ -90,7 +90,8 @@ function renderFeed(searchTerm = '') {
         
         const filteredPitches = allPitches.filter(p => {
             const headline = (p.headline || '').toLowerCase();
-            return headline.includes(searchTerm);
+            const author = (p.author || '').toLowerCase();
+            return headline.includes(searchTerm) || author.includes(searchTerm);
         });
 
         if (filteredPitches.length === 0) {
@@ -98,9 +99,9 @@ function renderFeed(searchTerm = '') {
         }
 
         filteredPitches.forEach((pitch) => {
-            const pitchSlug = pitch.headline.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            const pitchSlug = pitch.headline.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
             const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
-            const pitchTitle = pitch.headline;
+            const pitchTitle = pitch.headline || "Untitled Pitch";
             const pitchAuthor = pitch.author || "Anonymous Reader";
             const pitchDate = new Date(pitch.submittedAt).toLocaleDateString();
             const articleUrl = `/article/${pitchSlug}`;
@@ -149,6 +150,7 @@ function renderFeed(searchTerm = '') {
             return matchesSearch;
         }
 
+        // Fuzzy match category (e.g. "culture" matches "Culture")
         const isMatch = postCategory === currentCategory || postCategory.includes(currentCategory);
         return matchesSearch && isMatch;
     });
@@ -163,7 +165,7 @@ function renderFeed(searchTerm = '') {
         const postTitle = post.title || "Untitled Satire";
         const postCategory = post.category || "General Satire";
         const postAuthor = post.author || "Anonymous Pomp";
-        const postDate = new Date(post.publishedAt).toLocaleDateString();
+        const postDate = post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : 'Recently';
         const postImage = post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
         const articleUrl = `/article/${articleSlug}`;
 
@@ -225,7 +227,6 @@ document.addEventListener('click', (e) => {
     if (navLink) {
         e.preventDefault();
         
-        // Remove active class from all nav items and add to clicked one
         document.querySelectorAll('.main-nav .nav-link, nav a').forEach(l => l.classList.remove('active'));
         navLink.classList.add('active');
 
@@ -246,7 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
         history.replaceState(null, null, window.location.pathname + window.location.search);
     }
 
-    // Search input listener
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
@@ -254,7 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Logo / Header home click handler
     const headerLinks = document.querySelectorAll('header a.site-title-link, .logo-area a');
     headerLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -270,7 +269,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Community Pitch Form Submission
     const pitchForm = document.getElementById('pitchForm');
     if (pitchForm) {
         pitchForm.addEventListener('submit', async (e) => {
