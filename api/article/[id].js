@@ -23,7 +23,7 @@ module.exports = async function handler(req, res) {
   const { id } = req.query;
 
   if (!id) {
-    return res.status(400).send('Article ID missing');
+    return res.status(400).send('Article identifier missing');
   }
 
   const projectId = '5hfaqqg7';
@@ -32,11 +32,10 @@ module.exports = async function handler(req, res) {
 
   try {
     let sanityQuery;
-    let cleanId = id;
 
     if (id.startsWith('pitch_')) {
-      cleanId = id.replace('pitch_', '');
-      sanityQuery = `*[_id == "${cleanId}"][0]{
+      const realPitchId = id.replace('pitch_', '');
+      sanityQuery = `*[_id == "${realPitchId}"][0]{
         "title": headline, 
         "imageUrl": mainImage.asset->url, 
         "author": author, 
@@ -44,7 +43,8 @@ module.exports = async function handler(req, res) {
         "category": "Community Pitch"
       }`;
     } else {
-      sanityQuery = `*[_id == "${cleanId}"][0]{
+      // THE ULTIMATE FALLBACK: Checks exact slug, partial slug match, OR database _id
+      sanityQuery = `*[_type == "post" && (slug.current == "${id}" || slug.current match "*${id}*" || _id == "${id}")][0]{
         title, 
         "imageUrl": mainImage.asset->url, 
         body, 
@@ -61,7 +61,7 @@ module.exports = async function handler(req, res) {
     const post = data.result;
 
     if (!post) {
-      return res.status(404).send(`Article not found for ID: ${id}`);
+      return res.status(404).send(`Article not found for: ${id}`);
     }
 
     let htmlContent = '<p>No content provided.</p>';
