@@ -44,6 +44,26 @@ if (closeSubModalBtn && subModal) {
     closeSubModalBtn.addEventListener('click', () => subModal.classList.remove('active'));
 }
 
+// --- Community Pitch Modal Management ---
+const pitchModal = document.getElementById('pitchModal');
+const openPitchModalBtn = document.getElementById('openPitchModalBtn');
+const closePitchModalBtn = document.getElementById('closePitchModalBtn');
+
+if (openPitchModalBtn && pitchModal) {
+    openPitchModalBtn.addEventListener('click', () => pitchModal.classList.add('active'));
+}
+if (closePitchModalBtn && pitchModal) {
+    closePitchModalBtn.addEventListener('click', () => pitchModal.classList.remove('active'));
+}
+
+if (pitchModal) {
+    pitchModal.addEventListener('click', (e) => {
+        if (e.target === pitchModal) {
+            pitchModal.classList.remove('active');
+        }
+    });
+}
+
 // --- CSS STYLING FOR BOTTOM-LEFT BADGE & CLEAN CARDS ---
 const dynamicStyle = document.createElement('style');
 dynamicStyle.textContent = `
@@ -84,7 +104,7 @@ function extractTextFromPortableText(item, maxLength = 160) {
     const raw = item?.body || item?.excerpt || item?.text || item?.description || item;
 
     if (!raw) {
-        plainText = "A reader-submitted satirical pitch approved by the editors...";
+        plainText = "A reader-submitted satirical article approved by the editors...";
     } else if (typeof raw === 'string') {
         plainText = raw;
     } else if (Array.isArray(raw)) {
@@ -100,7 +120,7 @@ function extractTextFromPortableText(item, maxLength = 160) {
     }
 
     if (!plainText) {
-        plainText = "A reader-submitted satirical pitch approved by the editors...";
+        plainText = "A reader-submitted satirical article approved by the editors...";
     }
 
     // Truncate to clean excerpt length with ellipses
@@ -129,13 +149,13 @@ function renderFeed(searchTerm = '') {
         });
 
         if (filteredPitches.length === 0) {
-            articlesGrid.innerHTML = `<p style="padding: 20px; color: var(--text-secondary);">No community pitches found.</p>`;
+            articlesGrid.innerHTML = `<p style="padding: 20px; color: var(--text-secondary);">No community articles found.</p>`;
         }
 
         filteredPitches.forEach((pitch) => {
             const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
             const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
-            const pitchTitle = pitch.headline || "Untitled Pitch";
+            const pitchTitle = pitch.headline || "Untitled Article";
             const pitchDate = pitch.submittedAt ? new Date(pitch.submittedAt).toLocaleDateString() : 'Recently';
             const articleUrl = `/article/${pitchSlug}`;
             const pitchExcerpt = extractTextFromPortableText(pitch);
@@ -145,7 +165,7 @@ function renderFeed(searchTerm = '') {
             pitchCard.innerHTML = `
                 <div class="card-image-wrapper">
                     <span class="category-tag">Community Pitch</span>
-                    <img src="${pitchImage}" alt="Pitch thumbnail">
+                    <img src="${pitchImage}" alt="Article thumbnail">
                 </div>
                 <div class="card-content">
                     <div class="article-meta">
@@ -225,7 +245,7 @@ function renderFeed(searchTerm = '') {
         filteredPitches.forEach((pitch) => {
             const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
             const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
-            const pitchTitle = pitch.headline || "Untitled Pitch";
+            const pitchTitle = pitch.headline || "Untitled Article";
             const pitchDate = pitch.submittedAt ? new Date(pitch.submittedAt).toLocaleDateString() : 'Recently';
             const articleUrl = `/article/${pitchSlug}`;
             const pitchExcerpt = extractTextFromPortableText(pitch);
@@ -235,7 +255,7 @@ function renderFeed(searchTerm = '') {
             pitchCard.innerHTML = `
                 <div class="card-image-wrapper">
                     <span class="category-tag">Community Pitch</span>
-                    <img src="${pitchImage}" alt="Pitch thumbnail">
+                    <img src="${pitchImage}" alt="Article thumbnail">
                 </div>
                 <div class="card-content">
                     <div class="article-meta">
@@ -343,22 +363,23 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const author = document.getElementById('pitchAuthor').value;
             const headline = document.getElementById('pitchHeadline').value;
-            const body = document.getElementById('pitchBody').value; // Grab pitch body/excerpt
+            const body = document.getElementById('pitchBody').value;
 
             try {
                 const response = await fetch('/api/submit-pitch', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ author, headline, body }) // Send body along
+                    body: JSON.stringify({ author, headline, body })
                 });
 
                 const result = await response.json();
 
                 if (response.ok) {
-                    showToast('Your headline pitch has been submitted to the editors for peer review!');
+                    showToast('Your satirical article has been submitted to the editors for peer review!');
                     pitchForm.reset();
+                    if (pitchModal) pitchModal.classList.remove('active');
                 } else {
-                    showToast('Error submitting pitch: ' + (result.error || 'Please try again.'));
+                    showToast('Error submitting article: ' + (result.error || 'Please try again.'));
                 }
             } catch (err) {
                 console.error('Submission error:', err);
