@@ -149,7 +149,6 @@ function renderFeed(searchTerm = '') {
             return matchesSearch;
         }
 
-        // Flexible matching for categories (e.g. matching "tech" with "Tech & AI")
         const isMatch = postCategory === currentCategory || postCategory.includes(currentCategory);
         return matchesSearch && isMatch;
     });
@@ -220,29 +219,32 @@ async function fetchArticlesFromSanity() {
     }
 }
 
-// --- SETUP EVENT LISTENERS ON DOM LOAD ---
+// --- UNIVERSAL EVENT DELEGATION FOR TABS ---
+document.addEventListener('click', (e) => {
+    const navLink = e.target.closest('.main-nav .nav-link, nav a');
+    if (navLink) {
+        e.preventDefault();
+        
+        // Remove active class from all nav items and add to clicked one
+        document.querySelectorAll('.main-nav .nav-link, nav a').forEach(l => l.classList.remove('active'));
+        navLink.classList.add('active');
+
+        currentCategory = (navLink.getAttribute('data-category') || navLink.textContent || 'all').trim().toLowerCase();
+        
+        const searchInput = document.getElementById('searchInput');
+        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+        
+        renderFeed(searchTerm);
+    }
+});
+
+// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
     
     if (window.location.hash) {
         history.replaceState(null, null, window.location.pathname + window.location.search);
     }
-
-    // Category navigation tab clicks
-    const navLinks = document.querySelectorAll('.main-nav .nav-link');
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            navLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-
-            currentCategory = (link.getAttribute('data-category') || 'all').trim().toLowerCase();
-            const searchInput = document.getElementById('searchInput');
-            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-            
-            renderFeed(searchTerm);
-        });
-    });
 
     // Search input listener
     const searchInput = document.getElementById('searchInput');
@@ -253,21 +255,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Logo / Header home click handler
-    const headerLinks = document.querySelectorAll('header a, .logo a');
+    const headerLinks = document.querySelectorAll('header a.site-title-link, .logo-area a');
     headerLinks.forEach(link => {
         link.addEventListener('click', (e) => {
-            const href = link.getAttribute('href');
-            if (href === '/' || href === '#' || href === window.location.pathname) {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
-                if (homeNav) {
-                    navLinks.forEach(l => l.classList.remove('active'));
-                    homeNav.classList.add('active');
-                    currentCategory = 'all';
-                    renderFeed();
-                }
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
+            if (homeNav) {
+                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
+                homeNav.classList.add('active');
             }
+            currentCategory = 'all';
+            renderFeed();
         });
     });
 
