@@ -147,7 +147,7 @@ function renderFeed(searchTerm = '') {
         const matchesSearch = title.includes(searchTerm);
         
         // When Home or All is selected, show ALL articles matching search
-        if (currentCategory === 'all' || currentCategory === 'home' || !currentCategory) {
+        if (currentCategory === 'all' || currentCategory === 'home') {
             return matchesSearch;
         }
 
@@ -230,7 +230,6 @@ document.addEventListener('click', (e) => {
         document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
         navLink.classList.add('active');
 
-        // Explicitly check data-category attribute
         const catAttr = navLink.getAttribute('data-category');
         if (catAttr) {
             currentCategory = catAttr.trim().toLowerCase();
