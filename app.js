@@ -186,7 +186,6 @@ navLinks.forEach(link => {
         const categoryAttr = (link.getAttribute('data-category') || '').trim().toLowerCase();
         const heroArticle = document.querySelector('.hero-article');
         const articlesGrid = document.getElementById('articlesGrid');
-        const pitchSection = document.getElementById('pitchSection');
 
         if (categoryAttr === 'pitches') {
             if (heroArticle) heroArticle.style.display = 'none';
@@ -286,7 +285,28 @@ if (pitchForm) {
     });
 }
 
+// Prevent logo / header link anchor jumps and force clean top scroll
 document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
+    
+    // Clear out any hash fragments on load that might cause browser jumping
+    if (window.location.hash) {
+        history.replaceState(null, null, window.location.pathname + window.location.search);
+    }
+
+    // Intercept logo / header home links to scroll smoothly to the top instead of jumping
+    const headerLinks = document.querySelectorAll('header a, .logo a');
+    headerLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            if (link.getAttribute('href') === '/' || link.getAttribute('href') === '#') {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Reset any active category filters back to home/all
+                const homeNav = document.querySelector('.main-nav .nav-link[data-category="home"]') || document.querySelector('.main-nav .nav-link');
+                if (homeNav) homeNav.click();
+            }
+        });
+    });
+
     fetchArticlesFromSanity();
 });
