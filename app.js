@@ -175,7 +175,7 @@ async function fetchArticlesFromSanity() {
     }
 }
 
-// Category Filtering & Search
+// Category Filtering & Search (Using Event Delegation for robust tab handling)
 const navLinks = document.querySelectorAll('.main-nav .nav-link');
 navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
@@ -187,22 +187,8 @@ navLinks.forEach(link => {
         const heroArticle = document.querySelector('.hero-article');
         const articlesGrid = document.getElementById('articlesGrid');
 
-        if (categoryAttr === 'pitches') {
-            if (heroArticle) heroArticle.style.display = 'none';
-            if (articlesGrid) {
-                articlesGrid.style.display = 'grid';
-                const cards = articlesGrid.querySelectorAll('.article-card');
-                cards.forEach(card => {
-                    const tagEl = card.querySelector('.category-tag');
-                    const isPitch = tagEl && tagEl.textContent.trim().toLowerCase() === 'community pitch';
-                    card.style.display = isPitch ? 'block' : 'none';
-                });
-            }
-            return;
-        }
-
-        // Show standard feed layout for home/all or other categories (like Culture, Politics, etc.)
-        if (heroArticle) heroArticle.style.display = 'block';
+        // Show standard feed layout grid
+        if (heroArticle) heroArticle.style.display = categoryAttr === 'pitches' ? 'none' : 'block';
         if (articlesGrid) articlesGrid.style.display = 'grid';
 
         const cards = document.querySelectorAll('.article-card');
@@ -212,6 +198,8 @@ navLinks.forEach(link => {
             
             if (categoryAttr === 'all' || categoryAttr === 'home' || categoryAttr === '') {
                 card.style.display = 'block';
+            } else if (categoryAttr === 'pitches') {
+                card.style.display = (cardCategory === 'community pitch') ? 'block' : 'none';
             } else {
                 if (cardCategory.includes(categoryAttr)) {
                     card.style.display = 'block';
