@@ -1,6 +1,5 @@
 const https = require('https');
 
-// Helper to fetch using standard Node https module
 function fetchJson(url) {
   return new Promise((resolve, reject) => {
     https.get(url, (res) => {
@@ -21,11 +20,10 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
 
-  // Capture whatever parameter Vercel passes from the route
-  const identifier = req.query.id || req.query.slug;
+  const { id } = req.query;
 
-  if (!identifier) {
-    return res.status(400).send('Article identifier missing');
+  if (!id) {
+    return res.status(400).send('Article ID missing');
   }
 
   const projectId = '5hfaqqg7';
@@ -34,10 +32,11 @@ module.exports = async function handler(req, res) {
 
   try {
     let sanityQuery;
+    let cleanId = id;
 
-    if (identifier.startsWith('pitch_')) {
-      const realPitchId = identifier.replace('pitch_', '');
-      sanityQuery = `*[_id == "${realPitchId}"][0]{
+    if (id.startsWith('pitch_')) {
+      cleanId = id.replace('pitch_', '');
+      sanityQuery = `*[_id == "${cleanId}"][0]{
         "title": headline, 
         "imageUrl": mainImage.asset->url, 
         "author": author, 
@@ -45,8 +44,7 @@ module.exports = async function handler(req, res) {
         "category": "Community Pitch"
       }`;
     } else {
-      // Ultra-resilient query: checks exact slug, partial match, OR database _id
-      sanityQuery = `*[_type == "post" && (slug.current == "${identifier}" || slug.current match "*${identifier}*" || _id == "${identifier}")][0]{
+      sanityQuery = `*[_id == "${cleanId}"][0]{
         title, 
         "imageUrl": mainImage.asset->url, 
         body, 
@@ -63,7 +61,7 @@ module.exports = async function handler(req, res) {
     const post = data.result;
 
     if (!post) {
-      return res.status(404).send(`Article not found for identifier: ${identifier}`);
+      return res.status(404).send(`Article not found for ID: ${id}`);
     }
 
     let htmlContent = '<p>No content provided.</p>';
@@ -74,11 +72,11 @@ module.exports = async function handler(req, res) {
         }
         return '';
       }).join('');
-    } else if (post.title && identifier.startsWith('pitch_')) {
+    } else if (post.title && id.startsWith('pitch_')) {
       htmlContent = `<p>${post.title}</p>`;
     }
 
-    const articleUrl = `https://pompous-pomegranate.vercel.app/article/${identifier}`;
+    const articleUrl = `https://pompous-pomegranate.vercel.app/article/${id}`;
     const encodedUrl = encodeURIComponent(articleUrl);
     const encodedTitle = encodeURIComponent(post.title || 'Satire Article');
 
