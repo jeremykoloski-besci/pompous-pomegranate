@@ -186,7 +186,6 @@ navLinks.forEach(link => {
         const categoryAttr = (link.getAttribute('data-category') || '').trim().toLowerCase();
         const heroArticle = document.querySelector('.hero-article');
         const articlesGrid = document.getElementById('articlesGrid');
-        const pitchSection = document.getElementById('pitchSection');
 
         if (categoryAttr === 'pitches') {
             if (heroArticle) heroArticle.style.display = 'none';
@@ -202,7 +201,7 @@ navLinks.forEach(link => {
             return;
         }
 
-        // Show standard feed layout for home/all or other categories
+        // Show standard feed layout for home/all or other categories (like Culture, Politics, etc.)
         if (heroArticle) heroArticle.style.display = 'block';
         if (articlesGrid) articlesGrid.style.display = 'grid';
 
@@ -286,7 +285,26 @@ if (pitchForm) {
     });
 }
 
+// Initialization and Top-Scroll enforcement
 document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
+    
+    if (window.location.hash) {
+        history.replaceState(null, null, window.location.pathname + window.location.search);
+    }
+
+    const headerLinks = document.querySelectorAll('header a, .logo a');
+    headerLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            if (href === '/' || href === '#' || href === window.location.pathname) {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
+                if (homeNav) homeNav.click();
+            }
+        });
+    });
+
     fetchArticlesFromSanity();
 });
