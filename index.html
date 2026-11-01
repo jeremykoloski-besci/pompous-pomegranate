@@ -6,7 +6,7 @@
     <title>The Pompous Pomegranate - Fake news to cure the blues</title>
     <link rel="stylesheet" href="styles.css">
     
-    <!-- Open Graph / Social Sharing Meta Tags (Optimized for Babylon Bee style preview cards) -->
+    <!-- Open Graph / Social Sharing Meta Tags -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="The Pompous Pomegranate">
     <meta property="og:description" content="Fake news to cure the blues.">
@@ -77,7 +77,6 @@
                 <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
                     <i class="fa-solid fa-moon"></i>
                 </button>
-                <!-- Temporarily hidden until payment gateway is integrated -->
                 <button class="subscribe-btn" id="openModalBtn" style="display: none;">
                     <i class="fa-solid fa-crown"></i> Pomegranate Plus
                 </button>
@@ -156,7 +155,6 @@
             <div class="sidebar-widget trending-widget">
                 <h3><i class="fa-solid fa-fire"></i> Trending Nonsense</h3>
                 <ul class="trending-list" id="trendingList">
-                    <!-- Populated dynamically or via live content -->
                     <li><span class="trend-number">1</span> <span style="color:var(--text-secondary); font-size:0.9rem;">Awaiting published articles...</span></li>
                 </ul>
             </div>
@@ -173,7 +171,7 @@
 
     </div>
 
-    <!-- Pomegranate Plus Subscription Modal (Kept for future Stripe integration) -->
+    <!-- Pomegranate Plus Subscription Modal -->
     <div class="modal-overlay" id="subModal">
         <div class="modal-container sub-modal-container">
             <button class="modal-close" id="closeSubModalBtn"><i class="fa-solid fa-xmark"></i></button>
