@@ -76,6 +76,24 @@ dynamicStyle.textContent = `
 `;
 document.head.appendChild(dynamicStyle);
 
+// --- HELPER TO EXTRACT TEXT FROM SANITY PORTABLE TEXT ---
+function extractTextFromPortableText(body) {
+    if (!body) return "Local sources confirmed Friday that the situation has escalated far beyond initial expectations...";
+    if (typeof body === 'string') return body;
+    if (Array.isArray(body)) {
+        return body
+            .map(block => {
+                if (block._type === 'block' && block.children) {
+                    return block.children.map(child => child.text || '').join('');
+                }
+                return '';
+            })
+            .join(' ')
+            .trim() || "Local sources confirmed Friday that the situation has escalated far beyond initial expectations...";
+    }
+    return "Local sources confirmed Friday that the situation has escalated far beyond initial expectations...";
+}
+
 // --- RENDER FEED FUNCTION ---
 function renderFeed(searchTerm = '') {
     const articlesGrid = document.getElementById('articlesGrid');
@@ -103,9 +121,7 @@ function renderFeed(searchTerm = '') {
             const pitchTitle = pitch.headline || "Untitled Pitch";
             const pitchDate = new Date(pitch.submittedAt).toLocaleDateString();
             const articleUrl = `/article/${pitchSlug}`;
-            
-            // Extract excerpt or use snippet
-            const pitchExcerpt = pitch.excerpt || pitch.body || "A reader-submitted satirical pitch approved by the editors for maximum absurdity...";
+            const pitchExcerpt = extractTextFromPortableText(pitch.body || pitch.excerpt);
 
             const pitchCard = document.createElement('article');
             pitchCard.className = 'article-card card';
@@ -158,9 +174,7 @@ function renderFeed(searchTerm = '') {
         const postDate = post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : 'Recently';
         const postImage = post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
         const articleUrl = `/article/${articleSlug}`;
-        
-        // Extract real article excerpt or body snippet
-        const postExcerpt = post.excerpt || post.body || "Local sources confirmed Friday that the situation has escalated far beyond initial expectations, resulting in widespread confusion...";
+        const postExcerpt = extractTextFromPortableText(post.body || post.excerpt);
 
         const newCard = document.createElement('article');
         newCard.className = 'article-card card';
@@ -197,7 +211,7 @@ function renderFeed(searchTerm = '') {
             const pitchTitle = pitch.headline || "Untitled Pitch";
             const pitchDate = new Date(pitch.submittedAt).toLocaleDateString();
             const articleUrl = `/article/${pitchSlug}`;
-            const pitchExcerpt = pitch.excerpt || pitch.body || "A reader-submitted satirical pitch approved by the editors for maximum absurdity...";
+            const pitchExcerpt = extractTextFromPortableText(pitch.body || pitch.excerpt);
 
             const pitchCard = document.createElement('article');
             pitchCard.className = 'article-card card';
