@@ -296,3 +296,71 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
+            renderFeed(e.target.value.toLowerCase());
+        });
+    }
+
+    const headerLinks = document.querySelectorAll('header a.site-title-link, .logo-area a');
+    headerLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
+            if (homeNav) {
+                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
+                homeNav.classList.add('active');
+            }
+            currentCategory = 'all';
+            renderFeed();
+        });
+    });
+
+    const pitchForm = document.getElementById('pitchForm');
+    if (pitchForm) {
+        pitchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const author = document.getElementById('pitchAuthor').value;
+            const headline = document.getElementById('pitchHeadline').value;
+
+            try {
+                const response = await fetch('/api/submit-pitch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ author, headline })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast('Your headline pitch has been submitted to the editors for peer review!');
+                    pitchForm.reset();
+                } else {
+                    showToast('Error submitting pitch: ' + (result.error || 'Please try again.'));
+                }
+            } catch (err) {
+                console.error('Submission error:', err);
+                showToast('Something went wrong. Please try again later.');
+            }
+        });
+    }
+
+    fetchArticlesFromSanity();
+});
+
+function showToast(message) {
+    const toast = document.getElementById('toastNotification');
+    const toastMsg = document.getElementById('toastMessage');
+    if (!toast) return;
+
+    if (toastMsg) toastMsg.textContent = message;
+    toast.classList.add('show');
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 4000);
+}
+
+// Expose state and functions globally for console inspection and debugging
+window.allPosts = allPosts;
+window.allPitches = allPitches;
+window.renderFeed = renderFeed;
