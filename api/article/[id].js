@@ -1,6 +1,5 @@
 const https = require('https');
 
-// Helper to fetch using standard Node https module
 function fetchJson(url) {
   return new Promise((resolve, reject) => {
     https.get(url, (res) => {
@@ -21,11 +20,10 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
 
-  // Capture the slug/id parameter from the clean URL route
   const { id } = req.query;
 
   if (!id) {
-    return res.status(400).send('Article slug missing');
+    return res.status(400).send('Article identifier missing');
   }
 
   const projectId = '5hfaqqg7';
@@ -33,32 +31,31 @@ module.exports = async function handler(req, res) {
   const apiVersion = '2026-10-29';
 
   try {
-    let sanityQuery = `*[_type == "post" && (slug.current == $slug || slug.current match $slug + "*")][0]{
-      title, 
-      "imageUrl": mainImage.asset->url, 
-      body, 
-      author->name, 
-      publishedAt, 
-      "category": categories[0]->title
-    }`;
-    let fetchSlug = id;
+    let sanityQuery;
 
-    // Handle community pitches gracefully if accessed directly
     if (id.startsWith('pitch_')) {
       const realPitchId = id.replace('pitch_', '');
-      sanityQuery = `*[_id == $id][0]{
+      sanityQuery = `*[_id == "${realPitchId}"][0]{
         "title": headline, 
         "imageUrl": mainImage.asset->url, 
         "author": author, 
         "publishedAt": submittedAt, 
         "category": "Community Pitch"
       }`;
-      fetchSlug = realPitchId;
+    } else {
+      // Flexible query handling slugs, partial slug matches, and legacy IDs
+      sanityQuery = `*[_type == "post" && (slug.current == "${id}" || slug.current match "*${id}*" || _id == "${id}")][0]{
+        title, 
+        "imageUrl": mainImage.asset->url, 
+        body, 
+        author->name, 
+        publishedAt, 
+        "category": categories[0]->title
+      }`;
     }
 
     const encodedQuery = encodeURIComponent(sanityQuery);
-    const paramKey = id.startsWith('pitch_') ? '$id' : '$slug';
-    const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${encodedQuery}&${paramKey}="${fetchSlug}"`;
+    const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${encodedQuery}`;
 
     const data = await fetchJson(url);
     const post = data.result;
@@ -122,7 +119,7 @@ module.exports = async function handler(req, res) {
               <div class="meta"><span>By ${post.author || 'Staff'}</span> • <span>${post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : 'Recent'}</span></div>
               <img src="${post.imageUrl || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80'}" alt="Article Image" class="hero-img">
               
-              <!-- Babylone Bee Style Social Share Bar with X & TikTok -->
+              <!-- Social Share Bar with X & TikTok -->
               <div class="share-bar">
                   <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}" target="_blank" class="share-btn" title="Share on Facebook"><i class="fa-brands fa-square-facebook"></i></a>
                   <a href="https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}" target="_blank" class="share-btn" title="Share on X"><i class="fa-brands fa-x-twitter"></i></a>
