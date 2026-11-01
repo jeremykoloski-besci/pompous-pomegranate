@@ -75,7 +75,7 @@ dynamicStyle.textContent = `
 `;
 document.head.appendChild(dynamicStyle);
 
-// --- RENDER FUNCTION (Draws articles based on currentCategory filter) ---
+// --- RENDER FEED FUNCTION ---
 function renderFeed(searchTerm = '') {
     const articlesGrid = document.getElementById('articlesGrid');
     const heroArticle = document.querySelector('.hero-article');
@@ -136,7 +136,9 @@ function renderFeed(searchTerm = '') {
     }
 
     // Standard feed / Category filtering
-    if (heroArticle) heroArticle.style.display = (currentCategory === 'all' || currentCategory === 'home') ? 'block' : 'none';
+    if (heroArticle) {
+        heroArticle.style.display = (currentCategory === 'all' || currentCategory === 'home') ? 'block' : 'none';
+    }
 
     const filteredPosts = allPosts.filter(post => {
         const postCategory = (post.category || '').trim().toLowerCase();
@@ -146,7 +148,10 @@ function renderFeed(searchTerm = '') {
         if (currentCategory === 'all' || currentCategory === 'home' || !currentCategory) {
             return matchesSearch;
         }
-        return matchesSearch && postCategory.includes(currentCategory);
+
+        // Flexible matching for categories (e.g. matching "tech" with "Tech & AI")
+        const isMatch = postCategory === currentCategory || postCategory.includes(currentCategory);
+        return matchesSearch && isMatch;
     });
 
     if (filteredPosts.length === 0) {
