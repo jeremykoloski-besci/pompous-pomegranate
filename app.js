@@ -1,3 +1,8 @@
+// Global application state
+let allPosts = [];
+let allPitches = [];
+let currentCategory = 'all';
+
 // Current Date Display
 const dateEl = document.getElementById('currentDate');
 if (dateEl) {
@@ -70,86 +75,29 @@ dynamicStyle.textContent = `
 `;
 document.head.appendChild(dynamicStyle);
 
-// --- CORE FILTERING LOGIC ---
-function filterArticles(categoryAttr) {
-    const heroArticle = document.querySelector('.hero-article');
+// --- RENDER FUNCTION (Draws articles based on currentCategory filter) ---
+function renderFeed(searchTerm = '') {
     const articlesGrid = document.getElementById('articlesGrid');
+    const heroArticle = document.querySelector('.hero-article');
     const pitchSection = document.getElementById('pitchSection');
+    
+    if (!articlesGrid) return;
+    articlesGrid.innerHTML = '';
 
-    const cleanCat = (categoryAttr || 'all').trim().toLowerCase();
-
-    if (cleanCat === 'pitches') {
+    // Handle Community Pitches tab view
+    if (currentCategory === 'pitches') {
         if (heroArticle) heroArticle.style.display = 'none';
-        if (articlesGrid) {
-            articlesGrid.style.display = 'grid';
-            const cards = articlesGrid.querySelectorAll('.article-card');
-            cards.forEach(card => {
-                const tagEl = card.querySelector('.category-tag');
-                const cardText = tagEl ? tagEl.textContent.trim().toLowerCase() : '';
-                card.style.display = (cardText === 'community pitch') ? 'block' : 'none';
-            });
-        }
-        if (pitchSection) pitchSection.scrollIntoView({ behavior: 'smooth' });
-        return;
-    }
-
-    // Standard feed layout
-    if (heroArticle) heroArticle.style.display = (cleanCat === 'all' || cleanCat === 'home') ? 'block' : 'none';
-    if (articlesGrid) articlesGrid.style.display = 'grid';
-
-    const cards = document.querySelectorAll('.article-card');
-    cards.forEach(card => {
-        const tagEl = card.querySelector('.category-tag');
-        const cardCategory = tagEl ? tagEl.textContent.trim().toLowerCase() : '';
         
-        if (cleanCat === 'all' || cleanCat === 'home' || cleanCat === '') {
-            card.style.display = 'block';
-        } else {
-            if (cardCategory.includes(cleanCat)) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        }
-    });
-}
+        const filteredPitches = allPitches.filter(p => {
+            const headline = (p.headline || '').toLowerCase();
+            return headline.includes(searchTerm);
+        });
 
-// --- SANITY CMS DYNAMIC FETCHING VIA DIRECT FETCH ---
-async function fetchArticlesFromSanity() {
-    const url = '/api/posts';
-
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        const posts = data.result || [];
-        const approvedPitches = data.pitches || []; 
-        const factCheckData = data.factCheck; 
-
-        // Populate the Fact Check sidebar widget dynamically
-        const factCheckContainer = document.getElementById('factCheckContainer');
-        if (factCheckContainer && factCheckData) {
-            factCheckContainer.innerHTML = `
-                <p><strong>Claim:</strong> "${factCheckData.claim}"</p>
-                <p style="margin-top: 8px;"><strong>Verdict:</strong> <span style="color:var(--accent-color); font-weight:bold;">${factCheckData.verdict}</span></p>
-            `;
-        } else if (factCheckContainer) {
-            factCheckContainer.innerHTML = `<p>No fact checks published yet.</p>`;
-        }
-        
-        const articlesGrid = document.getElementById('articlesGrid');
-        if (!articlesGrid) return;
-
-        articlesGrid.innerHTML = '';
-
-        function attachCardClick(cardElement, targetUrl) {
-            cardElement.addEventListener('click', (e) => {
-                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-                window.location.href = targetUrl;
-            });
+        if (filteredPitches.length === 0) {
+            articlesGrid.innerHTML = `<p style="padding: 20px; color: var(--text-secondary);">No community pitches found.</p>`;
         }
 
-        // 1. Render approved community pitches
-        approvedPitches.forEach((pitch) => {
+        filteredPitches.forEach((pitch) => {
             const pitchSlug = pitch.headline.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
             const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
             const pitchTitle = pitch.headline;
@@ -176,89 +124,181 @@ async function fetchArticlesFromSanity() {
                     </div>
                 </div>
             `;
-            attachCardClick(pitchCard, articleUrl);
+            pitchCard.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+                window.location.href = articleUrl;
+            });
             articlesGrid.appendChild(pitchCard);
         });
 
-        // 2. Render standard regular posts
-        posts.forEach((post, index) => {
-            const articleSlug = post.slug?.current || post._id || index + 1;
-            const postTitle = post.title || "Untitled Satire";
-            const postCategory = post.category || "General Satire";
-            const postAuthor = post.author || "Anonymous Pomp";
-            const postDate = new Date(post.publishedAt).toLocaleDateString();
-            const postImage = post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
-            const articleUrl = `/article/${articleSlug}`;
+        if (pitchSection) pitchSection.scrollIntoView({ behavior: 'smooth' });
+        return;
+    }
 
-            const newCard = document.createElement('article');
-            newCard.className = 'article-card card';
-            newCard.innerHTML = `
-                <div class="card-image-wrapper">
-                    <span class="category-tag">${postCategory}</span>
-                    <img src="${postImage}" alt="Article thumbnail">
-                </div>
-                <div class="card-content">
-                    <div class="article-meta">
-                        <span><i class="fa-regular fa-user"></i> By ${postAuthor}</span>
-                        <span><i class="fa-regular fa-clock"></i> ${postDate}</span>
-                    </div>
-                    <h3 class="article-headline">${postTitle}</h3>
-                    <p class="article-excerpt">Click to read the full breaking story and participate in the pomposity verification.</p>
-                    <div class="card-footer">
-                        <a href="${articleUrl}" style="text-decoration:none; color:var(--accent-color); font-weight:700;">Read Full Story &rarr;</a>
-                    </div>
-                </div>
-            `;
-            attachCardClick(newCard, articleUrl);
-            articlesGrid.appendChild(newCard);
-        });
+    // Standard feed / Category filtering
+    if (heroArticle) heroArticle.style.display = (currentCategory === 'all' || currentCategory === 'home') ? 'block' : 'none';
 
-        // Re-apply current active filter after cards are loaded
-        const activeLink = document.querySelector('.main-nav .nav-link.active');
-        if (activeLink) {
-            filterArticles(activeLink.getAttribute('data-category'));
+    const filteredPosts = allPosts.filter(post => {
+        const postCategory = (post.category || '').trim().toLowerCase();
+        const title = (post.title || '').toLowerCase();
+        const matchesSearch = title.includes(searchTerm);
+        
+        if (currentCategory === 'all' || currentCategory === 'home' || !currentCategory) {
+            return matchesSearch;
         }
+        return matchesSearch && postCategory.includes(currentCategory);
+    });
 
+    if (filteredPosts.length === 0) {
+        articlesGrid.innerHTML = `<p style="padding: 20px; color: var(--text-secondary);">No articles found in this category.</p>`;
+        return;
+    }
+
+    filteredPosts.forEach((post, index) => {
+        const articleSlug = post.slug?.current || post._id || index + 1;
+        const postTitle = post.title || "Untitled Satire";
+        const postCategory = post.category || "General Satire";
+        const postAuthor = post.author || "Anonymous Pomp";
+        const postDate = new Date(post.publishedAt).toLocaleDateString();
+        const postImage = post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
+        const articleUrl = `/article/${articleSlug}`;
+
+        const newCard = document.createElement('article');
+        newCard.className = 'article-card card';
+        newCard.innerHTML = `
+            <div class="card-image-wrapper">
+                <span class="category-tag">${postCategory}</span>
+                <img src="${postImage}" alt="Article thumbnail">
+            </div>
+            <div class="card-content">
+                <div class="article-meta">
+                    <span><i class="fa-regular fa-user"></i> By ${postAuthor}</span>
+                    <span><i class="fa-regular fa-clock"></i> ${postDate}</span>
+                </div>
+                <h3 class="article-headline">${postTitle}</h3>
+                <p class="article-excerpt">Click to read the full breaking story and participate in the pomposity verification.</p>
+                <div class="card-footer">
+                    <a href="${articleUrl}" style="text-decoration:none; color:var(--accent-color); font-weight:700;">Read Full Story &rarr;</a>
+                </div>
+            </div>
+        `;
+        newCard.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+            window.location.href = articleUrl;
+        });
+        articlesGrid.appendChild(newCard);
+    });
+}
+
+// --- SANITY CMS DYNAMIC FETCHING ---
+async function fetchArticlesFromSanity() {
+    try {
+        const response = await fetch('/api/posts');
+        const data = await response.json();
+        allPosts = data.result || [];
+        allPitches = data.pitches || []; 
+        const factCheckData = data.factCheck; 
+
+        const factCheckContainer = document.getElementById('factCheckContainer');
+        if (factCheckContainer && factCheckData) {
+            factCheckContainer.innerHTML = `
+                <p><strong>Claim:</strong> "${factCheckData.claim}"</p>
+                <p style="margin-top: 8px;"><strong>Verdict:</strong> <span style="color:var(--accent-color); font-weight:bold;">${factCheckData.verdict}</span></p>
+            `;
+        } else if (factCheckContainer) {
+            factCheckContainer.innerHTML = `<p>No fact checks published yet.</p>`;
+        }
+        
+        renderFeed();
     } catch (error) {
         console.error("Error fetching live articles from Sanity proxy:", error);
     }
 }
 
-// --- EVENT DELEGATION FOR NAVIGATION TABS ---
-document.addEventListener('click', (e) => {
-    const navLink = e.target.closest('.main-nav a, .nav-link');
-    if (navLink) {
-        e.preventDefault();
-        
-        // Update active class on all nav links
-        document.querySelectorAll('.main-nav .nav-link, nav a').forEach(l => l.classList.remove('active'));
-        navLink.classList.add('active');
-
-        const categoryAttr = navLink.getAttribute('data-category') || navLink.textContent.trim();
-        filterArticles(categoryAttr);
+// --- SETUP EVENT LISTENERS ON DOM LOAD ---
+document.addEventListener('DOMContentLoaded', () => {
+    window.scrollTo(0, 0);
+    
+    if (window.location.hash) {
+        history.replaceState(null, null, window.location.pathname + window.location.search);
     }
-});
 
-// Search input listener
-const searchInput = document.getElementById('searchInput');
-if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        const cards = document.querySelectorAll('.article-card');
-        
-        cards.forEach(card => {
-            const headline = card.querySelector('.article-headline').textContent.toLowerCase();
-            const excerpt = card.querySelector('.article-excerpt') ? card.querySelector('.article-excerpt').textContent.toLowerCase() : '';
-            if (headline.includes(term) || excerpt.includes(term)) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
+    // Category navigation tab clicks
+    const navLinks = document.querySelectorAll('.main-nav .nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            navLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+
+            currentCategory = (link.getAttribute('data-category') || 'all').trim().toLowerCase();
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            renderFeed(searchTerm);
+        });
+    });
+
+    // Search input listener
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            renderFeed(e.target.value.toLowerCase());
+        });
+    }
+
+    // Logo / Header home click handler
+    const headerLinks = document.querySelectorAll('header a, .logo a');
+    headerLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            if (href === '/' || href === '#' || href === window.location.pathname) {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
+                if (homeNav) {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    homeNav.classList.add('active');
+                    currentCategory = 'all';
+                    renderFeed();
+                }
             }
         });
     });
-}
 
-// Custom Toast Notification Helper
+    // Community Pitch Form Submission
+    const pitchForm = document.getElementById('pitchForm');
+    if (pitchForm) {
+        pitchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const author = document.getElementById('pitchAuthor').value;
+            const headline = document.getElementById('pitchHeadline').value;
+
+            try {
+                const response = await fetch('/api/submit-pitch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ author, headline })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast('Your headline pitch has been submitted to the editors for peer review!');
+                    pitchForm.reset();
+                } else {
+                    showToast('Error submitting pitch: ' + (result.error || 'Please try again.'));
+                }
+            } catch (err) {
+                console.error('Submission error:', err);
+                showToast('Something went wrong. Please try again later.');
+            }
+        });
+    }
+
+    fetchArticlesFromSanity();
+});
+
 function showToast(message) {
     const toast = document.getElementById('toastNotification');
     const toastMsg = document.getElementById('toastMessage');
@@ -271,61 +311,3 @@ function showToast(message) {
         toast.classList.remove('show');
     }, 4000);
 }
-
-// Community Pitch Form Submission
-const pitchForm = document.getElementById('pitchForm');
-if (pitchForm) {
-    pitchForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const author = document.getElementById('pitchAuthor').value;
-        const headline = document.getElementById('pitchHeadline').value;
-
-        try {
-            const response = await fetch('/api/submit-pitch', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ author, headline })
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                showToast('Your headline pitch has been submitted to the editors for peer review!');
-                pitchForm.reset();
-            } else {
-                showToast('Error submitting pitch: ' + (result.error || 'Please try again.'));
-            }
-        } catch (err) {
-            console.error('Submission error:', err);
-            showToast('Something went wrong. Please try again later.');
-        }
-    });
-}
-
-// Initialization and Top-Scroll enforcement
-document.addEventListener('DOMContentLoaded', () => {
-    window.scrollTo(0, 0);
-    
-    if (window.location.hash) {
-        history.replaceState(null, null, window.location.pathname + window.location.search);
-    }
-
-    const headerLinks = document.querySelectorAll('header a, .logo a');
-    headerLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            const href = link.getAttribute('href');
-            if (href === '/' || href === '#' || href === window.location.pathname) {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
-                if (homeNav) {
-                    document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-                    homeNav.classList.add('active');
-                    filterArticles('all');
-                }
-            }
-        });
-    });
-
-    fetchArticlesFromSanity();
-});
