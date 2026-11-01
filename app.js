@@ -285,11 +285,12 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Force window to top immediately on load
+    // Force immediate scroll position lock
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
     window.scrollTo(0, 0);
-    setTimeout(() => window.scrollTo(0, 0), 10);
     
     if (window.location.hash) {
         history.replaceState(null, null, window.location.pathname + window.location.search);
