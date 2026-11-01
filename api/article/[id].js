@@ -44,9 +44,9 @@ module.exports = async function handler(req, res) {
         "publishedAt": submittedAt, 
         "category": "Community Pitch"
       }`;
-    } else {
-      // Directly matching the slug string safely inside GROQ
-      sanityQuery = `*[_type == "post" && (slug.current == "${id}" || slug.current match "${id}*")][0]{
+} else {
+      // Flexible match so any portion of the slug or id will find the post
+      sanityQuery = `*[_type == "post" && (slug.current match "*${id}*" || _id == "${id}")][0]{
         title, 
         "imageUrl": mainImage.asset->url, 
         body, 
