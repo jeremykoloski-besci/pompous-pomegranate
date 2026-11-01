@@ -199,7 +199,6 @@ navLinks.forEach(link => {
                     card.style.display = isPitch ? 'block' : 'none';
                 });
             }
-            if (pitchSection) pitchSection.scrollIntoView({ behavior: 'smooth' });
             return;
         }
 
@@ -288,5 +287,6 @@ if (pitchForm) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    window.scrollTo(0, 0);
     fetchArticlesFromSanity();
 });
