@@ -1,9 +1,15 @@
-/* Hide body initially to prevent bottom-flash on load */
+/* 1. Prevent browser scroll memory entirely */
 html {
     scroll-restoration: manual;
 }
-html {
-    scroll-behavior: auto !important;
+
+/* 2. Lock the viewport height and prevent initial render shifts */
+html, body {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
 }
 :root {
     --bg-color: #fdfbf7;
