@@ -70,6 +70,9 @@ dynamicStyle.textContent = `
 `;
 document.head.appendChild(dynamicStyle);
 
+// Global filter state
+let activeCategory = 'all';
+
 // --- SANITY CMS DYNAMIC FETCHING VIA DIRECT FETCH ---
 async function fetchArticlesFromSanity() {
     const url = '/api/posts';
@@ -170,12 +173,43 @@ async function fetchArticlesFromSanity() {
             articlesGrid.appendChild(newCard);
         });
 
+        // Apply current category filter immediately after rendering
+        applyFilter(activeCategory);
+
     } catch (error) {
         console.error("Error fetching live articles from Sanity proxy:", error);
     }
 }
 
-// Category Filtering & Search (Using Event Delegation for robust tab handling)
+// Unified filtering function that evaluates cards dynamically at runtime
+function applyFilter(categoryAttr) {
+    activeCategory = categoryAttr;
+    const heroArticle = document.querySelector('.hero-article');
+    const articlesGrid = document.getElementById('articlesGrid');
+
+    if (heroArticle) heroArticle.style.display = (categoryAttr === 'pitches' || categoryAttr !== 'all') ? 'none' : 'block';
+    if (articlesGrid) articlesGrid.style.display = 'grid';
+
+    const cards = document.querySelectorAll('.article-card');
+    cards.forEach(card => {
+        const tagEl = card.querySelector('.category-tag');
+        const cardCategory = tagEl ? tagEl.textContent.trim().toLowerCase() : '';
+        
+        if (categoryAttr === 'all' || categoryAttr === 'home' || !categoryAttr) {
+            card.style.display = 'block';
+        } else if (categoryAttr === 'pitches') {
+            card.style.display = (cardCategory === 'community pitch') ? 'block' : 'none';
+        } else {
+            if (cardCategory.includes(categoryAttr.toLowerCase())) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        }
+    });
+}
+
+// Category Filtering & Search Listeners
 const navLinks = document.querySelectorAll('.main-nav .nav-link');
 navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
@@ -183,31 +217,8 @@ navLinks.forEach(link => {
         navLinks.forEach(l => l.classList.remove('active'));
         link.classList.add('active');
 
-        const categoryAttr = (link.getAttribute('data-category') || '').trim().toLowerCase();
-        const heroArticle = document.querySelector('.hero-article');
-        const articlesGrid = document.getElementById('articlesGrid');
-
-        // Show standard feed layout grid
-        if (heroArticle) heroArticle.style.display = categoryAttr === 'pitches' ? 'none' : 'block';
-        if (articlesGrid) articlesGrid.style.display = 'grid';
-
-        const cards = document.querySelectorAll('.article-card');
-        cards.forEach(card => {
-            const tagEl = card.querySelector('.category-tag');
-            const cardCategory = tagEl ? tagEl.textContent.trim().toLowerCase() : '';
-            
-            if (categoryAttr === 'all' || categoryAttr === 'home' || categoryAttr === '') {
-                card.style.display = 'block';
-            } else if (categoryAttr === 'pitches') {
-                card.style.display = (cardCategory === 'community pitch') ? 'block' : 'none';
-            } else {
-                if (cardCategory.includes(categoryAttr)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            }
-        });
+        const categoryAttr = (link.getAttribute('data-category') || 'all').trim().toLowerCase();
+        applyFilter(categoryAttr);
     });
 });
 
@@ -289,7 +300,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
-                if (homeNav) homeNav.click();
+                if (homeNav) {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    homeNav.classList.add('active');
+                    applyFilter('all');
+                }
             }
         });
     });
