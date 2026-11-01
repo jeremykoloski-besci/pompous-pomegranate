@@ -146,17 +146,17 @@ function renderFeed(searchTerm = '') {
         const title = (post.title || '').toLowerCase();
         const matchesSearch = title.includes(searchTerm);
         
+        // When Home or All is selected, show ALL articles matching search
         if (currentCategory === 'all' || currentCategory === 'home' || !currentCategory) {
             return matchesSearch;
         }
 
-        // Fuzzy match category (e.g. "culture" matches "Culture")
         const isMatch = postCategory === currentCategory || postCategory.includes(currentCategory);
         return matchesSearch && isMatch;
     });
 
     if (filteredPosts.length === 0) {
-        articlesGrid.innerHTML = `<p style="padding: 20px; color: var(--text-secondary);">No articles found in this category.</p>`;
+        articlesGrid.innerHTML = `<p style="padding: 20px; color: var(--text-secondary);">No articles found.</p>`;
         return;
     }
 
