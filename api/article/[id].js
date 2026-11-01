@@ -33,7 +33,7 @@ module.exports = async function handler(req, res) {
   const apiVersion = '2026-10-29';
 
   try {
-    let sanityQuery = `*[_type == "post" && slug.current == $slug][0]{
+    let sanityQuery = `*[_type == "post" && (slug.current == $slug || slug.current match $slug + "*")][0]{
       title, 
       "imageUrl": mainImage.asset->url, 
       body, 
