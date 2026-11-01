@@ -5,6 +5,10 @@ let currentCategory = 'all';
 
 // Current Date Display
 document.addEventListener('DOMContentLoaded', () => {
+    // Force immediate jump to top before paint completes
+    window.scrollTo(0, 0);
+    setTimeout(() => window.scrollTo(0, 0), 0);
+
     const dateEl = document.getElementById('currentDate');
     if (dateEl) {
         dateEl.textContent = new Date().toLocaleDateString('en-US', { 
