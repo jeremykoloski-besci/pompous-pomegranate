@@ -31,34 +31,48 @@ module.exports = async function handler(req, res) {
   const apiVersion = '2026-10-29';
 
   try {
-    let sanityQuery;
-
-    if (id.startsWith('pitch_')) {
-      const realPitchId = id.replace('pitch_', '');
-      sanityQuery = `*[_id == "${realPitchId}"][0]{
-        "title": headline, 
-        "imageUrl": mainImage.asset->url, 
-        "author": author, 
-        "publishedAt": submittedAt, 
-        "category": "Community Pitch"
-      }`;
-    } else {
-      // Flexible query handling slugs, partial slug matches, and legacy IDs
-      sanityQuery = `*[_type == "post" && (slug.current == "${id}" || slug.current match "*${id}*" || _id == "${id}")][0]{
+    // Query both standard posts and pitches, matching either exact IDs, slugs, or partial strings
+    const sanityQuery = `{
+      "post": *[_type == "post" && (slug.current == "${id}" || slug.current match "*${id}*" || _id == "${id}")][0]{
         title, 
         "imageUrl": mainImage.asset->url, 
         body, 
         author->name, 
         publishedAt, 
         "category": categories[0]->title
-      }`;
-    }
+      },
+      "pitches": *[_type == "pitch"]{
+        _id,
+        headline,
+        "imageUrl": mainImage.asset->url,
+        author,
+        submittedAt
+      }
+    }`;
 
     const encodedQuery = encodeURIComponent(sanityQuery);
     const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${encodedQuery}`;
 
     const data = await fetchJson(url);
-    const post = data.result;
+    let post = data.result?.post;
+
+    // If not found in standard posts, check if it matches a community pitch via id or generated slug
+    if (!post && data.result?.pitches) {
+      const matchedPitch = data.result.pitches.find(p => {
+        const generatedSlug = p.headline.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        return p._id === id || generatedSlug === id || generatedSlug.includes(id) || id.includes(p._id);
+      });
+
+      if (matchedPitch) {
+        post = {
+          title: matchedPitch.headline,
+          imageUrl: matchedPitch.imageUrl,
+          author: matchedPitch.author || "Anonymous Reader",
+          publishedAt: matchedPitch.submittedAt,
+          category: "Community Pitch"
+        };
+      }
+    }
 
     if (!post) {
       return res.status(404).send(`Article not found for: ${id}`);
@@ -72,7 +86,7 @@ module.exports = async function handler(req, res) {
         }
         return '';
       }).join('');
-    } else if (post.title && id.startsWith('pitch_')) {
+    } else if (post.title) {
       htmlContent = `<p>${post.title}</p>`;
     }
 
