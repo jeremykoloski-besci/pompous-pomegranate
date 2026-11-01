@@ -1,0 +1,6 @@
+{
+  "routes": [
+    { "src": "/article/(?<id>[^/]+)", "dest": "/api/article/[id]" },
+    { "handle": "filesystem" }
+  ]
+}
