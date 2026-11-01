@@ -2,15 +2,7 @@
 html {
     scroll-restoration: manual;
 }
-body {
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 0.1s ease-in;
-}
-body.loaded {
-    visibility: visible;
-    opacity: 1;
-}
+
 :root {
     --bg-color: #fdfbf7;
     --card-bg: #ffffff;
