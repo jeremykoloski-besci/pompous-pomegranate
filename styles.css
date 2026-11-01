@@ -1,3 +1,7 @@
+/* Prevent any layout jumps or scroll flickering on initial load */
+html {
+    scroll-behavior: auto !important;
+}
 :root {
     --bg-color: #fdfbf7;
     --card-bg: #ffffff;
