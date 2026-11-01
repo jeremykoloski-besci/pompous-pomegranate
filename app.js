@@ -92,9 +92,9 @@ async function fetchArticlesFromSanity() {
             articlesGrid.appendChild(pitchCard);
         });
 
-        // 2. Render standard regular posts using reliable Sanity _id
+        // 2. Render standard regular posts using clean URL slugs
         posts.forEach((post, index) => {
-            const articleId = post._id || index + 1;
+            const articleSlug = post.slug?.current || post._id || index + 1;
             const postTitle = post.title || "Untitled Satire";
             const postCategory = post.category || "General Satire";
             const postAuthor = post.author || "Anonymous Pomp";
@@ -116,7 +116,7 @@ async function fetchArticlesFromSanity() {
                     <h3 class="article-headline">${postTitle}</h3>
                     <p class="article-excerpt">Click to read the full breaking story and participate in the pomposity verification.</p>
                     <div class="card-footer">
-                        <a href="/article/${articleId}" style="text-decoration:none; color:var(--accent-color); font-weight:700;">Read Full Story &rarr;</a>
+                        <a href="/article/${articleSlug}" style="text-decoration:none; color:var(--accent-color); font-weight:700;">Read Full Story &rarr;</a>
                     </div>
                 </div>
             `;
@@ -156,7 +156,6 @@ navLinks.forEach(link => {
             return;
         }
 
-        // Show standard feed layout for home/all or other categories
         if (heroArticle) heroArticle.style.display = 'block';
         if (articlesGrid) articlesGrid.style.display = 'grid';
 
