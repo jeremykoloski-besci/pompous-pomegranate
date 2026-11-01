@@ -132,7 +132,6 @@ function renderFeed(searchTerm = '') {
             articlesGrid.appendChild(pitchCard);
         });
 
-        if (pitchSection) pitchSection.scrollIntoView({ behavior: 'smooth' });
         return;
     }
 
