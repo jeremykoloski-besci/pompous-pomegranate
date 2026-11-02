@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { author, headline } = req.body;
+  const { author, headline, body } = req.body; // <--- Capture body here
 
   if (!author || !headline) {
     return res.status(400).json({ error: 'Author and headline are required.' });
@@ -20,11 +20,10 @@ export default async function handler(req, res) {
   const projectId = '5hfaqqg7';
   const dataset = 'production';
   const apiVersion = '2026-10-29';
-  const token = 'sktVjq2V0jTt9XtdeFOqDQmVXhnVkwxXxBAFWSf03xfzCNLH5Y1gjMHPLo22oL31xBqEekjGU28YTyYHA0MSfu1zaXZehLsL10s1fSOI74YJOSbkwkRrkz5OpYolfRW6UM1rNnKMRCgVJbA00PzGuBANRK68dWXHVzE3Yj9MX6e8Cd4ezpzh';
+  const token = 'skUaP8VnZYnUOJV7kpwTHWWBwpORkNkhEuAmO3idhBkNOl4APE5bwRBtpUisdgQiIpgXaxBpQV1Or7FKCUlnHzSHb7hQG9rFUYzVfA7XWD8mkLLMGlbCMIZFsMV9sUD1mXrHLRkP7o7Up8OInPFfGNee1KbOqHBkRE6xkrrLnJrWEPBy4fX6';
 
   const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/mutate/${dataset}`;
 
-  // Sanity Mutations API payload to create a new document
   const mutationPayload = {
     mutations: [
       {
@@ -32,6 +31,7 @@ export default async function handler(req, res) {
           _type: 'pitch',
           author: author,
           headline: headline,
+          body: body || '', // <--- Save body to Sanity document
           status: 'pending',
           submittedAt: new Date().toISOString()
         }
