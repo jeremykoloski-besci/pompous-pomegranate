@@ -55,7 +55,8 @@ module.exports = async function handler(req, res) {
 
     // Normalize fields between posts and pitches
     const title = doc.title || doc.headline || 'Satire Article';
-    const publishedAt = doc.publishedAt || doc.submittedAt;
+    const rawDate = doc.publishedAt || doc.submittedAt;
+    const formattedDate = rawDate ? new Date(rawDate).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'Recent';
     const category = doc.category || (doc.headline ? 'Community Pitch' : 'Satire');
     const imageUrl = doc.imageUrl || doc.pitchImageUrl || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
 
@@ -114,8 +115,8 @@ module.exports = async function handler(req, res) {
           <div class="container">
               <span class="category-tag">${category}</span>
               <h1>${title}</h1>
-              <!-- Author metadata removed -->
-              <div class="meta"><span><i class="fa-regular fa-clock"></i> ${publishedAt ? new Date(publishedAt).toLocaleDateString() : 'Recent'}</span></div>
+              <!-- Author metadata removed; Date formatted as M/D/YYYY -->
+              <div class="meta"><span><i class="fa-regular fa-clock"></i> ${formattedDate}</span></div>
               <img src="${imageUrl}" alt="Article Image" class="hero-img">
               
               <!-- Social Share Bar with X & TikTok -->
