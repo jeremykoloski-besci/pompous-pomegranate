@@ -135,10 +135,6 @@ function extractTextFromPortableText(item, maxLength = 160) {
 function renderFeed(searchTerm = '') {
     const articlesGrid = document.getElementById('articlesGrid');
     const heroArticle = document.querySelector('.hero-article');
-    const rawDate = post.publishedAt || post.submittedAt || pitch.publishedAt || pitch.submittedAt;
-    const postDate = rawDate 
-    ? new Date(rawDate).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) 
-    : new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
     
     if (!articlesGrid) return;
     articlesGrid.innerHTML = '';
