@@ -31,7 +31,6 @@ module.exports = async function handler(req, res) {
   const apiVersion = '2026-10-29';
 
   try {
-    // Query fetching the current article AND the latest breaking post for the top banner
     const sanityQuery = `{
       "article": *[_type in ["post", "pitch"] && (slug.current == "${id}" || slug.current match "*${id}*" || _id == "${id}" || lower(headline) match "*${id.replace(/-/g, ' ')}*")][0]{
         title,
@@ -84,7 +83,6 @@ module.exports = async function handler(req, res) {
     const encodedUrl = encodeURIComponent(articleUrl);
     const encodedTitle = encodeURIComponent(title);
 
-    // Prepare breaking news variables for template injection
     const breakingTitle = breakingData?.title || "";
     const breakingSlug = breakingData?.slug?.current || "#";
     const breakingDisplay = breakingData ? "block" : "none";
@@ -101,21 +99,59 @@ module.exports = async function handler(req, res) {
           <meta property="og:description" content="Fake news to cure the blues.">
           <meta property="og:image" content="${imageUrl}">
           <meta property="og:url" content="${articleUrl}">
-          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+          
+          <!-- Google Fonts & FontAwesome -->
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
           <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400&family=Zilla+Slab:wght@700;900&display=swap" rel="stylesheet">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+          
+          <!-- Global Stylesheet -->
           <link rel="stylesheet" href="/styles.css">
+
           <style>
-              body { font-family: 'Merriweather', serif; background: var(--bg-color, #f9f9f9); color: var(--text-primary, #1a1a1a); margin: 0; padding: 0; line-height: 1.8; }
-              .article-page-container { max-width: 800px; margin: 40px auto; background: var(--card-bg, #fff); padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-              .category-tag { background: #8B0000; color: #fff; padding: 4px 10px; font-size: 0.8rem; text-transform: uppercase; font-weight: bold; border-radius: 4px; display: inline-block; margin-bottom: 15px; }
-              h1 { font-family: 'Zilla Slab', serif; font-size: 2.5rem; margin-top: 0; line-height: 1.2; }
-              .meta { font-size: 0.9rem; color: var(--text-secondary, #666); margin-bottom: 20px; font-family: sans-serif; }
-              .hero-img { width: 100%; border-radius: 6px; margin-bottom: 20px; }
-              .share-bar { display: flex; justify-content: center; gap: 20px; padding: 15px 0; background: inherit; border-top: 1px solid var(--border-color, #eee); border-bottom: 1px solid var(--border-color, #eee); margin-bottom: 30px; }
-              .share-btn { font-size: 1.3rem; color: #D4AF37; background: none; border: none; cursor: pointer; text-decoration: none; transition: transform 0.2s; }
+              /* Scoped container styling for the individual article view */
+              .article-page-container {
+                  max-width: 800px;
+                  margin: 40px auto;
+                  background: var(--card-bg, #fff);
+                  padding: 40px;
+                  border-radius: 8px;
+                  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+              }
+              .article-page-container h1 {
+                  font-family: 'Zilla Slab', serif;
+                  font-size: 2.5rem;
+                  margin-top: 0;
+                  line-height: 1.2;
+              }
+              .share-bar {
+                  display: flex;
+                  justify-content: center;
+                  gap: 20px;
+                  padding: 15px 0;
+                  border-top: 1px solid var(--border-color, #eee);
+                  border-bottom: 1px solid var(--border-color, #eee);
+                  margin-bottom: 30px;
+              }
+              .share-btn {
+                  font-size: 1.3rem;
+                  color: #D4AF37;
+                  background: none;
+                  border: none;
+                  cursor: pointer;
+                  text-decoration: none;
+                  transition: transform 0.2s;
+              }
               .share-btn:hover { transform: scale(1.1); }
-              .article-body { font-size: 1.15rem; margin-bottom: 40px; }
-              .back-home { display: inline-block; margin-top: 20px; color: #8B0000; font-weight: bold; text-decoration: none; font-family: sans-serif; }
+              .back-home {
+                  display: inline-block;
+                  margin-top: 20px;
+                  color: var(--accent-color, #8B0000);
+                  font-weight: bold;
+                  text-decoration: none;
+                  font-family: 'Inter', sans-serif;
+              }
               .back-home:hover { text-decoration: underline; }
           </style>
       </head>
@@ -175,18 +211,22 @@ module.exports = async function handler(req, res) {
           <div class="article-page-container">
               <span class="category-tag">${category}</span>
               <h1>${title}</h1>
-              <div class="meta"><span><i class="fa-regular fa-clock"></i> ${formattedDate}</span></div>
-              <img src="${imageUrl}" alt="Article Image" class="hero-img">
+              <div class="article-meta" style="margin-bottom: 20px;">
+                  <span><i class="fa-regular fa-clock"></i> ${formattedDate}</span>
+              </div>
+              <div class="card-image-wrapper" style="margin-bottom: 25px;">
+                  <img src="${imageUrl}" alt="Article Image" class="hero-img" style="width: 100%; border-radius: 6px;">
+              </div>
               
               <div class="share-bar">
                   <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}" target="_blank" class="share-btn" title="Share on Facebook"><i class="fa-brands fa-square-facebook"></i></a>
                   <a href="https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}" target="_blank" class="share-btn" title="Share on X"><i class="fa-brands fa-x-twitter"></i></a>
                   <a href="https://www.tiktok.com/@pompouspomegranate" target="_blank" class="share-btn" title="Follow us on TikTok"><i class="fa-brands fa-tiktok"></i></a>
                   <a href="mailto:?subject=${encodedTitle}&body=Check out this article: ${encodedUrl}" class="share-btn" title="Share via Email"><i class="fa-solid fa-envelope"></i></a>
-                  <button onclick="navigator.clipboard.writeText('${articleUrl}'); alert('Link copied to clipboard!');" class="share-btn" title="Copy Link" style="background:none; border:none; cursor:pointer;"><i class="fa-solid fa-link"></i></button>
+                  <button onclick="navigator.clipboard.writeText('${articleUrl}'); alert('Link copied to clipboard!');" class="share-btn" title="Copy Link"><i class="fa-solid fa-link"></i></button>
               </div>
 
-              <div class="article-body">${htmlContent}</div>
+              <div class="article-body" style="font-size: 1.15rem; line-height: 1.8; margin-bottom: 40px;">${htmlContent}</div>
               <a href="/" class="back-home">&larr; Back to Home Feed</a>
           </div>
 
