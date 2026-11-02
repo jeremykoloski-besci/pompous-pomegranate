@@ -201,12 +201,54 @@ function renderFeed(searchTerm = '') {
         return;
     }
 
-    // Standard feed / Category filtering
-    if (heroArticle) {
-        heroArticle.style.display = (currentCategory === 'all' || currentCategory === 'home') ? 'block' : 'none';
+    // Handle Community Pitches tab view (Only Pitches)
+    if (currentCategory === 'pitches') {
+        if (heroArticle) heroArticle.style.display = 'none';
+        
+        const filteredPitches = allPitches.filter(p => {
+            if (!p) return false;
+            const headline = (p.headline || '').toLowerCase();
+            return headline.includes(searchTerm);
+        });
+
+        if (filteredPitches.length === 0) {
+            articlesGrid.innerHTML = '<p style="padding: 20px; color: var(--text-secondary);">No community articles found.</p>';
+        }
+
+        filteredPitches.forEach((pitch) => {
+            const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
+            const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
+            const pitchTitle = pitch.headline || "Untitled Article";
+            const pitchDate = formatArticleDate(pitch.submittedAt || pitch.publishedAt);
+            const articleUrl = "/article/" + pitchSlug;
+            const pitchExcerpt = extractTextFromPortableText(pitch);
+
+            const pitchCard = document.createElement('article');
+            pitchCard.className = 'article-card card';
+            pitchCard.innerHTML = `
+                <div class="card-image-wrapper">
+                    <span class="category-tag">Community Pitch</span>
+                    <img src="${pitchImage}" alt="Article thumbnail">
+                </div>
+                <div class="card-content">
+                    <div class="article-meta">
+                        <span><i class="fa-regular fa-clock"></i> ${pitchDate}</span>
+                    </div>
+                    <h3 class="article-headline">${pitchTitle}</h3>
+                    <p class="article-excerpt">${pitchExcerpt}</p>
+                </div>
+            `;
+            pitchCard.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+                window.location.href = articleUrl;
+            });
+            articlesGrid.appendChild(pitchCard);
+        });
+
+        return;
     }
 
-    // 1. Render standard posts
+    // Standard feed / Category filtering
     const filteredPosts = allPosts.filter(post => {
         if (!post) return false;
         const postCategory = (post.category || '').trim().toLowerCase();
@@ -219,6 +261,43 @@ function renderFeed(searchTerm = '') {
         return matchesSearch && (postCategory === currentCategory || postCategory.includes(currentCategory));
     });
 
+    // Render Hero Article if on Home/All view and posts exist
+    if (heroArticle) {
+        if ((currentCategory === 'all' || currentCategory === 'home') && filteredPosts.length > 0 && !searchTerm) {
+            const hero = filteredPosts[0];
+            const heroSlug = hero.slug?.current || hero._id;
+            const heroTitle = hero.title || "Untitled Satire";
+            const heroCategory = hero.category || "General Satire";
+            const heroDate = formatArticleDate(hero.publishedAt);
+            const heroImage = hero.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
+            const heroExcerpt = extractTextFromPortableText(hero, 220);
+
+            heroArticle.style.display = 'block';
+            heroArticle.innerHTML = `
+                <div class="card-image-wrapper" style="cursor: pointer;">
+                    <span class="category-tag">${heroCategory}</span>
+                    <img src="${heroImage}" alt="Hero thumbnail" style="width:100%; height:auto; display:block;">
+                </div>
+                <div class="card-content" style="cursor: pointer; padding: 20px;">
+                    <div class="article-meta">
+                        <span><i class="fa-regular fa-clock"></i> ${heroDate}</span>
+                    </div>
+                    <h2 class="article-headline" style="font-size: 1.8rem; margin: 10px 0;">${heroTitle}</h2>
+                    <p class="article-excerpt">${heroExcerpt}</p>
+                </div>
+            `;
+            heroArticle.onclick = () => {
+                window.location.href = "/article/" + heroSlug;
+            };
+
+            // Skip the first post in the grid since it's displayed as the hero
+            filteredPosts.shift();
+        } else {
+            heroArticle.style.display = 'none';
+        }
+    }
+
+    // Render remaining standard posts into grid
     filteredPosts.forEach((post, index) => {
         const articleSlug = post.slug?.current || post._id || index + 1;
         const postTitle = post.title || "Untitled Satire";
@@ -250,8 +329,8 @@ function renderFeed(searchTerm = '') {
         articlesGrid.appendChild(newCard);
     });
 
-    // 2. Render community pitches on Home / All view or Pitches tab
-    if (currentCategory === 'all' || currentCategory === 'home' || currentCategory === 'pitches') {
+    // Render community pitches on Home / All view
+    if (currentCategory === 'all' || currentCategory === 'home') {
         const filteredPitches = allPitches.filter(p => {
             if (!p) return false;
             const headline = (p.headline || '').toLowerCase();
@@ -288,8 +367,11 @@ function renderFeed(searchTerm = '') {
             articlesGrid.appendChild(pitchCard);
         });
     }
-}
 
+    if (filteredPosts.length === 0 && allPitches.length === 0 && (!heroArticle || heroArticle.style.display === 'none')) {
+        articlesGrid.innerHTML = '<p style="padding: 20px; color: var(--text-secondary);">No articles found.</p>';
+    }
+}
 // --- SANITY CMS DYNAMIC FETCHING ---
 async function fetchArticlesFromSanity() {
     try {
