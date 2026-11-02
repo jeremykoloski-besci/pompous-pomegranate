@@ -31,22 +31,30 @@ module.exports = async function handler(req, res) {
   const apiVersion = '2026-10-29';
 
   try {
-    const sanityQuery = `*[_type in ["post", "pitch"] && (slug.current == "${id}" || slug.current match "*${id}*" || _id == "${id}" || lower(headline) match "*${id.replace(/-/g, ' ')}*")][0]{
-      title,
-      headline,
-      "imageUrl": mainImage.asset->url,
-      "pitchImageUrl": image.asset->url,
-      body,
-      publishedAt,
-      submittedAt,
-      "category": categories[0]->title
+    // Query fetching the current article AND the latest breaking post for the top banner
+    const sanityQuery = `{
+      "article": *[_type in ["post", "pitch"] && (slug.current == "${id}" || slug.current match "*${id}*" || _id == "${id}" || lower(headline) match "*${id.replace(/-/g, ' ')}*")][0]{
+        title,
+        headline,
+        "imageUrl": mainImage.asset->url,
+        "pitchImageUrl": image.asset->url,
+        body,
+        publishedAt,
+        submittedAt,
+        "category": categories[0]->title
+      },
+      "breaking": *[_type == "post"] | order(publishedAt desc)[0] {
+        title,
+        slug
+      }
     }`;
 
     const encodedQuery = encodeURIComponent(sanityQuery);
     const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${encodedQuery}`;
 
     const data = await fetchJson(url);
-    const doc = data.result;
+    const doc = data.result?.article;
+    const breakingData = data.result?.breaking;
 
     if (!doc) {
       return res.status(404).send(`Article not found for: ${id}`);
@@ -75,6 +83,11 @@ module.exports = async function handler(req, res) {
     const articleUrl = `https://pompous-pomegranate.vercel.app/article/${id}`;
     const encodedUrl = encodeURIComponent(articleUrl);
     const encodedTitle = encodeURIComponent(title);
+
+    // Prepare breaking news variables for template injection
+    const breakingTitle = breakingData?.title || "";
+    const breakingSlug = breakingData?.slug?.current || "#";
+    const breakingDisplay = breakingData ? "block" : "none";
 
     const html = `
       <!DOCTYPE html>
@@ -107,9 +120,9 @@ module.exports = async function handler(req, res) {
           </style>
       </head>
       <body>
-          <!-- Top Announcement Bar -->
-          <div class="announcement-bar">
-              <span>🚨 The Pompous Pomegranate — Fake News to Cure the Blues.</span>
+          <!-- Top Announcement Bar (Dynamic Breaking News matching Homepage) -->
+          <div class="announcement-bar" id="breakingBar" style="display: ${breakingDisplay};">
+              <span id="breakingContent">🚨 BREAKING: ${breakingTitle} <a href="/article/${breakingSlug}">Read Story &rarr;</a></span>
           </div>
 
           <!-- Header & Navigation matching Homepage -->
