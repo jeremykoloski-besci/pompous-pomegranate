@@ -263,8 +263,7 @@ function renderFeed(searchTerm = '') {
         const articleSlug = post.slug?.current || post._id || index + 1;
         const postTitle = post.title || "Untitled Satire";
         const postCategory = post.category || "General Satire";
-        const postDate = formatArticleDate(post.publishedAt || post.submittedAt);
-        const postImage = post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
+        const postDate = formatArticleDate(post.publishedAt || post.submittedAt || post._createdAt || new Date());        const postImage = post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
         const articleUrl = "/article/" + articleSlug;
         const postExcerpt = extractTextFromPortableText(post);
 
