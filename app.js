@@ -294,10 +294,11 @@ async function fetchArticlesFromSanity() {
 
         const factCheckContainer = document.getElementById('factCheckContainer');
         if (factCheckContainer && factCheckData) {
-            factCheckContainer.innerHTML = `
-                <p><strong>Claim:</strong> "${factCheckData.claim}"</p>
-                <p style="margin-top: 8px;"><strong>Verdict:</strong> <span style="color:var(--accent-color); font-weight:bold;">${factCheckData.verdict}</span></p>
-            `;
+            const claimText = factCheckData.claim || "";
+            const verdictText = factCheckData.verdict || "";
+            factCheckContainer.innerHTML = 
+                '<p><strong>Claim:</strong> "' + claimText + '"</p>' +
+                '<p style="margin-top: 8px;"><strong>Verdict:</strong> <span style="color:var(--accent-color); font-weight:bold;">' + verdictText + '</span></p>';
         } else if (factCheckContainer) {
             factCheckContainer.innerHTML = '<p>No fact checks published yet.</p>';
         }
@@ -309,10 +310,4 @@ async function fetchArticlesFromSanity() {
     }
 }
 
-// --- UNIVERSAL EVENT DELEGATION FOR TABS ---
-document.addEventListener('click', (e) => {
-    const navLink = e.target.closest('.main-nav .nav-link, nav a');
-    if (navLink && navLink.closest('.main-nav')) {
-        e.preventDefault();
-        
-        document.querySelectorAll('.main-nav
+// ---
