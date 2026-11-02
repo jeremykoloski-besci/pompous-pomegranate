@@ -38,8 +38,6 @@ module.exports = async function handler(req, res) {
       "imageUrl": mainImage.asset->url,
       "pitchImageUrl": image.asset->url,
       body,
-      author,
-      "authorName": author->name,
       publishedAt,
       submittedAt,
       "category": categories[0]->title
@@ -57,7 +55,6 @@ module.exports = async function handler(req, res) {
 
     // Normalize fields between posts and pitches
     const title = doc.title || doc.headline || 'Satire Article';
-    const author = doc.authorName || doc.author || 'Staff';
     const publishedAt = doc.publishedAt || doc.submittedAt;
     const category = doc.category || (doc.headline ? 'Community Pitch' : 'Satire');
     const imageUrl = doc.imageUrl || doc.pitchImageUrl || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
@@ -72,7 +69,6 @@ module.exports = async function handler(req, res) {
         return '';
       }).join('');
     } else if (typeof doc.body === 'string' && doc.body.trim() !== '') {
-      // Split plain text by newlines so paragraphs format nicely
       htmlContent = doc.body.split('\n').map(para => `<p>${para}</p>`).join('');
     } else if (title) {
       htmlContent = `<p>${title}</p>`;
@@ -118,7 +114,8 @@ module.exports = async function handler(req, res) {
           <div class="container">
               <span class="category-tag">${category}</span>
               <h1>${title}</h1>
-              <div class="meta"><span>By ${author}</span> • <span>${publishedAt ? new Date(publishedAt).toLocaleDateString() : 'Recent'}</span></div>
+              <!-- Author metadata removed -->
+              <div class="meta"><span><i class="fa-regular fa-clock"></i> ${publishedAt ? new Date(publishedAt).toLocaleDateString() : 'Recent'}</span></div>
               <img src="${imageUrl}" alt="Article Image" class="hero-img">
               
               <!-- Social Share Bar with X & TikTok -->
