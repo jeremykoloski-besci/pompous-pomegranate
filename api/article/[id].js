@@ -36,6 +36,7 @@ module.exports = async function handler(req, res) {
       title,
       headline,
       "imageUrl": mainImage.asset->url,
+      "pitchImageUrl": image.asset->url,
       body,
       author,
       "authorName": author->name,
@@ -47,7 +48,7 @@ module.exports = async function handler(req, res) {
     const encodedQuery = encodeURIComponent(sanityQuery);
     const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${encodedQuery}`;
 
-    const data = rawData = await fetchJson(url);
+    const data = await fetchJson(url);
     const doc = data.result;
 
     if (!doc) {
@@ -59,15 +60,20 @@ module.exports = async function handler(req, res) {
     const author = doc.authorName || doc.author || 'Staff';
     const publishedAt = doc.publishedAt || doc.submittedAt;
     const category = doc.category || (doc.headline ? 'Community Pitch' : 'Satire');
+    const imageUrl = doc.imageUrl || doc.pitchImageUrl || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
 
+    // Robust content parser supporting both Portable Text arrays and plain text strings
     let htmlContent = '<p>No content provided.</p>';
     if (Array.isArray(doc.body)) {
       htmlContent = doc.body.map(block => {
         if (block._type === 'block' && block.children) {
-          return `<p>${block.children.map(c => c.text).join('')}</p>`;
+          return `<p>${block.children.map(c => c.text || '').join('')}</p>`;
         }
         return '';
       }).join('');
+    } else if (typeof doc.body === 'string' && doc.body.trim() !== '') {
+      // Split plain text by newlines so paragraphs format nicely
+      htmlContent = doc.body.split('\n').map(para => `<p>${para}</p>`).join('');
     } else if (title) {
       htmlContent = `<p>${title}</p>`;
     }
@@ -86,7 +92,7 @@ module.exports = async function handler(req, res) {
           <meta property="og:type" content="article">
           <meta property="og:title" content="${title}">
           <meta property="og:description" content="Fake news to cure the blues.">
-          <meta property="og:image" content="${doc.imageUrl || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80'}">
+          <meta property="og:image" content="${imageUrl}">
           <meta property="og:url" content="${articleUrl}">
           <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
           <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400&family=Zilla+Slab:wght@700;900&display=swap" rel="stylesheet">
@@ -113,7 +119,7 @@ module.exports = async function handler(req, res) {
               <span class="category-tag">${category}</span>
               <h1>${title}</h1>
               <div class="meta"><span>By ${author}</span> • <span>${publishedAt ? new Date(publishedAt).toLocaleDateString() : 'Recent'}</span></div>
-              <img src="${doc.imageUrl || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80'}" alt="Article Image" class="hero-img">
+              <img src="${imageUrl}" alt="Article Image" class="hero-img">
               
               <!-- Social Share Bar with X & TikTok -->
               <div class="share-bar">
