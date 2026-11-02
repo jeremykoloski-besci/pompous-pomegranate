@@ -1,472 +1,247 @@
-// Global application state
-let allPosts = [];
-let allPitches = [];
-let currentCategory = 'all';
-
-// Force manual scroll restoration immediately
-if ('scrollRestoration' in history) {
-    history.scrollRestoration = 'manual';
-}
-
-// Current Date Display in Header
-const dateEl = document.getElementById('currentDate');
-if (dateEl) {
-    dateEl.textContent = new Date().toLocaleDateString('en-US', { 
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-    });
-}
-
-// Dark/Light Theme Toggle
-const themeToggle = document.getElementById('themeToggle');
-const body = document.body;
-
-if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-        if (body.getAttribute('data-theme') === 'dark') {
-            body.removeAttribute('data-theme');
-            themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
-        } else {
-            body.setAttribute('data-theme', 'dark');
-            themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
-        }
-    });
-}
-
-// Subscriptions & Modals
-const subModal = document.getElementById('subModal');
-const openModalBtn = document.getElementById('openModalBtn');
-const closeSubModalBtn = document.getElementById('closeSubModalBtn');
-
-if (openModalBtn && subModal) {
-    openModalBtn.addEventListener('click', () => subModal.classList.add('active'));
-}
-if (closeSubModalBtn && subModal) {
-    closeSubModalBtn.addEventListener('click', () => subModal.classList.remove('active'));
-}
-
-// --- Community Pitch Modal Management ---
-const pitchModal = document.getElementById('pitchModal');
-const openPitchModalBtn = document.getElementById('openPitchModalBtn');
-const closePitchModalBtn = document.getElementById('closePitchModalBtn');
-
-if (openPitchModalBtn && pitchModal) {
-    openPitchModalBtn.addEventListener('click', () => pitchModal.classList.add('active'));
-}
-if (closePitchModalBtn && pitchModal) {
-    closePitchModalBtn.addEventListener('click', () => pitchModal.classList.remove('active'));
-}
-
-if (pitchModal) {
-    pitchModal.addEventListener('click', (e) => {
-        if (e.target === pitchModal) {
-            pitchModal.classList.remove('active');
-        }
-    });
-}
-
-// --- Legal & About Modals Management ---
-const legalModal = document.getElementById('legalAboutModal');
-const closeLegalModalBtn = document.getElementById('closeLegalModalBtn');
-const legalModalContentBody = document.getElementById('legalModalContentBody');
-
-const legalContentData = {
-    about: {
-        badge: "About Us",
-        title: "The Pompous Pomegranate",
-        text: "Founded during a particularly tedious Zoom call in 2026, The Pompous Pomegranate is dedicated to delivering hard-hitting, entirely fabricated news that cures the blues and infuriates people who read only headlines. We don't have sources; we have vivid imaginations."
-    },
-    standards: {
-        badge: "Editorial Standards",
-        title: "Our Code of Pomposity",
-        text: "We hold ourselves to the absolute highest standards of fiction. If a story is even remotely plausible or resembles real life by sheer coincidence, we rewrite it until it sounds sufficiently absurd. Fact-checking is strictly handled by a golden retriever who just wants a treat."
-    },
-    privacy: {
-        badge: "Privacy Policy",
-        title: "Your Data Is Safe With Us",
-        text: "We collect your email only if you sign up for The Daily Seed newsletter. We promise never to sell your data to evil corporate overlords—unless they offer us really good pastries. Your browsing habits remain between you, your browser history, and existential dread."
-    },
-    contact: {
-        badge: "Contact Desk",
-        title: "Drop Us a Line",
-        text: "Have a complaint? Take it up with our complaint department (which is currently a shredder under the desk). For pitches, please use our Community Desk modal rather than emailing us directly, because reading emails sounds like work."
-    }
-};
-
-function openLegalModal(type) {
-    const data = legalContentData[type];
-    if (!data || !legalModal || !legalModalContentBody) return;
-
-    legalModalContentBody.innerHTML = `
-        <span class="badge-gold"><i class="fa-solid fa-scroll"></i> ${data.badge}</span>
-        <h2 style="margin-top: 10px; font-family: 'Zilla Slab', serif;">${data.title}</h2>
-        <p style="color: var(--text-secondary); line-height: 1.8; margin-top: 15px;">${data.text}</p>
-    `;
-    legalModal.classList.add('active');
-}
-
-if (closeLegalModalBtn && legalModal) {
-    closeLegalModalBtn.addEventListener('click', () => legalModal.classList.remove('active'));
-}
-
-if (legalModal) {
-    legalModal.addEventListener('click', (e) => {
-        if (e.target === legalModal) legalModal.classList.remove('active');
-    });
-}
-
-// --- CSS STYLING FOR BOTTOM-LEFT BADGE & CLEAN CARDS ---
-const dynamicStyle = document.createElement('style');
-dynamicStyle.textContent = `
-    .card-image-wrapper {
-        position: relative;
-        overflow: hidden;
-    }
-    .card-image-wrapper .category-tag {
-        position: absolute !important;
-        bottom: 12px !important;
-        left: 12px !important;
-        top: auto !important;
-        right: auto !important;
-        z-index: 2;
-        margin-bottom: 0 !important;
-        width: auto !important;
-        height: auto !important;
-        display: inline-block !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    }
-    .article-card.card {
-        cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .article-card.card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
-`;
-document.head.appendChild(dynamicStyle);
-
-// --- HELPER TO EXTRACT & TRUNCATE TEXT FROM SANITY PORTABLE TEXT OR STRINGS ---
-function extractTextFromPortableText(item, maxLength = 160) {
-    let plainText = "";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Pompous Pomegranate - Fake news to cure the blues</title>
+    <link rel="stylesheet" href="styles.css">
     
-    const raw = item?.body || item?.excerpt || item?.text || item?.description || item;
-
-    if (!raw) {
-        plainText = "A reader-submitted satirical article approved by the editors...";
-    } else if (typeof raw === 'string') {
-        plainText = raw;
-    } else if (Array.isArray(raw)) {
-        plainText = raw
-            .map(block => {
-                if (block._type === 'block' && block.children) {
-                    return block.children.map(child => child.text || '').join('');
-                }
-                return '';
-            })
-            .join(' ')
-            .trim();
-    }
-
-    if (!plainText) {
-        plainText = "A reader-submitted satirical article approved by the editors...";
-    }
-
-    if (plainText.length > maxLength) {
-        return plainText.substring(0, maxLength).trim() + '...';
-    }
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="The Pompous Pomegranate">
+    <meta property="og:description" content="Fake news to cure the blues.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80">
+    <meta property="og:url" content="https://pompouspomegranate.com">
     
-    return plainText;
-}
+    <!-- Twitter/X Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="The Pompous Pomegranate">
+    <meta name="twitter:description" content="Fake news to cure the blues.">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80">
 
-// --- HELPER TO FORMAT DATE STRICTLY AS M/D/YYYY ---
-function formatArticleDate(rawDateString) {
-    if (!rawDateString) {
-        return new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
-    }
-    return new Date(rawDateString).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
-}
+    <!-- Google Fonts for Editorial Serif & Zilla Slab Title -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400&family=Zilla+Slab:wght@700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Custom Notification Toast -->
+    <div id="toastNotification" class="toast-notification">
+          <i class="fa-solid fa-circle-check"></i>
+          <span id="toastMessage">Your satirical article has been submitted to the editors for peer review!</span>
+    </div>
+    <!-- Top Announcement Bar -->
+    <div class="announcement-bar">
+        <span>🚨 BREAKING: CMS Integration Complete — Ready for Live Sanity Content. <a href="#" onclick="return false;">Read Story &rarr;</a></span>
+    </div>
 
-// --- RENDER FEED FUNCTION ---
-function renderFeed(searchTerm = '') {
-    const articlesGrid = document.getElementById('articlesGrid');
-    const heroArticle = document.querySelector('.hero-article');
-    
-    if (!articlesGrid) return;
-    articlesGrid.innerHTML = '';
-
-    // Handle Community Pitches tab view (Only Pitches)
-    if (currentCategory === 'pitches') {
-        if (heroArticle) heroArticle.style.display = 'none';
-        
-        const filteredPitches = allPitches.filter(p => {
-            const headline = (p.headline || '').toLowerCase();
-            return headline.includes(searchTerm);
-        });
-
-        if (filteredPitches.length === 0) {
-            articlesGrid.innerHTML = '<p style="padding: 20px; color: var(--text-secondary);">No community articles found.</p>';
-        }
-
-        filteredPitches.forEach((pitch) => {
-            const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
-            const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
-            const pitchTitle = pitch.headline || "Untitled Article";
-            const pitchDate = formatArticleDate(pitch.submittedAt || pitch.publishedAt);
-            const articleUrl = "/article/" + pitchSlug;
-            const pitchExcerpt = extractTextFromPortableText(pitch);
-
-            const pitchCard = document.createElement('article');
-            pitchCard.className = 'article-card card';
-            pitchCard.innerHTML = `
-                <div class="card-image-wrapper">
-                    <span class="category-tag">Community Pitch</span>
-                    <img src="${pitchImage}" alt="Article thumbnail">
-                </div>
-                <div class="card-content">
-                    <div class="article-meta">
-                        <span><i class="fa-regular fa-clock"></i> ${pitchDate}</span>
-                    </div>
-                    <h3 class="article-headline">${pitchTitle}</h3>
-                    <p class="article-excerpt">${pitchExcerpt}</p>
-                </div>
-            `;
-            pitchCard.addEventListener('click', (e) => {
-                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-                window.location.href = articleUrl;
-            });
-            articlesGrid.appendChild(pitchCard);
-        });
-
-        return;
-    }
-
-    // Standard feed / Category filtering (or Home/All view)
-    if (heroArticle) {
-        heroArticle.style.display = (currentCategory === 'all' || currentCategory === 'home') ? 'block' : 'none';
-    }
-
-    const filteredPosts = allPosts.filter(post => {
-        const postCategory = (post.category || '').trim().toLowerCase();
-        const title = (post.title || '').toLowerCase();
-        const matchesSearch = title.includes(searchTerm);
-        
-        if (currentCategory === 'all' || currentCategory === 'home') {
-            return matchesSearch;
-        }
-
-        const isMatch = postCategory === currentCategory || postCategory.includes(currentCategory);
-        return matchesSearch && isMatch;
-    });
-
-    // 1. Render regular articles first
-    filteredPosts.forEach((post, index) => {
-        const articleSlug = post.slug?.current || post._id || index + 1;
-        const postTitle = post.title || "Untitled Satire";
-        const postCategory = post.category || "General Satire";
-        const postDate = formatArticleDate(post.publishedAt || post.submittedAt);
-        const postImage = post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
-        const articleUrl = "/article/" + articleSlug;
-        const postExcerpt = extractTextFromPortableText(post);
-
-        const newCard = document.createElement('article');
-        newCard.className = 'article-card card';
-        newCard.innerHTML = `
-            <div class="card-image-wrapper">
-                <span class="category-tag">${postCategory}</span>
-                <img src="${postImage}" alt="Article thumbnail">
+    <!-- Header & Navigation -->
+    <header class="site-header">
+        <div class="header-container">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+                <div class="current-date" id="currentDate"></div>
             </div>
-            <div class="card-content">
-                <div class="article-meta">
-                    <span><i class="fa-regular fa-clock"></i> ${postDate}</span>
-                </div>
-                <h3 class="article-headline">${postTitle}</h3>
-                <p class="article-excerpt">${postExcerpt}</p>
-            </div>
-        `;
-        newCard.addEventListener('click', (e) => {
-            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-            window.location.href = articleUrl;
-        });
-        articlesGrid.appendChild(newCard);
-    });
+            
+            <!-- Branded Logo & Clickable Title -->
+            <div class="logo-area">
+                <a href="#" class="site-title-link">
+                    <div class="brand-logo-wrapper">
+                        <!-- Custom Stylized Pomegranate Icon -->
+                        <svg class="pomegranate-icon" viewBox="0 0 100 100" width="46" height="46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Crown / Sepal top -->
+                            <path d="M40 18 L50 6 L60 18 L68 12 L64 24 L36 24 L32 12 Z" fill="#8B0000" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round"/>
+                            <!-- Main Pomegranate Body -->
+                            <circle cx="50" cy="56" r="36" fill="#8B0000" stroke="#1A1A1A" stroke-width="4"/>
+                            <!-- Inner Stylized Cutout / Crown Detail -->
+                            <path d="M35 48 C35 40, 65 40, 65 48 C65 65, 35 65, 35 48 Z" fill="#D4AF37" opacity="0.9"/>
+                            <!-- Internal Seeds Accent -->
+                            <circle cx="44" cy="48" r="3" fill="#600000"/>
+                            <circle cx="54" cy="48" r="3" fill="#600000"/>
+                            <circle cx="49" cy="56" r="3.5" fill="#600000"/>
+                        </svg>
 
-    // 2. If we are on Home / All, also append community pitches into the grid
-    if (currentCategory === 'all' || currentCategory === 'home') {
-        const filteredPitches = allPitches.filter(p => {
-            const headline = (p.headline || '').toLowerCase();
-            return headline.includes(searchTerm);
-        });
-
-        filteredPitches.forEach((pitch) => {
-            const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
-            const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
-            const pitchTitle = pitch.headline || "Untitled Article";
-            const pitchDate = formatArticleDate(pitch.submittedAt || pitch.publishedAt);
-            const articleUrl = "/article/" + pitchSlug;
-            const pitchExcerpt = extractTextFromPortableText(pitch);
-
-            const pitchCard = document.createElement('article');
-            pitchCard.className = 'article-card card';
-            pitchCard.innerHTML = `
-                <div class="card-image-wrapper">
-                    <span class="category-tag">Community Pitch</span>
-                    <img src="${pitchImage}" alt="Article thumbnail">
-                </div>
-                <div class="card-content">
-                    <div class="article-meta">
-                        <span><i class="fa-regular fa-clock"></i> ${pitchDate}</span>
+                        <!-- Stylized Brand Title -->
+                        <div class="brand-title-text">
+                            <span class="title-prefix">The</span>
+                            <span class="title-main">Pompous Pomegranate</span>
+                        </div>
                     </div>
-                    <h3 class="article-headline">${pitchTitle}</h3>
-                    <p class="article-excerpt">${pitchExcerpt}</p>
+                </a>
+                <p class="site-tagline">Fake news to cure the blues</p>
+            </div>
+
+            <div class="header-right">
+                <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <button class="subscribe-btn" id="openModalBtn" style="display: none;">
+                    <i class="fa-solid fa-crown"></i> Pomegranate Plus
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Categories -->
+        <nav class="main-nav">
+            <ul>
+                <li><a href="#" class="nav-link active" data-category="all">Home</a></li>
+                <li><a href="#" class="nav-link" data-category="politics">Politics</a></li>
+                <li><a href="#" class="nav-link" data-category="tech">Tech & AI</a></li>
+                <li><a href="#" class="nav-link" data-category="culture">Culture</a></li>
+                <li><a href="#" class="nav-link" data-category="opinion">Opinion</a></li>
+                <li><a href="#" class="nav-link" data-category="pitches">Community Pitches</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Layout Container -->
+    <div class="container main-layout">
+        
+        <!-- Left Content Area -->
+        <main class="content-feed">
+            
+            <!-- Search & Filter Bar -->
+            <div class="feed-controls">
+                <div class="search-box">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search headlines, politicians, absurd claims...">
                 </div>
-            `;
-            pitchCard.addEventListener('click', (e) => {
-                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-                window.location.href = articleUrl;
-            });
-            articlesGrid.appendChild(pitchCard);
-        });
-    }
+                <div class="badge-filter">
+                    <span class="satire-badge"><i class="fa-solid fa-check-circle"></i> 100% Verified Satire</span>
+                </div>
+            </div>
 
-    if (filteredPosts.length === 0 && allPitches.length === 0) {
-        articlesGrid.innerHTML = '<p style="padding: 20px; color: var(--text-secondary);">No articles found.</p>';
-    }
-}
+            <!-- Hero Featured Article Container (Populated by Sanity) -->
+            <article class="hero-article card" id="heroArticle" style="display: none;"></article>
 
-// --- SANITY CMS DYNAMIC FETCHING ---
-async function fetchArticlesFromSanity() {
-    try {
-        const response = await fetch('/api/posts');
-        const data = await response.json();
-        allPosts = data.result || [];
-        allPitches = data.pitches || []; 
-        const factCheckData = data.factCheck; 
+            <!-- Grid Articles Container (Populated by Sanity) -->
+            <div class="articles-grid" id="articlesGrid"></div>
 
-        const factCheckContainer = document.getElementById('factCheckContainer');
-        if (factCheckContainer && factCheckData) {
-            const claimText = factCheckData.claim || "";
-            const verdictText = factCheckData.verdict || "";
-            factCheckContainer.innerHTML = 
-                '<p><strong>Claim:</strong> "' + claimText + '"</p>' +
-                '<p style="margin-top: 8px;"><strong>Verdict:</strong> <span style="color:var(--accent-color); font-weight:bold;">' + verdictText + '</span></p>';
-        } else if (factCheckContainer) {
-            factCheckContainer.innerHTML = '<p>No fact checks published yet.</p>';
-        }
-        
-        renderFeed();
-        window.scrollTo(0, 0);
-    } catch (error) {
-        console.error("Error fetching live articles from Sanity proxy:", error);
-    }
-}
+            <!-- Community Article Submission Call to Action Section -->
+            <section class="pitch-cta-section card" style="text-align: center; padding: 40px 20px;">
+                <h2><i class="fa-solid fa-lightbulb"></i> Got a Satirical Scoop?</h2>
+                <p style="color: var(--text-secondary); margin: 10px 0 20px;">Think you can out-satire us? Send your headline and full article to our editors.</p>
+                <button class="submit-pitch-btn" id="openPitchModalBtn" style="padding: 12px 24px; font-size: 1rem; cursor: pointer; background: var(--accent-color); color: #fff; border: none; border-radius: 4px; font-weight: bold;">
+                    <i class="fa-solid fa-pen-nib"></i> Submit a Community Article
+                </button>
+            </section>
 
-// --- UNIVERSAL EVENT DELEGATION FOR TABS ---
-document.addEventListener('click', (e) => {
-    const navLink = e.target.closest('.main-nav .nav-link, nav a');
-    if (navLink && navLink.closest('.main-nav')) {
-        e.preventDefault();
-        
-        document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-        navLink.classList.add('active');
+        </main>
 
-        const catAttr = navLink.getAttribute('data-category');
-        if (catAttr) {
-            currentCategory = catAttr.trim().toLowerCase();
-        } else {
-            currentCategory = 'all';
-        }
-        
-        const searchInput = document.getElementById('searchInput');
-        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-        
-        renderFeed(searchTerm);
-    }
+        <!-- Right Sidebar -->
+        <aside class="site-sidebar">
+            
+            <!-- Newsletter Box -->
+            <div class="sidebar-widget newsletter-widget">
+                <h3><i class="fa-solid fa-envelope-open-text"></i> The Daily Seed</h3>
+                <p>Get our top fake news delivered directly to your inbox so you don't have to experience reality.</p>
+                <form onsubmit="event.preventDefault(); alert('Subscribed successfully to The Daily Seed!');">
+                    <input type="email" placeholder="Enter your email address" required>
+                    <button type="submit">Subscribe Free</button>
+                </form>
+            </div>
 
-    // Footer Legal Modal Triggers
-    if (e.target.id === 'openAboutModal') { e.preventDefault(); openLegalModal('about'); }
-    if (e.target.id === 'openStandardsModal') { e.preventDefault(); openLegalModal('standards'); }
-    if (e.target.id === 'openPrivacyModal') { e.preventDefault(); openLegalModal('privacy'); }
-    if (e.target.id === 'openContactModal') { e.preventDefault(); openLegalModal('contact'); }
-});
+            <!-- Trending Satire Ticker -->
+            <div class="sidebar-widget trending-widget">
+                <h3><i class="fa-solid fa-fire"></i> Trending Nonsense</h3>
+                <ul class="trending-list" id="trendingList">
+                    <li><span class="trend-number">1</span> <span style="color:var(--text-secondary); font-size:0.9rem;">Awaiting published articles...</span></li>
+                </ul>
+            </div>
 
-// --- INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', () => {
-    window.scrollTo(0, 0);
-    
-    if (window.location.hash) {
-        history.replaceState(null, null, window.location.pathname + window.location.search);
-    }
+            <!-- Fact Check Widget -->
+            <div class="sidebar-widget factcheck-widget">
+                <h3><i class="fa-solid fa-magnifying-glass-chart"></i> Pomegranate Fact Check</h3>
+                <div id="factCheckContainer">
+                    <p>Loading fact check...</p>
+                </div>
+            </div>
 
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            renderFeed(e.target.value.toLowerCase());
-        });
-    }
+        </aside>
 
-    const headerLinks = document.querySelectorAll('header a.site-title-link, .logo-area a');
-    headerLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
-            if (homeNav) {
-                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-                homeNav.classList.add('active');
-            }
-            currentCategory = 'all';
-            renderFeed();
-        });
-    });
+    </div>
 
-    const pitchForm = document.getElementById('pitchForm');
-    if (pitchForm) {
-        pitchForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const author = document.getElementById('pitchAuthor').value;
-            const headline = document.getElementById('pitchHeadline').value;
-            const body = document.getElementById('pitchBody').value;
+    <!-- Community Article Submission Modal Overlay -->
+    <div class="modal-overlay" id="pitchModal">
+        <div class="modal-container sub-modal-container" style="max-width: 600px;">
+            <button class="modal-close" id="closePitchModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="sub-modal-content" style="text-align: left;">
+                <span class="badge-gold"><i class="fa-solid fa-lightbulb"></i> Community Desk</span>
+                <h2>Submit Your Satirical Article</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">If our editors laugh, we'll publish your full article live to the global feed.</p>
+                
+                <form id="pitchForm" class="pitch-form" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div class="form-group">
+                        <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 5px;">Your Name or Pseudonym</label>
+                        <input type="text" id="pitchAuthor" placeholder="e.g., Lord Pomegranate" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 5px;">Headline</label>
+                        <input type="text" id="pitchHeadline" placeholder="e.g., Local Cat Declares Himself CEO of Living Room" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 5px;">Full Article Text</label>
+                        <textarea id="pitchBody" placeholder="Paste your full article text here..." rows="8" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; resize: vertical;"></textarea>
+                    </div>
+                    <button type="submit" class="submit-pitch-btn" style="width: 100%; padding: 12px; margin-top: 10px; background: var(--accent-color); color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Publish to Community Pitches</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
-            try {
-                const response = await fetch('/api/submit-pitch', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ author, headline, body })
-                });
+    <!-- Pomegranate Plus Subscription Modal -->
+    <div class="modal-overlay" id="subModal">
+        <div class="modal-container sub-modal-container">
+            <button class="modal-close" id="closeSubModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="sub-modal-content">
+                <span class="badge-gold"><i class="fa-solid fa-crown"></i> Premium Satire</span>
+                <h2>Unlock Pomegranate Plus</h2>
+                <p>Support independent fake news and cure your blues permanently with elite perks:</p>
+                <ul class="perks-list">
+                    <li><i class="fa-solid fa-check"></i> 100% Ad-Free Reading Experience</li>
+                    <li><i class="fa-solid fa-check"></i> Exclusive Weekly Unreleased Headlines</li>
+                    <li><i class="fa-solid fa-check"></i> Access to the Subscriber-Only Discord Lounge</li>
+                    <li><i class="fa-solid fa-check"></i> A digital badge that proves you have superior humor</li>
+                </ul>
+                <div class="price-tag">$5 / month or $49 / year</div>
+                <button class="upgrade-btn" onclick="alert('Stripe checkout simulation! Ready to integrate live payments.')">Join Pomegranate Plus</button>
+            </div>
+        </div>
+    </div>
 
-                const result = await response.json();
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <div class="footer-col">
+                <h3>The Pompous Pomegranate</h3>
+                <p>Fake news to cure the blues. All events depicted in this publication are fictional, satirical, or the result of someone daydreaming during a meeting.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Sections</h4>
+                <ul>
+                    <li><a href="#">Politics</a></li>
+                    <li><a href="#">Tech & AI</a></li>
+                    <li><a href="#">Culture</a></li>
+                    <li><a href="#">Opinion</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Legal & About</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Editorial Standards</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Contact Editors</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 The Pompous Pomegranate. All rights reserved. Satire is protected under free speech.</p>
+        </div>
+    </footer>
 
-                if (response.ok) {
-                    showToast('Your satirical article has been submitted to the editors for peer review!');
-                    pitchForm.reset();
-                    if (pitchModal) pitchModal.classList.remove('active');
-                } else {
-                    showToast('Error submitting article: ' + (result.error || 'Please try again.'));
-                }
-            } catch (err) {
-                console.error('Submission error:', err);
-                showToast('Something went wrong. Please try again later.');
-            }
-        });
-    }
-
-    fetchArticlesFromSanity();
-});
-
-function showToast(message) {
-    const toast = document.getElementById('toastNotification');
-    const toastMsg = document.getElementById('toastMessage');
-    if (!toast) return;
-
-    if (toastMsg) toastMsg.textContent = message;
-    toast.classList.add('show');
-
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 4000);
-}
-
-// Expose state globally for debugging
-window.allPosts = allPosts;
-window.allPitches = allPitches;
-window.renderFeed = renderFeed;
+    <script type="module" src="app.js"></script>
+</body>
+</html>
