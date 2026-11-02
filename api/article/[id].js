@@ -209,7 +209,7 @@ module.exports = async function handler(req, res) {
           </header>
 
           <div class="article-page-container">
-              <span class="category-tag">${category}</span>
+              
               <h1>${title}</h1>
               <div class="article-meta" style="margin-bottom: 20px;">
                   <span><i class="fa-regular fa-clock"></i> ${formattedDate}</span>
