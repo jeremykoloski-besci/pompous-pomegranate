@@ -32,7 +32,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const sanityQuery = `{
-      "article": *[_type in ["post", "pitch"] && (slug.current == "${id}" || slug.current match "*${id}*" || _id == "${id}" || lower(headline) match "*${id.replace(/-/g, ' ')}*")][0]{
+      "article": *[_type in ["post", "pitch"] && (slug.current == "${id}" || slug.current match "*${id}*" || _id == "${id}" \vert{}\vert{} lower(headline) match "*${id.replace(/-/g, ' ')}*")][0]{
         title,
         headline,
         "imageUrl": mainImage.asset->url,
@@ -69,17 +69,9 @@ module.exports = async function handler(req, res) {
     if (Array.isArray(doc.body)) {
       htmlContent = doc.body.map(block => {
         if (block._type === 'block' && block.children) {
-          return `<p>${block.children.map(c => c.text || '').join('')}</p>`;
-        }
-        return '';
-      }).join('');
-    } else if (typeof doc.body === 'string' && doc.body.trim() !== '') {
-      htmlContent = doc.body.split('\n').map(para => `<p>${para}</p>`).join('');
+          return `<p>${block.children.map(c => c.text \vert{}\vert{} '').join('')}</p>`; } return ''; }).join(''); } else if (typeof doc.body === 'string' && doc.body.trim() !== '') { htmlContent = doc.body.split('\n').map(para => `<p>${para}</p>`).join('');
     } else if (title) {
-      htmlContent = `<p>${title}</p>`;
-    }
-
-    const articleUrl = `https://pompous-pomegranate.vercel.app/article/${id}`;
+      htmlContent = `<p>${title}</p>`; }  const articleUrl = `https://pompous-pomegranate.vercel.app/article/${id}`;
     const encodedUrl = encodeURIComponent(articleUrl);
     const encodedTitle = encodeURIComponent(title);
 
@@ -110,7 +102,6 @@ module.exports = async function handler(req, res) {
           <link rel="stylesheet" href="/styles.css">
 
           <style>
-              /* Scoped container styling for the individual article view */
               .article-page-container {
                   max-width: 800px;
                   margin: 40px auto;
@@ -222,47 +213,8 @@ module.exports = async function handler(req, res) {
                   <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}" target="_blank" class="share-btn" title="Share on Facebook"><i class="fa-brands fa-square-facebook"></i></a>
                   <a href="https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}" target="_blank" class="share-btn" title="Share on X"><i class="fa-brands fa-x-twitter"></i></a>
                   <a href="https://www.tiktok.com/@pompouspomegranate" target="_blank" class="share-btn" title="Follow us on TikTok"><i class="fa-brands fa-tiktok"></i></a>
-                  <a href="mailto:?subject=${encodedTitle}&body=Check out this article: ${encodedUrl}" class="share-btn" title="Share via Email"><i class="fa-solid fa-envelope"></i></a>
+                  <a href="mailto:?subject=${encodedTitle}&body=Check out this article:${encodedUrl}" class="share-btn" title="Share via Email"><i class="fa-solid fa-envelope"></i></a>
                   <button onclick="navigator.clipboard.writeText('${articleUrl}'); alert('Link copied to clipboard!');" class="share-btn" title="Copy Link"><i class="fa-solid fa-link"></i></button>
               </div>
 
-              <div class="article-body" style="font-size: 1.15rem; line-height: 1.8; margin-bottom: 40px;">${htmlContent}</div>
-              <a href="/" class="back-home">&larr; Back to Home Feed</a>
-          </div>
-
-          <script>
-              // Current Date Display in Header
-              const dateEl = document.getElementById('currentDate');
-              if (dateEl) {
-                  dateEl.textContent = new Date().toLocaleDateString('en-US', { 
-                      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-                  });
-              }
-
-              // Dark/Light Theme Toggle
-              const themeToggle = document.getElementById('themeToggle');
-              const body = document.body;
-
-              if (themeToggle) {
-                  themeToggle.addEventListener('click', () => {
-                      if (body.getAttribute('data-theme') === 'dark') {
-                          body.removeAttribute('data-theme');
-                          themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
-                      } else {
-                          body.setAttribute('data-theme', 'dark');
-                          themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
-                      }
-                  });
-              }
-          </script>
-      </body>
-      </html>
-    `;
-
-    res.setHeader('Content-Type', 'text/html');
-    return res.status(200).send(html);
-  } catch (error) {
-    console.error('Serverless fetch crash:', error);
-    return res.status(500).send(`Server Error: ${error.message}`);
-  }
-};
+              <div class="article-body" style="font-size: 1.15rem; line-height: 1.8; margin-bottom:
