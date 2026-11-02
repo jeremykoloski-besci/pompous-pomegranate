@@ -4,60 +4,102 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Pompous Pomegranate - Fake news to cure the blues</title>
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="The Pompous Pomegranate">
+    <meta property="og:description" content="Fake news to cure the blues.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80">
+    <meta property="og:url" content="https://pompouspomegranate.com">
+    
+    <!-- Twitter/X Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="The Pompous Pomegranate">
+    <meta name="twitter:description" content="Fake news to cure the blues.">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80">
+
+    <!-- Google Fonts for Editorial Serif & Zilla Slab Title -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400&family=Zilla+Slab:wght@700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Top Bar -->
-    <div class="top-bar">
-        <div class="container top-bar-content">
-            <div class="current-date" id="currentDate"></div>
-            <div class="top-links">
-                <button id="openModalBtn" class="btn-sub"><i class="fa-solid fa-seedling"></i> Get The Daily Seed</button>
-                <button id="themeToggle" class="theme-toggle" aria-label="Toggle Dark Mode"><i class="fa-solid fa-moon"></i></button>
+    <!-- Custom Notification Toast -->
+    <div id="toastNotification" class="toast-notification">
+          <i class="fa-solid fa-circle-check"></i>
+          <span id="toastMessage">Your satirical article has been submitted to the editors for peer review!</span>
+    </div>
+    <!-- Top Announcement Bar -->
+    <div class="announcement-bar" id="breakingBar" style="display: none;">
+        <span id="breakingContent">Loading breaking news...</span>
+    </div>
+
+    <!-- Header & Navigation -->
+    <header class="site-header">
+        <div class="header-container">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+                <div class="current-date" id="currentDate"></div>
+            </div>
+            
+            <!-- Branded Logo & Clickable Title -->
+            <div class="logo-area">
+                <a href="#" class="site-title-link">
+                    <div class="brand-logo-wrapper">
+                        <!-- Custom Stylized Pomegranate Icon -->
+                        <svg class="pomegranate-icon" viewBox="0 0 100 100" width="46" height="46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Crown / Sepal top -->
+                            <path d="M40 18 L50 6 L60 18 L68 12 L64 24 L36 24 L32 12 Z" fill="#8B0000" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round"/>
+                            <!-- Main Pomegranate Body -->
+                            <circle cx="50" cy="56" r="36" fill="#8B0000" stroke="#1A1A1A" stroke-width="4"/>
+                            <!-- Inner Stylized Cutout / Crown Detail -->
+                            <path d="M35 48 C35 40, 65 40, 65 48 C65 65, 35 65, 35 48 Z" fill="#D4AF37" opacity="0.9"/>
+                            <!-- Internal Seeds Accent -->
+                            <circle cx="44" cy="48" r="3" fill="#600000"/>
+                            <circle cx="54" cy="48" r="3" fill="#600000"/>
+                            <circle cx="49" cy="56" r="3.5" fill="#600000"/>
+                        </svg>
+
+                        <!-- Stylized Brand Title -->
+                        <div class="brand-title-text">
+                            <span class="title-prefix">The</span>
+                            <span class="title-main">Pompous Pomegranate</span>
+                        </div>
+                    </div>
+                </a>
+                <p class="site-tagline">Fake news to cure the blues</p>
+            </div>
+
+            <div class="header-right">
+                <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <button class="subscribe-btn" id="openModalBtn" style="display: none;">
+                    <i class="fa-solid fa-crown"></i> Pomegranate Plus
+                </button>
             </div>
         </div>
-    </div>
 
-    <!-- Header & Logo -->
-    <header class="site-header">
-        <div class="container logo-area">
-            <a href="#" class="site-title-link">
-                <div class="site-logo">
-                    <i class="fa-solid fa-seedling"></i>
-                </div>
-                <div class="site-title-text">
-                    <h1>The Pompous Pomegranate</h1>
-                    <p class="tagline">Fake news to cure the blues</p>
-                </div>
-            </a>
-        </div>
+        <!-- Navigation Categories -->
+        <nav class="main-nav">
+            <ul>
+                <li><a href="#" class="nav-link active" data-category="all">Home</a></li>
+                <li><a href="#" class="nav-link" data-category="politics">Politics</a></li>
+                <li><a href="#" class="nav-link" data-category="tech">Tech & AI</a></li>
+                <li><a href="#" class="nav-link" data-category="culture">Culture</a></li>
+                <li><a href="#" class="nav-link" data-category="opinion">Opinion</a></li>
+                <li><a href="#" class="nav-link" data-category="pitches">Community Pitches</a></li>
+            </ul>
+        </nav>
     </header>
-
-    <!-- Main Navigation Bar -->
-    <nav class="main-nav">
-        <div class="container nav-container">
-            <a href="#" class="nav-link active" data-category="all">Home</a>
-            <a href="#" class="nav-link" data-category="politics">Politics</a>
-            <a href="#" class="nav-link" data-category="tech">Tech & AI</a>
-            <a href="#" class="nav-link" data-category="culture">Culture</a>
-            <a href="#" class="nav-link" data-category="opinion">Opinion</a>
-            <a href="#" class="nav-link" data-category="pitches">Community Pitches</a>
-        </div>
-    </nav>
-
-    <!-- Breaking News Ticker -->
-    <div class="breaking-bar" id="breakingBar" style="display: none;">
-        <div class="container breaking-content" id="breakingContent">
-            <!-- Dynamically populated breaking news -->
-        </div>
-    </div>
 
     <!-- Main Layout Container -->
     <div class="container main-layout">
         
-        <!-- Left Content Feed -->
+        <!-- Left Content Area -->
         <main class="content-feed">
             
             <!-- Search & Filter Bar -->
@@ -71,166 +113,5 @@
                 </div>
             </div>
 
-            <!-- Hero Featured Article (Hidden if not used) -->
-            <article class="hero-article card" id="heroArticle" style="display: none;"></article>
-
-            <!-- Articles Grid Container -->
-            <div class="articles-grid" id="articlesGrid">
-                <!-- Dynamically populated articles from Sanity -->
-            </div>
-        </main>
-
-        <!-- Right Sidebar -->
-        <aside class="sidebar">
-            <!-- Community Pitch Widget Card -->
-            <div class="sidebar-widget pitch-widget card">
-                <div class="widget-header">
-                    <h3><i class="fa-solid fa-pen-nib"></i> Community Desk</h3>
-                </div>
-                <div class="widget-body">
-                    <p>Got a headline so absurd it belongs in a fictional newspaper? Pitch your satirical masterpiece to our editors.</p>
-                    <button id="openPitchModalBtn" class="btn-primary" style="width: 100%; margin-top: 15px;">
-                        <i class="fa-solid fa-paper-plane"></i> Submit a Pitch
-                    </button>
-                </div>
-            </div>
-
-            <!-- Fact Check Widget -->
-            <div class="sidebar-widget card">
-                <div class="widget-header">
-                    <h3><i class="fa-solid fa-magnifying-glass-chart"></i> Fact Check Desk</h3>
-                </div>
-                <div class="widget-body" id="factCheckContainer">
-                    <p>Loading latest fact check...</p>
-                </div>
-            </div>
-
-            <!-- Newsletter Sidebar Widget -->
-            <div class="sidebar-widget newsletter-widget card">
-                <h3>The Daily Seed</h3>
-                <p>Get our finest fabricated headlines delivered straight to your inbox before breakfast.</p>
-                <form onsubmit="event.preventDefault(); alert('Subscribed successfully!');">
-                    <input type="email" placeholder="Enter your email address" required style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-color); color: var(--text-color);">
-                    <button type="submit" class="btn-primary" style="width: 100%;">Subscribe Free</button>
-                </form>
-            </div>
-        </aside>
-    </div>
-
-    <!-- Community Pitch Modal -->
-    <div class="modal-overlay" id="pitchModal">
-        <div class="modal card">
-            <button class="close-modal-btn" id="closePitchModalBtn"><i class="fa-solid fa-xmark"></i></button>
-            <div class="modal-header">
-                <h2><i class="fa-solid fa-feather-pointed"></i> Submit Your Satire Pitch</h2>
-                <p>Our automated editorial review board will review your submission.</p>
-            </div>
-            <form id="pitchForm" class="modal-form">
-                <div class="form-group">
-                    <label for="pitchAuthor">Your Name / Pseudonym</label>
-                    <input type="text" id="pitchAuthor" required placeholder="e.g. Lord Pomegranate">
-                </div>
-                <div class="form-group">
-                    <label for="pitchEmail">Your Email (for publication notification)</label>
-                    <input type="email" id="pitchEmail" required placeholder="writer@example.com">
-                </div>
-                <div class="form-group">
-                    <label for="pitchHeadline">Satirical Headline</label>
-                    <input type="text" id="pitchHeadline" required placeholder="e.g. Local Man Discovers Water Is Wet">
-                </div>
-                <div class="form-group">
-                    <label for="pitchBody">Article Body / Excerpt</label>
-                    <textarea id="pitchBody" rows="4" required placeholder="Write your satirical article body here..."></textarea>
-                </div>
-                <button type="submit" class="btn-primary" style="width: 100%;">Send to Editors</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Subscription Modal -->
-    <div class="modal-overlay" id="subModal">
-        <div class="modal card">
-            <button class="close-modal-btn" id="closeSubModalBtn"><i class="fa-solid fa-xmark"></i></button>
-            <div class="modal-header">
-                <h2><i class="fa-solid fa-seedling"></i> Join The Daily Seed</h2>
-                <p>Receive our weekly dispatch of pure fabricated nonsense.</p>
-            </div>
-            <form onsubmit="event.preventDefault(); alert('Subscribed successfully!'); subModal.classList.remove('active');">
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label for="subEmail">Email Address</label>
-                    <input type="email" id="subEmail" required placeholder="you@example.com" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-color); color: var(--text-color);">
-                </div>
-                <button type="submit" class="btn-primary" style="width: 100%;">Get The Dispatch</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Legal & About Modals Container -->
-    <div class="modal-overlay" id="legalAboutModal">
-        <div class="modal card">
-            <button class="close-modal-btn" id="closeLegalModalBtn"><i class="fa-solid fa-xmark"></i></button>
-            <div class="modal-body" id="legalModalContentBody">
-                <!-- Dynamically populated legal / about content -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="site-footer">
-        <div class="container footer-content">
-            <div class="footer-col">
-                <h3>The Pompous Pomegranate</h3>
-                <p>Fake news to cure the blues. All events depicted in this publication are fictional, satirical, or the result of someone daydreaming during a meeting.</p>
-            </div>
-            <div class="footer-col">
-                <h4>Sections</h4>
-                <ul>
-                    <li><a href="#" data-category="politics">Politics</a></li>
-                    <li><a href="#" data-category="tech">Tech & AI</a></li>
-                    <li><a href="#" data-category="culture">Culture</a></li>
-                    <li><a href="#" data-category="opinion">Opinion</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>Legal & About</h4>
-                <ul>
-                    <li><a href="#" id="openAboutModal">About Us</a></li>
-                    <li><a href="#" id="openStandardsModal">Editorial Standards</a></li>
-                    <li><a href="#" id="openPrivacyModal">Privacy Policy</a></li>
-                    <li><a href="#" id="openContactModal">Contact Editors</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 The Pompous Pomegranate. All rights reserved. Satire is protected under free speech.</p>
-        </div>
-    </footer>
-
-    <!-- Inline Application Logic Script -->
-    <script>
-        let allPosts = [];
-        let allPitches = [];
-        let currentCategory = 'all';
-
-        if ('scrollRestoration' in history) {
-            history.scrollRestoration = 'manual';
-        }
-
-        const dateEl = document.getElementById('currentDate');
-        if (dateEl) {
-            dateEl.textContent = new Date().toLocaleDateString('en-US', { 
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-            });
-        }
-
-        const themeToggle = document.getElementById('themeToggle');
-        const body = document.body;
-
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                if (body.getAttribute('data-theme') === 'dark') {
-                    body.removeAttribute('data-theme');
-                    themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
-                } else {
-                    body.setAttribute('data-theme', 'dark');
-                    themeToggle.innerHTML = '<i class
+            <!-- Hero Featured Article Container (Populated by Sanity) -->
+            <article class="hero-article card" id="heroArticle" style="display: none
