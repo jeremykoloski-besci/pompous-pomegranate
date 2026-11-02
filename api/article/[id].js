@@ -1,8 +1,8 @@
 const https = require('https');
 
-function fetchJson(url) {
+function fetchJson(url, options = {}) {
   return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
+    const req = https.get(url, options, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
@@ -12,7 +12,9 @@ function fetchJson(url) {
           reject(e);
         }
       });
-    }).on('error', reject);
+    });
+    req.on('error', reject);
+    req.end();
   });
 }
 
@@ -29,10 +31,11 @@ module.exports = async function handler(req, res) {
   const projectId = '5hfaqqg7';
   const dataset = 'production';
   const apiVersion = '2026-10-29';
+  const token = 'skUaP8VnZYnUOJV7kpwTHWWBwpORkNkhEuAmO3idhBkNOl4APE5bwRBtpUisdgQiIpgXaxBpQV1Or7FKCUlnHzSHb7hQG9rFUYzVfA7XWD8mkLLMGlbCMIZFsMV9sUD1mXrHLRkP7o7Up8OInPFfGNee1KbOqHBkRE6xkrrLnJrWEPBy4fX6';
 
   try {
     const sanityQuery = `{
-      "article": *[_type in ["post", "pitch"] && (slug.current == "${id}" || slug.current match "*${id}*" || _id == "${id}" \vert{}\vert{} lower(headline) match "*${id.replace(/-/g, ' ')}*")][0]{
+      "article": *[_type in ["post", "pitch"] && (slug.current == "${id}" || _id == "${id}")][0]{
         title,
         headline,
         "imageUrl": mainImage.asset->url,
@@ -51,7 +54,10 @@ module.exports = async function handler(req, res) {
     const encodedQuery = encodeURIComponent(sanityQuery);
     const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${encodedQuery}`;
 
-    const data = await fetchJson(url);
+    const data = await fetchJson(url, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
     const doc = data.result?.article;
     const breakingData = data.result?.breaking;
 
@@ -69,9 +75,17 @@ module.exports = async function handler(req, res) {
     if (Array.isArray(doc.body)) {
       htmlContent = doc.body.map(block => {
         if (block._type === 'block' && block.children) {
-          return `<p>${block.children.map(c => c.text \vert{}\vert{} '').join('')}</p>`; } return ''; }).join(''); } else if (typeof doc.body === 'string' && doc.body.trim() !== '') { htmlContent = doc.body.split('\n').map(para => `<p>${para}</p>`).join('');
+          return `<p>${block.children.map(c => c.text || '').join('')}</p>`;
+        }
+        return '';
+      }).join('');
+    } else if (typeof doc.body === 'string' && doc.body.trim() !== '') {
+      htmlContent = doc.body.split('\n').map(para => `<p>${para}</p>`).join('');
     } else if (title) {
-      htmlContent = `<p>${title}</p>`; }  const articleUrl = `https://pompous-pomegranate.vercel.app/article/${id}`;
+      htmlContent = `<p>${title}</p>`;
+    }
+
+    const articleUrl = `https://pompous-pomegranate.vercel.app/article/${id}`;
     const encodedUrl = encodeURIComponent(articleUrl);
     const encodedTitle = encodeURIComponent(title);
 
@@ -92,13 +106,10 @@ module.exports = async function handler(req, res) {
           <meta property="og:image" content="${imageUrl}">
           <meta property="og:url" content="${articleUrl}">
           
-          <!-- Google Fonts & FontAwesome -->
           <link rel="preconnect" href="https://fonts.googleapis.com">
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
           <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400&family=Zilla+Slab:wght@700;900&display=swap" rel="stylesheet">
           <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-          
-          <!-- Global Stylesheet -->
           <link rel="stylesheet" href="/styles.css">
 
           <style>
@@ -147,12 +158,10 @@ module.exports = async function handler(req, res) {
           </style>
       </head>
       <body>
-          <!-- Top Announcement Bar (Dynamic Breaking News matching Homepage) -->
           <div class="announcement-bar" id="breakingBar" style="display: ${breakingDisplay};">
               <span id="breakingContent">🚨 BREAKING: ${breakingTitle} <a href="/article/${breakingSlug}">Read Story &rarr;</a></span>
           </div>
 
-          <!-- Header & Navigation matching Homepage -->
           <header class="site-header">
               <div class="header-container">
                   <div class="header-left">
@@ -213,8 +222,45 @@ module.exports = async function handler(req, res) {
                   <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}" target="_blank" class="share-btn" title="Share on Facebook"><i class="fa-brands fa-square-facebook"></i></a>
                   <a href="https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}" target="_blank" class="share-btn" title="Share on X"><i class="fa-brands fa-x-twitter"></i></a>
                   <a href="https://www.tiktok.com/@pompouspomegranate" target="_blank" class="share-btn" title="Follow us on TikTok"><i class="fa-brands fa-tiktok"></i></a>
-                  <a href="mailto:?subject=${encodedTitle}&body=Check out this article:${encodedUrl}" class="share-btn" title="Share via Email"><i class="fa-solid fa-envelope"></i></a>
+                  <a href="mailto:?subject=${encodedTitle}&body=Check out this article: ${encodedUrl}" class="share-btn" title="Share via Email"><i class="fa-solid fa-envelope"></i></a>
                   <button onclick="navigator.clipboard.writeText('${articleUrl}'); alert('Link copied to clipboard!');" class="share-btn" title="Copy Link"><i class="fa-solid fa-link"></i></button>
               </div>
 
-              <div class="article-body" style="font-size: 1.15rem; line-height: 1.8; margin-bottom:
+              <div class="article-body" style="font-size: 1.15rem; line-height: 1.8; margin-bottom: 40px;">${htmlContent}</div>
+              <a href="/" class="back-home">&larr; Back to Home Feed</a>
+          </div>
+
+          <script>
+              const dateEl = document.getElementById('currentDate');
+              if (dateEl) {
+                  dateEl.textContent = new Date().toLocaleDateString('en-US', { 
+                      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+                  });
+              }
+
+              const themeToggle = document.getElementById('themeToggle');
+              const body = document.body;
+
+              if (themeToggle) {
+                  themeToggle.addEventListener('click', () => {
+                      if (body.getAttribute('data-theme') === 'dark') {
+                          body.removeAttribute('data-theme');
+                          themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+                      } else {
+                          body.setAttribute('data-theme', 'dark');
+                          themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+                      }
+                  });
+              }
+          </script>
+      </body>
+      </html>
+    `;
+
+    res.setHeader('Content-Type', 'text/html');
+    return res.status(200).send(html);
+  } catch (error) {
+    console.error('Serverless fetch crash:', error);
+    return res.status(500).send(`Server Error: ${error.message}`);
+  }
+};
