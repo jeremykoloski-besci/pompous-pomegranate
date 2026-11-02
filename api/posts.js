@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   const dataset = 'production';
   const apiVersion = '2026-10-29';
 
-  const query = encodeURIComponent(`{
+ const query = encodeURIComponent(`{
     "posts": *[_type == "post"] | order(publishedAt desc) {
       _id,
       title,
@@ -33,6 +33,10 @@ export default async function handler(req, res) {
     "factCheck": *[_type == "factCheck"] | order(publishedAt desc)[0] {
       claim,
       verdict
+    },
+    "breaking": *[_type == "post"] | order(publishedAt desc)[0] {
+      title,
+      slug
     }
   }`);
 
