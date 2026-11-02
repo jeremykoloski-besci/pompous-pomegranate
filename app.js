@@ -71,7 +71,6 @@ dynamicStyle.textContent = `
         position: relative;
         overflow: hidden;
     }
-    /* Force category tag to bottom-left over the image */
     .card-image-wrapper .category-tag {
         position: absolute !important;
         bottom: 12px !important;
@@ -155,7 +154,7 @@ function renderFeed(searchTerm = '') {
         });
 
         if (filteredPitches.length === 0) {
-            articlesGrid.innerHTML = `<p style="padding: 20px; color: var(--text-secondary);">No community articles found.</p>`;
+            articlesGrid.innerHTML = '<p style="padding: 20px; color: var(--text-secondary);">No community articles found.</p>';
         }
 
         filteredPitches.forEach((pitch) => {
@@ -163,7 +162,7 @@ function renderFeed(searchTerm = '') {
             const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
             const pitchTitle = pitch.headline || "Untitled Article";
             const pitchDate = formatArticleDate(pitch.submittedAt || pitch.publishedAt);
-            const articleUrl = `/article/${pitchSlug}`;
+            const articleUrl = "/article/" + pitchSlug;
             const pitchExcerpt = extractTextFromPortableText(pitch);
 
             const pitchCard = document.createElement('article');
@@ -215,4 +214,105 @@ function renderFeed(searchTerm = '') {
         const postTitle = post.title || "Untitled Satire";
         const postCategory = post.category || "General Satire";
         const postDate = formatArticleDate(post.publishedAt || post.submittedAt);
-        const postImage = post.imageUrl || "
+        const postImage = post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
+        const articleUrl = "/article/" + articleSlug;
+        const postExcerpt = extractTextFromPortableText(post);
+
+        const newCard = document.createElement('article');
+        newCard.className = 'article-card card';
+        newCard.innerHTML = `
+            <div class="card-image-wrapper">
+                <span class="category-tag">${postCategory}</span>
+                <img src="${postImage}" alt="Article thumbnail">
+            </div>
+            <div class="card-content">
+                <div class="article-meta">
+                    <span><i class="fa-regular fa-clock"></i> ${postDate}</span>
+                </div>
+                <h3 class="article-headline">${postTitle}</h3>
+                <p class="article-excerpt">${postExcerpt}</p>
+            </div>
+        `;
+        newCard.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+            window.location.href = articleUrl;
+        });
+        articlesGrid.appendChild(newCard);
+    });
+
+    // 2. If we are on Home / All, also append community pitches into the grid
+    if (currentCategory === 'all' || currentCategory === 'home') {
+        const filteredPitches = allPitches.filter(p => {
+            const headline = (p.headline || '').toLowerCase();
+            return headline.includes(searchTerm);
+        });
+
+        filteredPitches.forEach((pitch) => {
+            const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
+            const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
+            const pitchTitle = pitch.headline || "Untitled Article";
+            const pitchDate = formatArticleDate(pitch.submittedAt || pitch.publishedAt);
+            const articleUrl = "/article/" + pitchSlug;
+            const pitchExcerpt = extractTextFromPortableText(pitch);
+
+            const pitchCard = document.createElement('article');
+            pitchCard.className = 'article-card card';
+            pitchCard.innerHTML = `
+                <div class="card-image-wrapper">
+                    <span class="category-tag">Community Pitch</span>
+                    <img src="${pitchImage}" alt="Article thumbnail">
+                </div>
+                <div class="card-content">
+                    <div class="article-meta">
+                        <span><i class="fa-regular fa-clock"></i> ${pitchDate}</span>
+                    </div>
+                    <h3 class="article-headline">${pitchTitle}</h3>
+                    <p class="article-excerpt">${pitchExcerpt}</p>
+                </div>
+            `;
+            pitchCard.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+                window.location.href = articleUrl;
+            });
+            articlesGrid.appendChild(pitchCard);
+        });
+    }
+
+    if (filteredPosts.length === 0 && allPitches.length === 0) {
+        articlesGrid.innerHTML = '<p style="padding: 20px; color: var(--text-secondary);">No articles found.</p>';
+    }
+}
+
+// --- SANITY CMS DYNAMIC FETCHING ---
+async function fetchArticlesFromSanity() {
+    try {
+        const response = await fetch('/api/posts');
+        const data = await response.json();
+        allPosts = data.result || [];
+        allPitches = data.pitches || []; 
+        const factCheckData = data.factCheck; 
+
+        const factCheckContainer = document.getElementById('factCheckContainer');
+        if (factCheckContainer && factCheckData) {
+            factCheckContainer.innerHTML = `
+                <p><strong>Claim:</strong> "${factCheckData.claim}"</p>
+                <p style="margin-top: 8px;"><strong>Verdict:</strong> <span style="color:var(--accent-color); font-weight:bold;">${factCheckData.verdict}</span></p>
+            `;
+        } else if (factCheckContainer) {
+            factCheckContainer.innerHTML = '<p>No fact checks published yet.</p>';
+        }
+        
+        renderFeed();
+        window.scrollTo(0, 0);
+    } catch (error) {
+        console.error("Error fetching live articles from Sanity proxy:", error);
+    }
+}
+
+// --- UNIVERSAL EVENT DELEGATION FOR TABS ---
+document.addEventListener('click', (e) => {
+    const navLink = e.target.closest('.main-nav .nav-link, nav a');
+    if (navLink && navLink.closest('.main-nav')) {
+        e.preventDefault();
+        
+        document.querySelectorAll('.main-nav
