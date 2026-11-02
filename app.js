@@ -334,7 +334,6 @@ function renderFeed(searchTerm = '') {
 }
 
 // --- SANITY CMS DYNAMIC FETCHING ---
-// --- SANITY CMS DYNAMIC FETCHING ---
 async function fetchArticlesFromSanity() {
     try {
         const response = await fetch('/api/posts');
@@ -380,7 +379,6 @@ async function fetchArticlesFromSanity() {
 
 // --- UNIVERSAL EVENT DELEGATION FOR TABS & FOOTER SECTIONS ---
 document.addEventListener('click', (e) => {
-    // Check if clicked link is part of main nav OR footer sections
     const navLink = e.target.closest('.main-nav .nav-link, .footer-col ul a[data-category]');
     
     if (navLink) {
@@ -393,7 +391,6 @@ document.addEventListener('click', (e) => {
             currentCategory = 'all';
         }
 
-        // If clicked from footer, smoothly scroll back up to the main feed and update main nav active state
         if (navLink.closest('.site-footer')) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             const matchingNav = document.querySelector(`.main-nav .nav-link[data-category="${currentCategory}"]`);
@@ -412,7 +409,6 @@ document.addEventListener('click', (e) => {
         renderFeed(searchTerm);
     }
 
-    // Footer Legal Modal Triggers
     if (e.target.id === 'openAboutModal') { e.preventDefault(); openLegalModal('about'); }
     if (e.target.id === 'openStandardsModal') { e.preventDefault(); openLegalModal('standards'); }
     if (e.target.id === 'openPrivacyModal') { e.preventDefault(); openLegalModal('privacy'); }
@@ -454,6 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pitchForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const author = document.getElementById('pitchAuthor').value;
+            const email = document.getElementById('pitchEmail').value;
             const headline = document.getElementById('pitchHeadline').value;
             const body = document.getElementById('pitchBody').value;
 
@@ -461,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch('/api/submit-pitch', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ author, headline, body })
+                    body: JSON.stringify({ author, email, headline, body })
                 });
 
                 const result = await response.json();
