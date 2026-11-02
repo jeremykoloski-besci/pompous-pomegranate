@@ -310,4 +310,107 @@ async function fetchArticlesFromSanity() {
     }
 }
 
-// ---
+// --- UNIVERSAL EVENT DELEGATION FOR TABS ---
+document.addEventListener('click', (e) => {
+    const navLink = e.target.closest('.main-nav .nav-link, nav a');
+    if (navLink && navLink.closest('.main-nav')) {
+        e.preventDefault();
+        
+        document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
+        navLink.classList.add('active');
+
+        const catAttr = navLink.getAttribute('data-category');
+        if (catAttr) {
+            currentCategory = catAttr.trim().toLowerCase();
+        } else {
+            currentCategory = 'all';
+        }
+        
+        const searchInput = document.getElementById('searchInput');
+        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+        
+        renderFeed(searchTerm);
+    }
+});
+
+// --- INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', () => {
+    window.scrollTo(0, 0);
+    
+    if (window.location.hash) {
+        history.replaceState(null, null, window.location.pathname + window.location.search);
+    }
+
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            renderFeed(e.target.value.toLowerCase());
+        });
+    }
+
+    const headerLinks = document.querySelectorAll('header a.site-title-link, .logo-area a');
+    headerLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
+            if (homeNav) {
+                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
+                homeNav.classList.add('active');
+            }
+            currentCategory = 'all';
+            renderFeed();
+        });
+    });
+
+    const pitchForm = document.getElementById('pitchForm');
+    if (pitchForm) {
+        pitchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const author = document.getElementById('pitchAuthor').value;
+            const headline = document.getElementById('pitchHeadline').value;
+            const body = document.getElementById('pitchBody').value;
+
+            try {
+                const response = await fetch('/api/submit-pitch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ author, headline, body })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast('Your satirical article has been submitted to the editors for peer review!');
+                    pitchForm.reset();
+                    if (pitchModal) pitchModal.classList.remove('active');
+                } else {
+                    showToast('Error submitting article: ' + (result.error || 'Please try again.'));
+                }
+            } catch (err) {
+                console.error('Submission error:', err);
+                showToast('Something went wrong. Please try again later.');
+            }
+        });
+    }
+
+    fetchArticlesFromSanity();
+});
+
+function showToast(message) {
+    const toast = document.getElementById('toastNotification');
+    const toastMsg = document.getElementById('toastMessage');
+    if (!toast) return;
+
+    if (toastMsg) toastMsg.textContent = message;
+    toast.classList.add('show');
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 4000);
+}
+
+// Expose state globally for debugging
+window.allPosts = allPosts;
+window.allPitches = allPitches;
+window.renderFeed = renderFeed;
