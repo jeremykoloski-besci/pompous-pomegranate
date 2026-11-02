@@ -147,19 +147,20 @@ document.head.appendChild(dynamicStyle);
 
 // --- HELPER TO EXTRACT & TRUNCATE TEXT FROM SANITY PORTABLE TEXT OR STRINGS ---
 function extractTextFromPortableText(item, maxLength = 160) {
-    let plainText = "";
+    if (!item) return "A reader-submitted satirical article approved by the editors...";
     
-    const raw = item?.body || item?.excerpt || item?.text || item?.description || item;
+    let plainText = "";
+    const raw = item.body || item.excerpt || item.headline || item.text || item.description;
 
     if (!raw) {
-        plainText = "A reader-submitted satirical article approved by the editors...";
+        plainText = item.title || item.headline || "A reader-submitted satirical article approved by the editors...";
     } else if (typeof raw === 'string') {
         plainText = raw;
     } else if (Array.isArray(raw)) {
         plainText = raw
             .map(block => {
-                if (block._type === 'block' && block.children) {
-                    return block.children.map(child => child.text || '').join('');
+                if (block && block._type === 'block' && Array.isArray(block.children)) {
+                    return block.children.map(child => child ? (child.text || '') : '').join('');
                 }
                 return '';
             })
@@ -189,63 +190,25 @@ function formatArticleDate(rawDateString) {
 // --- RENDER FEED FUNCTION ---
 function renderFeed(searchTerm = '') {
     const articlesGrid = document.getElementById('articlesGrid');
-    const heroArticle = document.querySelector('.hero-article');
+    const heroArticle = document.getElementById('heroArticle') || document.querySelector('.hero-article');
     
     if (!articlesGrid) return;
     articlesGrid.innerHTML = '';
 
-    // Handle Community Pitches tab view (Only Pitches)
-    if (currentCategory === 'pitches') {
-        if (heroArticle) heroArticle.style.display = 'none';
-        
-        const filteredPitches = allPitches.filter(p => {
-            const headline = (p.headline || '').toLowerCase();
-            return headline.includes(searchTerm);
-        });
-
-        if (filteredPitches.length === 0) {
-            articlesGrid.innerHTML = '<p style="padding: 20px; color: var(--text-secondary);">No community articles found.</p>';
-        }
-
-        filteredPitches.forEach((pitch) => {
-            const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
-            const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
-            const pitchTitle = pitch.headline || "Untitled Article";
-            const pitchDate = formatArticleDate(pitch.submittedAt || pitch.publishedAt);
-            const articleUrl = "/article/" + pitchSlug;
-            const pitchExcerpt = extractTextFromPortableText(pitch);
-
-            const pitchCard = document.createElement('article');
-            pitchCard.className = 'article-card card';
-            pitchCard.innerHTML = `
-                <div class="card-image-wrapper">
-                    <span class="category-tag">Community Pitch</span>
-                    <img src="${pitchImage}" alt="Article thumbnail">
-                </div>
-                <div class="card-content">
-                    <div class="article-meta">
-                        <span><i class="fa-regular fa-clock"></i> ${pitchDate}</span>
-                    </div>
-                    <h3 class="article-headline">${pitchTitle}</h3>
-                    <p class="article-excerpt">${pitchExcerpt}</p>
-                </div>
-            `;
-            pitchCard.addEventListener('click', (e) => {
-                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-                window.location.href = articleUrl;
-            });
-            articlesGrid.appendChild(pitchCard);
-        });
-
+    // Guard against null/empty state
+    if (allPosts.length === 0 && allPitches.length === 0) {
+        articlesGrid.innerHTML = '<p style="padding: 20px; color: var(--text-secondary);">No articles found in Sanity.</p>';
         return;
     }
 
-    // Standard feed / Category filtering (or Home/All view)
+    // Standard feed / Category filtering
     if (heroArticle) {
         heroArticle.style.display = (currentCategory === 'all' || currentCategory === 'home') ? 'block' : 'none';
     }
 
+    // 1. Render standard posts
     const filteredPosts = allPosts.filter(post => {
+        if (!post) return false;
         const postCategory = (post.category || '').trim().toLowerCase();
         const title = (post.title || '').toLowerCase();
         const matchesSearch = title.includes(searchTerm);
@@ -253,17 +216,15 @@ function renderFeed(searchTerm = '') {
         if (currentCategory === 'all' || currentCategory === 'home') {
             return matchesSearch;
         }
-
-        const isMatch = postCategory === currentCategory || postCategory.includes(currentCategory);
-        return matchesSearch && isMatch;
+        return matchesSearch && (postCategory === currentCategory || postCategory.includes(currentCategory));
     });
 
-    // 1. Render regular articles first
     filteredPosts.forEach((post, index) => {
         const articleSlug = post.slug?.current || post._id || index + 1;
         const postTitle = post.title || "Untitled Satire";
         const postCategory = post.category || "General Satire";
-        const postDate = formatArticleDate(post.publishedAt || post.submittedAt || post._createdAt || new Date());        const postImage = post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
+        const postDate = formatArticleDate(post.publishedAt || post.submittedAt || post._createdAt);
+        const postImage = post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
         const articleUrl = "/article/" + articleSlug;
         const postExcerpt = extractTextFromPortableText(post);
 
@@ -289,9 +250,10 @@ function renderFeed(searchTerm = '') {
         articlesGrid.appendChild(newCard);
     });
 
-    // 2. If we are on Home / All, also append community pitches into the grid
-    if (currentCategory === 'all' || currentCategory === 'home') {
+    // 2. Render community pitches on Home / All view or Pitches tab
+    if (currentCategory === 'all' || currentCategory === 'home' || currentCategory === 'pitches') {
         const filteredPitches = allPitches.filter(p => {
+            if (!p) return false;
             const headline = (p.headline || '').toLowerCase();
             return headline.includes(searchTerm);
         });
@@ -325,10 +287,6 @@ function renderFeed(searchTerm = '') {
             });
             articlesGrid.appendChild(pitchCard);
         });
-    }
-
-    if (filteredPosts.length === 0 && allPitches.length === 0) {
-        articlesGrid.innerHTML = '<p style="padding: 20px; color: var(--text-secondary);">No articles found.</p>';
     }
 }
 
@@ -436,63 +394,4 @@ document.addEventListener('DOMContentLoaded', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
             if (homeNav) {
-                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-                homeNav.classList.add('active');
-            }
-            currentCategory = 'all';
-            renderFeed();
-        });
-    });
-
-    const pitchForm = document.getElementById('pitchForm');
-    if (pitchForm) {
-        pitchForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const author = document.getElementById('pitchAuthor').value;
-            const email = document.getElementById('pitchEmail').value;
-            const headline = document.getElementById('pitchHeadline').value;
-            const body = document.getElementById('pitchBody').value;
-
-            try {
-                const response = await fetch('/api/submit-pitch', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ author, email, headline, body })
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    showToast('Your satirical article has been submitted to the editors for peer review!');
-                    pitchForm.reset();
-                    if (pitchModal) pitchModal.classList.remove('active');
-                } else {
-                    showToast('Error submitting article: ' + (result.error || 'Please try again.'));
-                }
-            } catch (err) {
-                console.error('Submission error:', err);
-                showToast('Something went wrong. Please try again later.');
-            }
-        });
-    }
-
-    fetchArticlesFromSanity();
-});
-
-function showToast(message) {
-    const toast = document.getElementById('toastNotification');
-    const toastMsg = document.getElementById('toastMessage');
-    if (!toast) return;
-
-    if (toastMsg) toastMsg.textContent = message;
-    toast.classList.add('show');
-
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 4000);
-}
-
-// Expose state globally for debugging
-window.allPosts = allPosts;
-window.allPitches = allPitches;
-window.renderFeed = renderFeed;
+                document.querySelectorAll('.main-nav .nav-link').forEach
