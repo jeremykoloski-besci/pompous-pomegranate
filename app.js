@@ -360,20 +360,32 @@ async function fetchArticlesFromSanity() {
     }
 }
 
-// --- UNIVERSAL EVENT DELEGATION FOR TABS ---
+// --- UNIVERSAL EVENT DELEGATION FOR TABS & FOOTER SECTIONS ---
 document.addEventListener('click', (e) => {
-    const navLink = e.target.closest('.main-nav .nav-link, nav a');
-    if (navLink && navLink.closest('.main-nav')) {
+    // Check if clicked link is part of main nav OR footer sections
+    const navLink = e.target.closest('.main-nav .nav-link, .footer-col ul a[data-category]');
+    
+    if (navLink) {
         e.preventDefault();
         
-        document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-        navLink.classList.add('active');
-
         const catAttr = navLink.getAttribute('data-category');
         if (catAttr) {
             currentCategory = catAttr.trim().toLowerCase();
         } else {
             currentCategory = 'all';
+        }
+
+        // If clicked from footer, smoothly scroll back up to the main feed and update main nav active state
+        if (navLink.closest('.site-footer')) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const matchingNav = document.querySelector(`.main-nav .nav-link[data-category="${currentCategory}"]`);
+            if (matchingNav) {
+                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
+                matchingNav.classList.add('active');
+            }
+        } else if (navLink.closest('.main-nav')) {
+            document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
+            navLink.classList.add('active');
         }
         
         const searchInput = document.getElementById('searchInput');
