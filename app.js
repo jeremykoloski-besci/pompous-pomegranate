@@ -334,6 +334,7 @@ function renderFeed(searchTerm = '') {
 }
 
 // --- SANITY CMS DYNAMIC FETCHING ---
+// --- SANITY CMS DYNAMIC FETCHING ---
 async function fetchArticlesFromSanity() {
     try {
         const response = await fetch('/api/posts');
@@ -341,7 +342,9 @@ async function fetchArticlesFromSanity() {
         allPosts = data.result || [];
         allPitches = data.pitches || []; 
         const factCheckData = data.factCheck; 
+        const breakingData = data.breaking;
 
+        // Fact Check Widget Rendering
         const factCheckContainer = document.getElementById('factCheckContainer');
         if (factCheckContainer && factCheckData) {
             const claimText = factCheckData.claim || "";
@@ -351,6 +354,21 @@ async function fetchArticlesFromSanity() {
                 '<p style="margin-top: 8px;"><strong>Verdict:</strong> <span style="color:var(--accent-color); font-weight:bold;">' + verdictText + '</span></p>';
         } else if (factCheckContainer) {
             factCheckContainer.innerHTML = '<p>No fact checks published yet.</p>';
+        }
+
+        // Breaking News Banner Rendering
+        const breakingBar = document.getElementById('breakingBar');
+        const breakingContent = document.getElementById('breakingContent');
+        if (breakingBar && breakingContent && breakingData) {
+            const breakingSlug = breakingData.slug?.current || '#';
+            const breakingTitle = breakingData.title || "Breaking Satirical Update";
+            
+            breakingContent.innerHTML = 
+                '🚨 BREAKING: ' + breakingTitle + 
+                ' <a href="/article/' + breakingSlug + '">Read Story &rarr;</a>';
+            breakingBar.style.display = 'block';
+        } else if (breakingBar) {
+            breakingBar.style.display = 'none';
         }
         
         renderFeed();
