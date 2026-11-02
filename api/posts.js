@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   const dataset = 'production';
   const apiVersion = '2026-10-29';
 
- const query = encodeURIComponent(`{
+  const query = encodeURIComponent(`{
     "posts": *[_type == "post"] | order(publishedAt desc) {
       _id,
       title,
@@ -52,7 +52,8 @@ export default async function handler(req, res) {
     return res.status(200).json({ 
       result: data.result?.posts || [], 
       pitches: data.result?.pitches || [],
-      factCheck: data.result?.factCheck || null 
+      factCheck: data.result?.factCheck || null,
+      breaking: data.result?.breaking || null  // <--- Added this property!
     });
   } catch (error) {
     return res.status(500).json({ error: 'Failed to fetch from Sanity', details: error.message });
