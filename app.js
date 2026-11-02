@@ -114,7 +114,7 @@ if (legalModal) {
     });
 }
 
-// --- CSS STYLING FOR BOTTOM-LEFT BADGE & CLEAN CARDS ---
+// --- CSS STYLING FOR CARDS ---
 const dynamicStyle = document.createElement('style');
 dynamicStyle.textContent = `
     .card-image-wrapper {
@@ -145,7 +145,7 @@ dynamicStyle.textContent = `
 `;
 document.head.appendChild(dynamicStyle);
 
-// --- HELPER TO EXTRACT & TRUNCATE TEXT FROM SANITY PORTABLE TEXT OR STRINGS ---
+// --- HELPER TO EXTRACT & TRUNCATE TEXT ---
 function extractTextFromPortableText(item, maxLength = 160) {
     if (!item) return "A reader-submitted satirical article approved by the editors...";
     
@@ -179,7 +179,7 @@ function extractTextFromPortableText(item, maxLength = 160) {
     return plainText;
 }
 
-// --- HELPER TO FORMAT DATE STRICTLY AS M/D/YYYY ---
+// --- HELPER TO FORMAT DATE ---
 function formatArticleDate(rawDateString) {
     if (!rawDateString) {
         return new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
@@ -190,18 +190,12 @@ function formatArticleDate(rawDateString) {
 // --- RENDER FEED FUNCTION ---
 function renderFeed(searchTerm = '') {
     const articlesGrid = document.getElementById('articlesGrid');
-    const heroArticle = document.getElementById('heroArticle') || document.querySelector('.hero-article');
+    const heroArticle = document.getElementById('heroArticle');
     
     if (!articlesGrid) return;
     articlesGrid.innerHTML = '';
 
-    // Guard against null/empty state
-    if (allPosts.length === 0 && allPitches.length === 0) {
-        articlesGrid.innerHTML = '<p style="padding: 20px; color: var(--text-secondary);">No articles found in Sanity.</p>';
-        return;
-    }
-
-    // Handle Community Pitches tab view (Only Pitches)
+    // If Community Pitches tab is selected
     if (currentCategory === 'pitches') {
         if (heroArticle) heroArticle.style.display = 'none';
         
@@ -213,6 +207,7 @@ function renderFeed(searchTerm = '') {
 
         if (filteredPitches.length === 0) {
             articlesGrid.innerHTML = '<p style="padding: 20px; color: var(--text-secondary);">No community articles found.</p>';
+            return;
         }
 
         filteredPitches.forEach((pitch) => {
@@ -238,17 +233,15 @@ function renderFeed(searchTerm = '') {
                     <p class="article-excerpt">${pitchExcerpt}</p>
                 </div>
             `;
-            pitchCard.addEventListener('click', (e) => {
-                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+            pitchCard.addEventListener('click', () => {
                 window.location.href = articleUrl;
             });
             articlesGrid.appendChild(pitchCard);
         });
-
         return;
     }
 
-    // Standard feed / Category filtering
+    // Filter standard posts
     const filteredPosts = allPosts.filter(post => {
         if (!post) return false;
         const postCategory = (post.category || '').trim().toLowerCase();
@@ -261,7 +254,7 @@ function renderFeed(searchTerm = '') {
         return matchesSearch && (postCategory === currentCategory || postCategory.includes(currentCategory));
     });
 
-    // Render Hero Article if on Home/All view and posts exist
+    // Render Hero Article on Home / All view
     if (heroArticle) {
         if ((currentCategory === 'all' || currentCategory === 'home') && filteredPosts.length > 0 && !searchTerm) {
             const hero = filteredPosts[0];
@@ -290,8 +283,7 @@ function renderFeed(searchTerm = '') {
                 window.location.href = "/article/" + heroSlug;
             };
 
-            // Skip the first post in the grid since it's displayed as the hero
-            filteredPosts.shift();
+            filteredPosts.shift(); // Remove first post since it's in the hero
         } else {
             heroArticle.style.display = 'none';
         }
@@ -322,14 +314,13 @@ function renderFeed(searchTerm = '') {
                 <p class="article-excerpt">${postExcerpt}</p>
             </div>
         `;
-        newCard.addEventListener('click', (e) => {
-            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+        newCard.addEventListener('click', () => {
             window.location.href = articleUrl;
         });
         articlesGrid.appendChild(newCard);
     });
 
-    // Render community pitches on Home / All view
+    // Also append community pitches on Home / All view
     if (currentCategory === 'all' || currentCategory === 'home') {
         const filteredPitches = allPitches.filter(p => {
             if (!p) return false;
@@ -360,19 +351,19 @@ function renderFeed(searchTerm = '') {
                     <p class="article-excerpt">${pitchExcerpt}</p>
                 </div>
             `;
-            pitchCard.addEventListener('click', (e) => {
-                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+            pitchCard.addEventListener('click', () => {
                 window.location.href = articleUrl;
             });
             articlesGrid.appendChild(pitchCard);
         });
     }
 
-    if (filteredPosts.length === 0 && allPitches.length === 0 && (!heroArticle || heroArticle.style.display === 'none')) {
+    if (articlesGrid.children.length === 0) {
         articlesGrid.innerHTML = '<p style="padding: 20px; color: var(--text-secondary);">No articles found.</p>';
     }
 }
-// --- SANITY CMS DYNAMIC FETCHING ---
+
+// --- FETCH FROM SANITY ---
 async function fetchArticlesFromSanity() {
     try {
         const response = await fetch('/api/posts');
@@ -382,25 +373,22 @@ async function fetchArticlesFromSanity() {
         const factCheckData = data.factCheck; 
         const breakingData = data.breaking;
 
-        // Fact Check Widget Rendering
+        // Fact Check Widget
         const factCheckContainer = document.getElementById('factCheckContainer');
         if (factCheckContainer && factCheckData) {
-            const claimText = factCheckData.claim || "";
-            const verdictText = factCheckData.verdict || "";
             factCheckContainer.innerHTML = 
-                '<p><strong>Claim:</strong> "' + claimText + '"</p>' +
-                '<p style="margin-top: 8px;"><strong>Verdict:</strong> <span style="color:var(--accent-color); font-weight:bold;">' + verdictText + '</span></p>';
+                '<p><strong>Claim:</strong> "' + (factCheckData.claim || '') + '"</p>' +
+                '<p style="margin-top: 8px;"><strong>Verdict:</strong> <span style="color:var(--accent-color); font-weight:bold;">' + (factCheckData.verdict || '') + '</span></p>';
         } else if (factCheckContainer) {
             factCheckContainer.innerHTML = '<p>No fact checks published yet.</p>';
         }
 
-        // Breaking News Banner Rendering
+        // Breaking News Banner
         const breakingBar = document.getElementById('breakingBar');
         const breakingContent = document.getElementById('breakingContent');
         if (breakingBar && breakingContent && breakingData) {
             const breakingSlug = breakingData.slug?.current || '#';
             const breakingTitle = breakingData.title || "Breaking Satirical Update";
-            
             breakingContent.innerHTML = 
                 '🚨 BREAKING: ' + breakingTitle + 
                 ' <a href="/article/' + breakingSlug + '">Read Story &rarr;</a>';
@@ -410,41 +398,27 @@ async function fetchArticlesFromSanity() {
         }
         
         renderFeed();
-        window.scrollTo(0, 0);
     } catch (error) {
         console.error("Error fetching live articles from Sanity proxy:", error);
     }
 }
 
-// --- UNIVERSAL EVENT DELEGATION FOR TABS & FOOTER SECTIONS ---
+// --- TAB & NAV EVENT DELEGATION ---
 document.addEventListener('click', (e) => {
     const navLink = e.target.closest('.main-nav .nav-link, .footer-col ul a[data-category]');
     
     if (navLink) {
         e.preventDefault();
-        
         const catAttr = navLink.getAttribute('data-category');
-        if (catAttr) {
-            currentCategory = catAttr.trim().toLowerCase();
-        } else {
-            currentCategory = 'all';
-        }
+        currentCategory = catAttr ? catAttr.trim().toLowerCase() : 'all';
 
-        if (navLink.closest('.site-footer')) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            const matchingNav = document.querySelector(`.main-nav .nav-link[data-category="${currentCategory}"]`);
-            if (matchingNav) {
-                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-                matchingNav.classList.add('active');
-            }
-        } else if (navLink.closest('.main-nav')) {
+        if (navLink.closest('.main-nav')) {
             document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
             navLink.classList.add('active');
         }
         
         const searchInput = document.getElementById('searchInput');
         const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-        
         renderFeed(searchTerm);
     }
 
@@ -457,10 +431,6 @@ document.addEventListener('click', (e) => {
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
-    
-    if (window.location.hash) {
-        history.replaceState(null, null, window.location.pathname + window.location.search);
-    }
 
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
@@ -476,4 +446,58 @@ document.addEventListener('DOMContentLoaded', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
             if (homeNav) {
-                document.querySelectorAll('.main-nav .nav-link').forEach
+                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
+                homeNav.classList.add('active');
+            }
+            currentCategory = 'all';
+            renderFeed();
+        });
+    });
+
+    const pitchForm = document.getElementById('pitchForm');
+    if (pitchForm) {
+        pitchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const author = document.getElementById('pitchAuthor').value;
+            const email = document.getElementById('pitchEmail').value;
+            const headline = document.getElementById('pitchHeadline').value;
+            const body = document.getElementById('pitchBody').value;
+
+            try {
+                const response = await fetch('/api/submit-pitch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ author, email, headline, body })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast('Your satirical article has been submitted to the editors for peer review!');
+                    pitchForm.reset();
+                    if (pitchModal) pitchModal.classList.remove('active');
+                } else {
+                    showToast('Error submitting article: ' + (result.error || 'Please try again.'));
+                }
+            } catch (err) {
+                console.error('Submission error:', err);
+                showToast('Something went wrong. Please try again later.');
+            }
+        });
+    }
+
+    fetchArticlesFromSanity();
+});
+
+function showToast(message) {
+    const toast = document.getElementById('toastNotification');
+    const toastMsg = document.getElementById('toastMessage');
+    if (!toast) return;
+
+    if (toastMsg) toastMsg.textContent = message;
+    toast.classList.add('show');
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 4000);
+}
