@@ -53,7 +53,7 @@ export default async function handler(req, res) {
       result: data.result?.posts || [], 
       pitches: data.result?.pitches || [],
       factCheck: data.result?.factCheck || null,
-      breaking: data.result?.breaking || null  // <--- Added this property!
+      breaking: data.result?.breaking || null
     });
   } catch (error) {
     return res.status(500).json({ error: 'Failed to fetch from Sanity', details: error.message });
