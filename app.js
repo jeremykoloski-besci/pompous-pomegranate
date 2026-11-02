@@ -64,56 +64,6 @@ if (pitchModal) {
     });
 }
 
-// --- Legal & About Modals Management ---
-const legalModal = document.getElementById('legalAboutModal');
-const closeLegalModalBtn = document.getElementById('closeLegalModalBtn');
-const legalModalContentBody = document.getElementById('legalModalContentBody');
-
-const legalContentData = {
-    about: {
-        badge: "About Us",
-        title: "The Pompous Pomegranate",
-        text: "Founded during a particularly tedious Zoom call in 2026, The Pompous Pomegranate is dedicated to delivering hard-hitting, entirely fabricated news that cures the blues and infuriates people who read only headlines. We don't have sources; we have vivid imaginations."
-    },
-    standards: {
-        badge: "Editorial Standards",
-        title: "Our Code of Pomposity",
-        text: "We hold ourselves to the absolute highest standards of fiction. If a story is even remotely plausible or resembles real life by sheer coincidence, we rewrite it until it sounds sufficiently absurd. Fact-checking is strictly handled by a golden retriever who just wants a treat."
-    },
-    privacy: {
-        badge: "Privacy Policy",
-        title: "Your Data Is Safe With Us",
-        text: "We collect your email only if you sign up for The Daily Seed newsletter. We promise never to sell your data to evil corporate overlords—unless they offer us really good pastries. Your browsing habits remain between you, your browser history, and existential dread."
-    },
-    contact: {
-        badge: "Contact Desk",
-        title: "Drop Us a Line",
-        text: "Have a complaint? Take it up with our complaint department (which is currently a shredder under the desk). For pitches, please use our Community Desk modal rather than emailing us directly, because reading emails sounds like work."
-    }
-};
-
-function openLegalModal(type) {
-    const data = legalContentData[type];
-    if (!data || !legalModal || !legalModalContentBody) return;
-
-    legalModalContentBody.innerHTML = `
-        <span class="badge-gold"><i class="fa-solid fa-scroll"></i> ${data.badge}</span>
-        <h2 style="margin-top: 10px; font-family: 'Zilla Slab', serif;">${data.title}</h2>
-        <p style="color: var(--text-secondary); line-height: 1.8; margin-top: 15px;">${data.text}</p>
-    `;
-    legalModal.classList.add('active');
-}
-
-if (closeLegalModalBtn && legalModal) {
-    closeLegalModalBtn.addEventListener('click', () => legalModal.classList.remove('active'));
-}
-
-if (legalModal) {
-    legalModal.addEventListener('click', (e) => {
-        if (e.target === legalModal) legalModal.classList.remove('active');
-    });
-}
-
 // --- CSS STYLING FOR BOTTOM-LEFT BADGE & CLEAN CARDS ---
 const dynamicStyle = document.createElement('style');
 dynamicStyle.textContent = `
@@ -381,12 +331,6 @@ document.addEventListener('click', (e) => {
         
         renderFeed(searchTerm);
     }
-
-    // Footer Legal Modal Triggers
-    if (e.target.id === 'openAboutModal') { e.preventDefault(); openLegalModal('about'); }
-    if (e.target.id === 'openStandardsModal') { e.preventDefault(); openLegalModal('standards'); }
-    if (e.target.id === 'openPrivacyModal') { e.preventDefault(); openLegalModal('privacy'); }
-    if (e.target.id === 'openContactModal') { e.preventDefault(); openLegalModal('contact'); }
 });
 
 // --- INITIALIZATION ---
@@ -434,4 +378,39 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({ author, headline, body })
                 });
 
-                const result = await response
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast('Your satirical article has been submitted to the editors for peer review!');
+                    pitchForm.reset();
+                    if (pitchModal) pitchModal.classList.remove('active');
+                } else {
+                    showToast('Error submitting article: ' + (result.error || 'Please try again.'));
+                }
+            } catch (err) {
+                console.error('Submission error:', err);
+                showToast('Something went wrong. Please try again later.');
+            }
+        });
+    }
+
+    fetchArticlesFromSanity();
+});
+
+function showToast(message) {
+    const toast = document.getElementById('toastNotification');
+    const toastMsg = document.getElementById('toastMessage');
+    if (!toast) return;
+
+    if (toastMsg) toastMsg.textContent = message;
+    toast.classList.add('show');
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 4000);
+}
+
+// Expose state globally for debugging
+window.allPosts = allPosts;
+window.allPitches = allPitches;
+window.renderFeed = renderFeed;
