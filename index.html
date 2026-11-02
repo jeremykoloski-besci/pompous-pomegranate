@@ -114,4 +114,144 @@
             </div>
 
             <!-- Hero Featured Article Container (Populated by Sanity) -->
-            <article class="hero-article card" id="heroArticle" style="display: none
+            <article class="hero-article card" id="heroArticle" style="display: none;"></article>
+
+            <!-- Grid Articles Container (Populated by Sanity) -->
+            <div class="articles-grid" id="articlesGrid"></div>
+
+            <!-- Community Article Submission Call to Action Section -->
+            <section class="pitch-cta-section card" style="text-align: center; padding: 40px 20px;">
+                <h2><i class="fa-solid fa-lightbulb"></i> Got a Satirical Scoop?</h2>
+                <p style="color: var(--text-secondary); margin: 10px 0 20px;">Think you can out-satire us? Send your headline and full article to our editors.</p>
+                <button class="submit-pitch-btn" id="openPitchModalBtn" style="padding: 12px 24px; font-size: 1rem; cursor: pointer; background: var(--accent-color); color: #fff; border: none; border-radius: 4px; font-weight: bold;">
+                    <i class="fa-solid fa-pen-nib"></i> Submit a Community Article
+                </button>
+            </section>
+
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="site-sidebar">
+            
+            <!-- Newsletter Box -->
+            <div class="sidebar-widget newsletter-widget">
+                <h3><i class="fa-solid fa-envelope-open-text"></i> The Daily Seed</h3>
+                <p>Get our top fake news delivered directly to your inbox so you don't have to experience reality.</p>
+                <form onsubmit="event.preventDefault(); alert('Subscribed successfully to The Daily Seed!');">
+                    <input type="email" placeholder="Enter your email address" required>
+                    <button type="submit">Subscribe Free</button>
+                </form>
+            </div>
+
+            <!-- Trending Satire Ticker -->
+            <div class="sidebar-widget trending-widget">
+                <h3><i class="fa-solid fa-fire"></i> Trending Nonsense</h3>
+                <ul class="trending-list" id="trendingList">
+                    <li><span class="trend-number">1</span> <span style="color:var(--text-secondary); font-size:0.9rem;">Awaiting published articles...</span></li>
+                </ul>
+            </div>
+
+            <!-- Fact Check Widget -->
+            <div class="sidebar-widget factcheck-widget">
+                <h3><i class="fa-solid fa-magnifying-glass-chart"></i> Pomegranate Fact Check</h3>
+                <div id="factCheckContainer">
+                    <p>Loading fact check...</p>
+                </div>
+            </div>
+
+        </aside>
+
+    </div>
+
+    <!-- Community Article Submission Modal Overlay -->
+    <div class="modal-overlay" id="pitchModal">
+        <div class="modal-container sub-modal-container" style="max-width: 600px;">
+            <button class="modal-close" id="closePitchModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="sub-modal-content" style="text-align: left;">
+                <span class="badge-gold"><i class="fa-solid fa-lightbulb"></i> Community Desk</span>
+                <h2>Submit Your Satirical Article</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">If our editors laugh, we'll publish your full article live to the global feed.</p>
+                
+                <form id="pitchForm" class="pitch-form" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div class="form-group">
+                        <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 5px;">Your Name or Pseudonym</label>
+                        <input type="text" id="pitchAuthor" placeholder="e.g., Lord Pomegranate" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 5px;">Headline</label>
+                        <input type="text" id="pitchHeadline" placeholder="e.g., Local Cat Declares Himself CEO of Living Room" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 5px;">Full Article Text</label>
+                        <textarea id="pitchBody" placeholder="Paste your full article text here..." rows="8" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; resize: vertical;"></textarea>
+                    </div>
+                    <button type="submit" class="submit-pitch-btn" style="width: 100%; padding: 12px; margin-top: 10px; background: var(--accent-color); color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Publish to Community Pitches</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legal & About Modal Overlay -->
+    <div class="modal-overlay" id="legalAboutModal">
+        <div class="modal-container sub-modal-container" style="max-width: 600px;">
+            <button class="modal-close" id="closeLegalModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="sub-modal-content" style="text-align: left;" id="legalModalContentBody">
+                <!-- Content Injected Dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Pomegranate Plus Subscription Modal -->
+    <div class="modal-overlay" id="subModal">
+        <div class="modal-container sub-modal-container">
+            <button class="modal-close" id="closeSubModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="sub-modal-content">
+                <span class="badge-gold"><i class="fa-solid fa-crown"></i> Premium Satire</span>
+                <h2>Unlock Pomegranate Plus</h2>
+                <p>Support independent fake news and cure your blues permanently with elite perks:</p>
+                <ul class="perks-list">
+                    <li><i class="fa-solid fa-check"></i> 100% Ad-Free Reading Experience</li>
+                    <li><i class="fa-solid fa-check"></i> Exclusive Weekly Unreleased Headlines</li>
+                    <li><i class="fa-solid fa-check"></i> Access to the Subscriber-Only Discord Lounge</li>
+                    <li><i class="fa-solid fa-check"></i> A digital badge that proves you have superior humor</li>
+                </ul>
+                <div class="price-tag">$5 / month or $49 / year</div>
+                <button class="upgrade-btn" onclick="alert('Stripe checkout simulation! Ready to integrate live payments.')">Join Pomegranate Plus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <div class="footer-col">
+                <h3>The Pompous Pomegranate</h3>
+                <p>Fake news to cure the blues. All events depicted in this publication are fictional, satirical, or the result of someone daydreaming during a meeting.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Sections</h4>
+                <ul>
+                    <li><a href="#" data-category="politics">Politics</a></li>
+                    <li><a href="#" data-category="tech">Tech & AI</a></li>
+                    <li><a href="#" data-category="culture">Culture</a></li>
+                    <li><a href="#" data-category="opinion">Opinion</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Legal & About</h4>
+                <ul>
+                    <li><a href="#" id="openAboutModal">About Us</a></li>
+                    <li><a href="#" id="openStandardsModal">Editorial Standards</a></li>
+                    <li><a href="#" id="openPrivacyModal">Privacy Policy</a></li>
+                    <li><a href="#" id="openContactModal">Contact Editors</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 The Pompous Pomegranate. All rights reserved. Satire is protected under free speech.</p>
+        </div>
+    </footer>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
