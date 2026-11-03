@@ -164,32 +164,35 @@
     </div>
 
     <!-- Community Article Submission Modal Overlay -->
-    <div class="modal-overlay" id="pitchModal">
-        <div class="modal-container sub-modal-container" style="max-width: 600px;">
-            <button class="modal-close" id="closePitchModalBtn"><i class="fa-solid fa-xmark"></i></button>
-            <div class="sub-modal-content" style="text-align: left;">
-                <span class="badge-gold"><i class="fa-solid fa-lightbulb"></i> Community Desk</span>
-                <h2>Submit Your Satirical Article</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 20px;">If our editors laugh, we'll publish your full article live to the global feed.</p>
-                
-                <form id="pitchForm" class="pitch-form" style="display: flex; flex-direction: column; gap: 15px;">
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 5px;">Your Name or Pseudonym</label>
-                        <input type="text" id="pitchAuthor" placeholder="e.g., Lord Pomegranate" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px;">
-                    </div>
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 5px;">Headline</label>
-                        <input type="text" id="pitchHeadline" placeholder="e.g., Local Cat Declares Himself CEO of Living Room" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px;">
-                    </div>
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 5px;">Full Article Text</label>
-                        <textarea id="pitchBody" placeholder="Paste your full article text here..." rows="8" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; resize: vertical;"></textarea>
-                    </div>
-                    <button type="submit" class="submit-pitch-btn" style="width: 100%; padding: 12px; margin-top: 10px; background: var(--accent-color); color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Publish to Community Pitches</button>
-                </form>
-            </div>
+   <!-- Community Pitch Modal -->
+<div class="modal-overlay" id="pitchModal">
+    <div class="modal card">
+        <button class="close-modal-btn" id="closePitchModalBtn"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-header">
+            <h2><i class="fa-solid fa-feather-pointed"></i> Submit Your Satire Pitch</h2>
+            <p>Our automated editorial review board will review your submission.</p>
         </div>
+        <form id="pitchForm" class="modal-form">
+            <div class="form-group">
+                <label for="pitchAuthor">Your Name / Pseudonym</label>
+                <input type="text" id="pitchAuthor" required placeholder="e.g. Lord Pomegranate">
+            </div>
+            <div class="form-group">
+                <label for="pitchEmail">Your Email (for publication notification)</label>
+                <input type="email" id="pitchEmail" required placeholder="writer@example.com">
+            </div>
+            <div class="form-group">
+                <label for="pitchHeadline">Satirical Headline</label>
+                <input type="text" id="pitchHeadline" required placeholder="e.g. Local Man Discovers Water Is Wet">
+            </div>
+            <div class="form-group">
+                <label for="pitchBody">Article Body / Excerpt</label>
+                <textarea id="pitchBody" rows="4" required placeholder="Write your satirical article body here..."></textarea>
+            </div>
+            <button type="submit" class="btn-primary" style="width: 100%;">Send to Editors</button>
+        </form>
     </div>
+</div>
 
     <!-- Legal & About Modal Overlay -->
     <div class="modal-overlay" id="legalAboutModal">
