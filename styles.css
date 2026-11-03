@@ -732,7 +732,48 @@ h1, h2, h3, h4, .article-headline {
     border-radius: 6px;
     cursor: pointer;
 }
+/* Polish Modal Layout and Form Spacing */
+.modal-container, .modal {
+    padding: 35px;
+}
 
+.modal-form .form-group {
+    margin-bottom: 18px;
+}
+
+.modal-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.modal-form input,
+.modal-form textarea {
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    width: 100%;
+}
+
+.submit-pitch-btn {
+    background-color: var(--accent-color);
+    color: #ffffff;
+    border: none;
+    padding: 12px 20px;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 0.95rem;
+    transition: opacity 0.2s ease;
+}
+
+.submit-pitch-btn:hover {
+    opacity: 0.9;
+}
 /* Footer */
 .site-footer {
     background-color: var(--header-bg);
