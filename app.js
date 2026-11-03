@@ -454,6 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pitchForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const author = document.getElementById('pitchAuthor').value;
+            const email = document.getElementById('pitchEmail').value;
             const headline = document.getElementById('pitchHeadline').value;
             const body = document.getElementById('pitchBody').value;
 
@@ -461,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch('/api/submit-pitch', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ author, headline, body })
+                    body: JSON.stringify({ author, email, headline, body })
                 });
 
                 const result = await response.json();
