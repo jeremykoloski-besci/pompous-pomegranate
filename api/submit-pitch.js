@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { author, headline, body } = req.body;
+  const { author, email, headline, body } = req.body;
 
   if (!author || !headline) {
     return res.status(400).json({ error: 'Author and headline are required.' });
@@ -30,6 +30,7 @@ export default async function handler(req, res) {
         create: {
           _type: 'pitch',
           author: author,
+          email: email || '',
           headline: headline,
           body: body || '',
           status: 'pending',
@@ -52,7 +53,6 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
-      // Return Sanity's exact error message back to the client for easy debugging
       const detailedError = data.error?.message || JSON.stringify(data);
       return res.status(500).json({ error: 'Sanity Mutation Failed', details: detailedError });
     }
