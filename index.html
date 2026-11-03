@@ -5,54 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Pompous Pomegranate - Fake news to cure the blues</title>
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="The Pompous Pomegranate">
+    <meta property="og:description" content="Fake news to cure the blues.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80">
+    <meta property="og:url" content="https://pompouspomegranate.com">
+    
+    <!-- Twitter/X Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="The Pompous Pomegranate">
+    <meta name="twitter:description" content="Fake news to cure the blues.">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80">
+
+    <!-- Google Fonts for Editorial Serif & Zilla Slab Title -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400&family=Zilla+Slab:wght@700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Top Announcement Bar -->
-    <div class="announcement-bar" id="breakingBar" style="display: none;">
-        <div class="container" id="breakingContent">
-            <!-- Dynamically populated breaking news -->
-        </div>
-    </div>
-
     <!-- Custom Notification Toast -->
     <div id="toastNotification" class="toast-notification">
-        <i class="fa-solid fa-circle-check"></i>
-        <span id="toastMessage">Action completed successfully!</span>
+          <i class="fa-solid fa-circle-check"></i>
+          <span id="toastMessage">Your satirical article has been submitted to the editors for peer review!</span>
+    </div>
+    <!-- Top Announcement Bar -->
+    <div class="announcement-bar" id="breakingBar" style="display: none;">
+        <span id="breakingContent">Loading breaking news...</span>
     </div>
 
-    <!-- Site Header -->
+    <!-- Header & Navigation -->
     <header class="site-header">
         <div class="header-container">
             <div class="header-left">
-                <span class="current-date" id="currentDate"></span>
+                <button class="menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+                <div class="current-date" id="currentDate"></div>
             </div>
             
+            <!-- Branded Logo & Clickable Title -->
             <div class="logo-area">
                 <a href="#" class="site-title-link">
                     <div class="brand-logo-wrapper">
-                        <i class="fa-solid fa-seedling pomegranate-icon" style="color: var(--gold-color); font-size: 2.2rem;"></i>
+                        <!-- Custom Stylized Pomegranate Icon -->
+                        <svg class="pomegranate-icon" viewBox="0 0 100 100" width="46" height="46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Crown / Sepal top -->
+                            <path d="M40 18 L50 6 L60 18 L68 12 L64 24 L36 24 L32 12 Z" fill="#8B0000" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round"/>
+                            <!-- Main Pomegranate Body -->
+                            <circle cx="50" cy="56" r="36" fill="#8B0000" stroke="#1A1A1A" stroke-width="4"/>
+                            <!-- Inner Stylized Cutout / Crown Detail -->
+                            <path d="M35 48 C35 40, 65 40, 65 48 C65 65, 35 65, 35 48 Z" fill="#D4AF37" opacity="0.9"/>
+                            <!-- Internal Seeds Accent -->
+                            <circle cx="44" cy="48" r="3" fill="#600000"/>
+                            <circle cx="54" cy="48" r="3" fill="#600000"/>
+                            <circle cx="49" cy="56" r="3.5" fill="#600000"/>
+                        </svg>
+
+                        <!-- Stylized Brand Title -->
                         <div class="brand-title-text">
-                            <span class="title-prefix">THE</span>
+                            <span class="title-prefix">The</span>
                             <span class="title-main">Pompous Pomegranate</span>
                         </div>
                     </div>
-                    <span class="site-tagline">Fake news to cure the blues</span>
                 </a>
+                <p class="site-tagline">Fake news to cure the blues</p>
             </div>
 
             <div class="header-right">
-                <button id="themeToggle" class="theme-toggle" aria-label="Toggle Dark Mode">
+                <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
                     <i class="fa-solid fa-moon"></i>
                 </button>
-                <button id="openModalBtn" class="subscribe-btn">
-                    <i class="fa-solid fa-seedling"></i> Get The Daily Seed
+                <button class="subscribe-btn" id="openModalBtn" style="display: none;">
+                    <i class="fa-solid fa-crown"></i> Pomegranate Plus
                 </button>
             </div>
         </div>
 
-        <!-- Navigation Bar -->
+        <!-- Navigation Categories -->
         <nav class="main-nav">
             <ul>
                 <li><a href="#" class="nav-link active" data-category="all">Home</a></li>
@@ -65,11 +96,13 @@
         </nav>
     </header>
 
-    <!-- Main Layout -->
+    <!-- Main Layout Container -->
     <div class="container main-layout">
         
-        <!-- Left Feed -->
+        <!-- Left Content Area -->
         <main class="content-feed">
+            
+            <!-- Search & Filter Bar -->
             <div class="feed-controls">
                 <div class="search-box">
                     <i class="fa-solid fa-search"></i>
@@ -80,84 +113,113 @@
                 </div>
             </div>
 
-            <!-- Articles Grid -->
-            <div class="articles-grid" id="articlesGrid">
-                <!-- Dynamically populated from Sanity API -->
-            </div>
+            <!-- Hero Featured Article Container (Populated by Sanity) -->
+            <article class="hero-article card" id="heroArticle" style="display: none;"></article>
+
+            <!-- Grid Articles Container (Populated by Sanity) -->
+            <div class="articles-grid" id="articlesGrid"></div>
+
+            <!-- Community Article Submission Call to Action Section -->
+            <section class="pitch-cta-section card" style="text-align: center; padding: 40px 20px;">
+                <h2><i class="fa-solid fa-lightbulb"></i> Got a Satirical Scoop?</h2>
+                <p style="color: var(--text-secondary); margin: 10px 0 20px;">Think you can out-satire us? Send your headline and full article to our editors.</p>
+                <button class="submit-pitch-btn" id="openPitchModalBtn" style="padding: 12px 24px; font-size: 1rem; cursor: pointer; background: var(--accent-color); color: #fff; border: none; border-radius: 4px; font-weight: bold;">
+                    <i class="fa-solid fa-pen-nib"></i> Submit a Community Article
+                </button>
+            </section>
+
         </main>
 
         <!-- Right Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-widget pitch-widget">
-                <h3><i class="fa-solid fa-pen-nib"></i> Community Desk</h3>
-                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 15px;">
-                    Got a headline so absurd it belongs in a fictional newspaper? Pitch your satirical masterpiece to our editors.
-                </p>
-                <button id="openPitchModalBtn" class="submit-pitch-btn">
-                    <i class="fa-solid fa-paper-plane"></i> Submit a Pitch
-                </button>
-            </div>
-
-            <div class="sidebar-widget fact-check-box">
-                <h3><i class="fa-solid fa-magnifying-glass-chart"></i> Fact Check Desk</h3>
-                <div id="factCheckContainer">
-                    <p class="claim">Loading latest fact check...</p>
-                </div>
-            </div>
-
+        <aside class="site-sidebar">
+            
+            <!-- Newsletter Box -->
             <div class="sidebar-widget newsletter-widget">
-                <h3>The Daily Seed</h3>
-                <p>Get our finest fabricated headlines delivered straight to your inbox before breakfast.</p>
-                <form onsubmit="event.preventDefault(); showToast('Subscribed to The Daily Seed!');">
+                <h3><i class="fa-solid fa-envelope-open-text"></i> The Daily Seed</h3>
+                <p>Get our top fake news delivered directly to your inbox so you don't have to experience reality.</p>
+                <form onsubmit="event.preventDefault(); alert('Subscribed successfully to The Daily Seed!');">
                     <input type="email" placeholder="Enter your email address" required>
                     <button type="submit">Subscribe Free</button>
                 </form>
             </div>
+
+            <!-- Trending Satire Ticker -->
+            <div class="sidebar-widget trending-widget">
+                <h3><i class="fa-solid fa-fire"></i> Trending Nonsense</h3>
+                <ul class="trending-list" id="trendingList">
+                    <li><span class="trend-number">1</span> <span style="color:var(--text-secondary); font-size:0.9rem;">Awaiting published articles...</span></li>
+                </ul>
+            </div>
+
+            <!-- Fact Check Widget -->
+            <div class="sidebar-widget factcheck-widget">
+                <h3><i class="fa-solid fa-magnifying-glass-chart"></i> Pomegranate Fact Check</h3>
+                <div id="factCheckContainer">
+                    <p>Loading fact check...</p>
+                </div>
+            </div>
+
         </aside>
+
     </div>
 
-    <!-- Pitch Modal -->
-    <div class="modal-overlay" id="pitchModal">
-        <div class="modal-container">
-            <button class="modal-close" id="closePitchModalBtn"><i class="fa-solid fa-xmark"></i></button>
-            <div class="pitch-header">
-                <h2><i class="fa-solid fa-feather-pointed"></i> Submit Your Satire Pitch</h2>
-                <p>Our automated editorial review board will review your submission.</p>
+    <!-- Community Article Submission Modal Overlay -->
+<!-- Community Pitch Modal -->
+<div class="modal-overlay" id="pitchModal">
+    <div class="modal card">
+        <button class="close-modal-btn" id="closePitchModalBtn"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-header">
+            <h2><i class="fa-solid fa-feather-pointed"></i> Submit Your Satire Pitch</h2>
+            <p>Our automated editorial review board will review your submission.</p>
+        </div>
+        <form id="pitchForm" class="modal-form">
+            <div class="form-group">
+                <label for="pitchAuthor">Your Name / Pseudonym</label>
+                <input type="text" id="pitchAuthor" required placeholder="e.g. Lord Pomegranate">
             </div>
-            <form id="pitchForm" class="modal-form">
-                <div class="form-group">
-                    <label for="pitchAuthor">Your Name / Pseudonym</label>
-                    <input type="text" id="pitchAuthor" required placeholder="e.g. Lord Pomegranate">
-                </div>
-                <div class="form-group">
-                    <label for="pitchEmail">Your Email (for publication notification)</label>
-                    <input type="email" id="pitchEmail" required placeholder="writer@example.com">
-                </div>
-                <div class="form-group">
-                    <label for="pitchHeadline">Satirical Headline</label>
-                    <input type="text" id="pitchHeadline" required placeholder="e.g. Local Man Discovers Water Is Wet">
-                </div>
-                <div class="form-group">
-                    <label for="pitchBody">Article Body / Excerpt</label>
-                    <textarea id="pitchBody" rows="4" required placeholder="Write your satirical article body here..."></textarea>
-                </div>
-                <button type="submit" class="submit-pitch-btn" style="margin-top: 10px;">Send to Editors</button>
-            </form>
+            <div class="form-group">
+                <label for="pitchEmail">Your Email (for publication notification)</label>
+                <input type="email" id="pitchEmail" required placeholder="writer@example.com">
+            </div>
+            <div class="form-group">
+                <label for="pitchHeadline">Satirical Headline</label>
+                <input type="text" id="pitchHeadline" required placeholder="e.g. Local Man Discovers Water Is Wet">
+            </div>
+            <div class="form-group">
+                <label for="pitchBody">Article Body / Excerpt</label>
+                <textarea id="pitchBody" rows="4" required placeholder="Write your satirical article body here..."></textarea>
+            </div>
+            <button type="submit" class="btn-primary" style="width: 100%;">Send to Editors</button>
+        </form>
+    </div>
+</div>
+
+    <!-- Legal & About Modal Overlay -->
+    <div class="modal-overlay" id="legalAboutModal">
+        <div class="modal-container sub-modal-container" style="max-width: 600px;">
+            <button class="modal-close" id="closeLegalModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="sub-modal-content" style="text-align: left;" id="legalModalContentBody">
+                <!-- Content Injected Dynamically -->
+            </div>
         </div>
     </div>
 
-    <!-- Subscription Modal -->
+    <!-- Pomegranate Plus Subscription Modal -->
     <div class="modal-overlay" id="subModal">
         <div class="modal-container sub-modal-container">
             <button class="modal-close" id="closeSubModalBtn"><i class="fa-solid fa-xmark"></i></button>
             <div class="sub-modal-content">
-                <span class="badge-gold">DAILY DISPATCH</span>
-                <h2>Join The Daily Seed</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 20px;">Receive our weekly dispatch of pure fabricated nonsense.</p>
-                <form onsubmit="event.preventDefault(); showToast('Welcome to The Daily Seed!'); subModal.classList.remove('active');">
-                    <input type="email" id="subEmail" placeholder="you@example.com" required style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-primary);">
-                    <button type="submit" class="upgrade-btn">Get The Dispatch</button>
-                </form>
+                <span class="badge-gold"><i class="fa-solid fa-crown"></i> Premium Satire</span>
+                <h2>Unlock Pomegranate Plus</h2>
+                <p>Support independent fake news and cure your blues permanently with elite perks:</p>
+                <ul class="perks-list">
+                    <li><i class="fa-solid fa-check"></i> 100% Ad-Free Reading Experience</li>
+                    <li><i class="fa-solid fa-check"></i> Exclusive Weekly Unreleased Headlines</li>
+                    <li><i class="fa-solid fa-check"></i> Access to the Subscriber-Only Discord Lounge</li>
+                    <li><i class="fa-solid fa-check"></i> A digital badge that proves you have superior humor</li>
+                </ul>
+                <div class="price-tag">$5 / month or $49 / year</div>
+                <button class="upgrade-btn" onclick="alert('Stripe checkout simulation! Ready to integrate live payments.')">Join Pomegranate Plus</button>
             </div>
         </div>
     </div>
@@ -172,10 +234,10 @@
             <div class="footer-col">
                 <h4>Sections</h4>
                 <ul>
-                    <li><a href="#" class="nav-link" data-category="politics">Politics</a></li>
-                    <li><a href="#" class="nav-link" data-category="tech">Tech & AI</a></li>
-                    <li><a href="#" class="nav-link" data-category="culture">Culture</a></li>
-                    <li><a href="#" class="nav-link" data-category="opinion">Opinion</a></li>
+                    <li><a href="#" data-category="politics">Politics</a></li>
+                    <li><a href="#" data-category="tech">Tech & AI</a></li>
+                    <li><a href="#" data-category="culture">Culture</a></li>
+                    <li><a href="#" data-category="opinion">Opinion</a></li>
                 </ul>
             </div>
             <div class="footer-col">
@@ -193,263 +255,6 @@
         </div>
     </footer>
 
-    <!-- Application Script -->
-    <script>
-        let allPosts = [];
-        let allPitches = [];
-        let currentCategory = 'all';
-
-        if ('scrollRestoration' in history) {
-            history.scrollRestoration = 'manual';
-        }
-
-        const dateEl = document.getElementById('currentDate');
-        if (dateEl) {
-            dateEl.textContent = new Date().toLocaleDateString('en-US', { 
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-            });
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toastNotification');
-            const toastMsg = document.getElementById('toastMessage');
-            if (!toast) return;
-            if (toastMsg) toastMsg.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 4000);
-        }
-
-        const themeToggle = document.getElementById('themeToggle');
-        const body = document.body;
-
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                if (body.getAttribute('data-theme') === 'dark') {
-                    body.removeAttribute('data-theme');
-                    themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
-                } else {
-                    body.setAttribute('data-theme', 'dark');
-                    themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
-                }
-            });
-        }
-
-        const subModal = document.getElementById('subModal');
-        const openModalBtn = document.getElementById('openModalBtn');
-        const closeSubModalBtn = document.getElementById('closeSubModalBtn');
-
-        if (openModalBtn && subModal) {
-            openModalBtn.addEventListener('click', () => subModal.classList.add('active'));
-        }
-        if (closeSubModalBtn && subModal) {
-            closeSubModalBtn.addEventListener('click', () => subModal.classList.remove('active'));
-        }
-
-        const pitchModal = document.getElementById('pitchModal');
-        const openPitchModalBtn = document.getElementById('openPitchModalBtn');
-        const closePitchModalBtn = document.getElementById('closePitchModalBtn');
-
-        if (openPitchModalBtn && pitchModal) {
-            openPitchModalBtn.addEventListener('click', () => pitchModal.classList.add('active'));
-        }
-        if (closePitchModalBtn && pitchModal) {
-            closePitchModalBtn.addEventListener('click', () => pitchModal.classList.remove('active'));
-        }
-
-        if (pitchModal) {
-            pitchModal.addEventListener('click', (e) => {
-                if (e.target === pitchModal) pitchModal.classList.remove('active');
-            });
-        }
-
-        function extractTextFromPortableText(item, maxLength = 160) {
-            if (!item) return "A reader-submitted satirical article approved by the editors...";
-            let plainText = "";
-            const raw = item.body || item.excerpt || item.headline || item.text || item.description;
-
-            if (!raw) {
-                plainText = item.title || item.headline || "A reader-submitted satirical article approved by the editors...";
-            } else if (typeof raw === 'string') {
-                plainText = raw;
-            } else if (Array.isArray(raw)) {
-                plainText = raw.map(block => {
-                    if (block && block._type === 'block' && Array.isArray(block.children)) {
-                        return block.children.map(child => child ? (child.text || '') : '').join('');
-                    }
-                    return '';
-                }).join(' ').trim();
-            }
-
-            if (!plainText) plainText = "A reader-submitted satirical article approved by the editors...";
-            return plainText.length > maxLength ? plainText.substring(0, maxLength).trim() + '...' : plainText;
-        }
-
-        function formatArticleDate(rawDateString) {
-            if (!rawDateString) return new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
-            return new Date(rawDateString).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
-        }
-
-        function renderFeed(searchTerm = '') {
-            const articlesGrid = document.getElementById('articlesGrid');
-            if (!articlesGrid) return;
-            articlesGrid.innerHTML = '';
-
-            if (currentCategory === 'pitches') {
-                const filteredPitches = allPitches.filter(p => p && (p.headline || '').toLowerCase().includes(searchTerm));
-                if (filteredPitches.length === 0) {
-                    articlesGrid.innerHTML = '<p style="padding: 20px; color: var(--text-secondary);">No community articles found.</p>';
-                    return;
-                }
-                filteredPitches.forEach((pitch) => {
-                    const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
-                    const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
-                    const pitchCard = document.createElement('article');
-                    pitchCard.className = 'card';
-                    pitchCard.innerHTML = `
-                        <div class="card-image-wrapper">
-                            <span class="category-tag">Community Pitch</span>
-                            <img src="${pitchImage}" alt="Article thumbnail">
-                        </div>
-                        <div class="card-content">
-                            <div class="article-meta"><span><i class="fa-regular fa-clock"></i> ${formatArticleDate(pitch.submittedAt)}</span></div>
-                            <h3 class="article-headline">${pitch.headline || "Untitled"}</h3>
-                            <p class="article-excerpt">${extractTextFromPortableText(pitch)}</p>
-                        </div>
-                    `;
-                    pitchCard.onclick = () => window.location.href = "/article/" + pitchSlug;
-                    articlesGrid.appendChild(pitchCard);
-                });
-                return;
-            }
-
-            const filteredPosts = allPosts.filter(post => {
-                if (!post) return false;
-                const postCategory = (post.category || '').trim().toLowerCase();
-                const title = (post.title || '').toLowerCase();
-                const matchesSearch = title.includes(searchTerm);
-                if (currentCategory === 'all' || currentCategory === 'home') return matchesSearch;
-                return matchesSearch && (postCategory === currentCategory || postCategory.includes(currentCategory));
-            });
-
-            filteredPosts.forEach((post, index) => {
-                const articleSlug = post.slug?.current || post._id || index + 1;
-                const newCard = document.createElement('article');
-                newCard.className = 'card';
-                newCard.innerHTML = `
-                    <div class="card-image-wrapper">
-                        <span class="category-tag">${post.category || "General"}</span>
-                        <img src="${post.imageUrl || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80'}" alt="Thumbnail">
-                    </div>
-                    <div class="card-content">
-                        <div class="article-meta"><span><i class="fa-regular fa-clock"></i> ${formatArticleDate(post.publishedAt)}</span></div>
-                        <h3 class="article-headline">${post.title || "Untitled"}</h3>
-                        <p class="article-excerpt">${extractTextFromPortableText(post)}</p>
-                    </div>
-                `;
-                newCard.onclick = () => window.location.href = "/article/" + articleSlug;
-                articlesGrid.appendChild(newCard);
-            });
-
-            if (currentCategory === 'all' || currentCategory === 'home') {
-                allPitches.forEach((pitch) => {
-                    const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
-                    const pitchCard = document.createElement('article');
-                    pitchCard.className = 'card';
-                    pitchCard.innerHTML = `
-                        <div class="card-image-wrapper">
-                            <span class="category-tag">Community Pitch</span>
-                            <img src="${pitch.imageUrl || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80'}" alt="Thumbnail">
-                        </div>
-                        <div class="card-content">
-                            <div class="article-meta"><span><i class="fa-regular fa-clock"></i> ${formatArticleDate(pitch.submittedAt)}</span></div>
-                            <h3 class="article-headline">${pitch.headline || "Untitled"}</h3>
-                            <p class="article-excerpt">${extractTextFromPortableText(pitch)}</p>
-                        </div>
-                    `;
-                    pitchCard.onclick = () => window.location.href = "/article/" + pitchSlug;
-                    articlesGrid.appendChild(pitchCard);
-                });
-            }
-
-            if (articlesGrid.children.length === 0) {
-                articlesGrid.innerHTML = '<p style="padding: 20px; color: var(--text-secondary);">No articles found.</p>';
-            }
-        }
-
-        async function fetchArticlesFromSanity() {
-            try {
-                const response = await fetch('/api/posts');
-                const data = await response.json();
-                allPosts = data.result || [];
-                allPitches = data.pitches || []; 
-
-                const factCheckContainer = document.getElementById('factCheckContainer');
-                if (factCheckContainer && data.factCheck) {
-                    factCheckContainer.innerHTML = `<p class="claim"><strong>Claim:</strong> "${data.factCheck.claim || ''}"</p><p class="verdict" style="margin-top: 8px;"><strong>Verdict:</strong> <span class="false-badge">${data.factCheck.verdict || ''}</span></p>`;
-                }
-
-                const breakingBar = document.getElementById('breakingBar');
-                const breakingContent = document.getElementById('breakingContent');
-                if (breakingBar && breakingContent && data.breaking) {
-                    breakingContent.innerHTML = `🚨 BREAKING: ${data.breaking.title} <a href="/article/${data.breaking.slug?.current || '#'}">Read Story &rarr;</a>`;
-                    breakingBar.style.display = 'block';
-                }
-
-                renderFeed();
-            } catch (error) {
-                console.error("Error fetching live articles:", error);
-            }
-        }
-
-        document.addEventListener('click', (e) => {
-            const navLink = e.target.closest('.main-nav .nav-link, .footer-col .nav-link');
-            if (navLink) {
-                e.preventDefault();
-                currentCategory = navLink.getAttribute('data-category').trim().toLowerCase();
-                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-                const activeHeaderLink = document.querySelector(`.main-nav .nav-link[data-category="${currentCategory}"]`);
-                if (activeHeaderLink) activeHeaderLink.classList.add('active');
-                renderFeed();
-            }
-        });
-
-        window.scrollTo(0, 0);
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => renderFeed(e.target.value.toLowerCase()));
-        }
-
-        const pitchForm = document.getElementById('pitchForm');
-        if (pitchForm) {
-            pitchForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const author = document.getElementById('pitchAuthor').value;
-                const email = document.getElementById('pitchEmail').value;
-                const headline = document.getElementById('pitchHeadline').value;
-                const body = document.getElementById('pitchBody').value;
-
-                try {
-                    const response = await fetch('/api/submit-pitch', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ author, email, headline, body })
-                    });
-                    const result = await response.json();
-                    if (response.ok) {
-                        showToast('Your satirical article has been submitted to the editors for peer review!');
-                        pitchForm.reset();
-                        if (pitchModal) pitchModal.classList.remove('active');
-                    } else {
-                        showToast('Error submitting article: ' + (result.error || 'Please try again.'));
-                    }
-                } catch (err) {
-                    console.error('Submission error:', err);
-                    showToast('Something went wrong. Please try again later.');
-                }
-            });
-        }
-
-        fetchArticlesFromSanity();
-    </script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
