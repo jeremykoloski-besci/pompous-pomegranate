@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   const projectId = '5hfaqqg7';
   const dataset = 'production';
   const apiVersion = '2026-10-29';
-  const token = 'skUaP8VnZYnUOJV7kpwTHWWBwpORkNkhEuAmO3idhBkNOl4APE5bwRBtpUisdgQiIpgXaxBpQV1Or7FKCUlnHzSHb7hQG9rFUYzVfA7XWD8mkLLMGlbCMIZFsMV9sUD1mXrHLRkP7o7Up8OInPFfGNee1KbOqHBkRE6xkrrLnJrWEPBy4fX6';
+  const token = 'sk4ndQcGiWdxdDgNSfo789OpmhEuFeCmIybfPSwfFi9LkTX7dSAA4YjQxI2Y7yK8RsJWEia2L5TPZkNlfsBpMtJrIygua0JRuzYqXoSKviyPELlPJLdIe4Nokig8KGWSnSLyFo3AnH4ei8dZHqArBXdYBkBTj8O5KMUv8MCMtMFYm5ueAXSb';
 
   const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/mutate/${dataset}`;
 
