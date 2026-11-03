@@ -1,10 +1,21 @@
-import { Resend } from 'resend'; // Or your preferred email service SDK (e.g., SendGrid/Nodemailer)
+import { Resend } from 'resend';
+import crypto from 'crypto';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Optional: Verify the request is coming securely from Sanity using your Webhook Secret
+  const webhookSecret = process.env.SANITY_WEBHOOK_SECRET;
+  if (webhookSecret) {
+    const signature = req.headers['sanity-webhook-signature'];
+    
+    // If you configured a secret in your Sanity webhook dashboard, 
+    // you can verify the signature or a custom header token:
+    // (Note: If passing via custom header or standard Sanity signature verification)
   }
 
   // Sanity Webhook payload structure
