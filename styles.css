@@ -99,7 +99,7 @@ h1, h2, h3, h4, .article-headline {
 }
 
 .toast-notification i {
-    color: #10b981; /* A fresh green color for success */
+    color: #10b981;
     font-size: 1.2rem;
 }
 /* Sticky Header */
@@ -474,10 +474,23 @@ h1, h2, h3, h4, .article-headline {
     font-weight: 600;
 }
 
-/* Pitch Form Section */
-.pitch-section {
+/* Pitch Form Section & Modals Form Alignment */
+.pitch-section, .modal-form {
     padding: 25px;
     background-color: var(--card-bg);
+}
+
+.modal-form .form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-form label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--text-primary);
 }
 
 .pitch-header {
@@ -498,6 +511,8 @@ h1, h2, h3, h4, .article-headline {
     margin-bottom: 15px;
 }
 
+.modal-form input, 
+.modal-form textarea,
 .pitch-form input {
     width: 100%;
     padding: 12px;
@@ -505,6 +520,8 @@ h1, h2, h3, h4, .article-headline {
     border: 1px solid var(--border-color);
     color: var(--text-primary);
     border-radius: 4px;
+    font-size: 0.95rem;
+    font-family: 'Inter', sans-serif;
 }
 
 .submit-pitch-btn {
