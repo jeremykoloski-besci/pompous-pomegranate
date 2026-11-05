@@ -1,9 +1,80 @@
-// Check if the user is viewing an individual article page
+// --- 1. SINGLE ARTICLE ROUTER (Executes on page load if visiting /article/...) ---
+async function renderSingleArticle(slug) {
+    const projectId = '5hfaqg7';
+    const dataset = 'production';
+    const query = encodeURIComponent(`*[_type == "post" && slug.current == "${slug}"][0]{
+        title,
+        body,
+        "author": author->name,
+        "imageUrl": mainImage.asset->url,
+        publishedAt
+    }`);
+    
+    const url = `https://${projectId}.api.sanity.io/v2024-03-01/data/query/${dataset}?query=${query}`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        const post = data.result;
+
+        // Hide home feed sections
+        document.querySelectorAll('main, .hero-section, .feed-container, .trending-section').forEach(el => {
+            if (el) el.style.display = 'none';
+        });
+
+        // Ensure the single article view container exists or create it dynamically
+        let articleView = document.getElementById('singleArticleView');
+        if (!articleView) {
+            articleView = document.createElement('div');
+            articleView.id = 'singleArticleView';
+            articleView.style.cssText = 'max-width: 800px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);';
+            document.body.appendChild(articleView);
+        }
+        articleView.style.display = 'block';
+
+        if (!post) {
+            articleView.innerHTML = `
+                <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px;">&larr; Back to Home</button>
+                <h1>Article Not Found</h1>
+                <p>This satire piece couldn't be found or is still awaiting publication.</p>
+            `;
+            return;
+        }
+
+        // Render article content
+        let htmlContent = '<p>No content provided.</p>';
+        if (Array.isArray(post.body)) {
+            htmlContent = post.body.map(block => {
+                if (block._type === 'block' && block.children) {
+                    return `<p style="margin-bottom: 16px; line-height: 1.8;">${block.children.map(c => c.text).join('')}</p>`;
+                }
+                return '';
+            }).join('');
+        }
+
+        articleView.innerHTML = `
+            <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:#18181b; color:#fff; border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
+            <h1 style="font-size: 32px; margin-bottom: 12px; font-weight: 700;">${post.title}</h1>
+            <div style="color: #666; margin-bottom: 24px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 12px;">
+                By ${post.author || 'Anonymous Pomp'} • ${new Date(post.publishedAt).toLocaleDateString()}
+            </div>
+            ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Article image" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;">` : ''}
+            <div style="font-size: 18px; color: #27272a;">${htmlContent}</div>
+        `;
+
+    } catch (err) {
+        console.error("Error loading article:", err);
+    }
+}
+
+function goHome() {
+    window.location.href = '/';
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     const path = window.location.pathname;
     if (path.startsWith('/article/')) {
         const slug = path.split('/article/')[1];
-        // Call your function to load and render this specific article by slug
         renderSingleArticle(slug);
     }
 });
@@ -344,7 +415,6 @@ function renderFeed(searchTerm = '') {
 }
 
 // --- SANITY CMS DYNAMIC FETCHING ---
-// --- SANITY CMS DYNAMIC FETCHING ---
 async function fetchArticlesFromSanity() {
     try {
         const response = await fetch('/api/posts');
@@ -390,7 +460,6 @@ async function fetchArticlesFromSanity() {
 
 // --- UNIVERSAL EVENT DELEGATION FOR TABS & FOOTER SECTIONS ---
 document.addEventListener('click', (e) => {
-    // Check if clicked link is part of main nav OR footer sections
     const navLink = e.target.closest('.main-nav .nav-link, .footer-col ul a[data-category]');
     
     if (navLink) {
@@ -403,7 +472,6 @@ document.addEventListener('click', (e) => {
             currentCategory = 'all';
         }
 
-        // If clicked from footer, smoothly scroll back up to the main feed and update main nav active state
         if (navLink.closest('.site-footer')) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             const matchingNav = document.querySelector(`.main-nav .nav-link[data-category="${currentCategory}"]`);
@@ -422,7 +490,6 @@ document.addEventListener('click', (e) => {
         renderFeed(searchTerm);
     }
 
-    // Footer Legal Modal Triggers
     if (e.target.id === 'openAboutModal') { e.preventDefault(); openLegalModal('about'); }
     if (e.target.id === 'openStandardsModal') { e.preventDefault(); openLegalModal('standards'); }
     if (e.target.id === 'openPrivacyModal') { e.preventDefault(); openLegalModal('privacy'); }
