@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -7,10 +7,36 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
+  const { slug } = req.query;
   const projectId = '5hfaqqg7';
   const dataset = 'production';
   const apiVersion = '2026-10-29';
+  const token = 'skUaP8VnZYnUOJV7kpwTHWWBwpORkNkhEuAmO3idhBkNOl4APE5bwRBtpUisdgQiIpgXaxBpQV1Or7FKCUlnHzSHb7hQG9rFUYzVfA7XWD8mkLLMGlbCMIZFsMV9sUD1mXrHLRkP7o7Up8OInPFfGNee1KbOqHBkRE6xkrrLnJrWEPBy4fX6';
 
+  // --- 1. SINGLE ARTICLE QUERY (If a slug is passed) ---
+  if (slug) {
+    const singleQuery = encodeURIComponent(`*[_type == "post" && slug.current == "${slug}"][0]{
+      title,
+      body,
+      "author": author->name,
+      "imageUrl": mainImage.asset->url,
+      publishedAt
+    }`);
+
+    const singleUrl = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${singleQuery}`;
+
+    try {
+      const response = await fetch(singleUrl, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      return res.status(200).json({ result: data.result || null });
+    } catch (error) {
+      return res.status(500).json({ error: 'Failed to fetch article from Sanity', details: error.message });
+    }
+  }
+
+  // --- 2. STANDARD FEED QUERY (Posts, Pitches, Fact Check, Breaking) ---
   const query = encodeURIComponent(`{
     "posts": *[_type == "post"] | order(publishedAt desc) {
       _id,
@@ -41,7 +67,6 @@ export default async function handler(req, res) {
   }`);
 
   const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${query}`;
-  const token = 'skUaP8VnZYnUOJV7kpwTHWWBwpORkNkhEuAmO3idhBkNOl4APE5bwRBtpUisdgQiIpgXaxBpQV1Or7FKCUlnHzSHb7hQG9rFUYzVfA7XWD8mkLLMGlbCMIZFsMV9sUD1mXrHLRkP7o7Up8OInPFfGNee1KbOqHBkRE6xkrrLnJrWEPBy4fX6';
 
   try {
     const response = await fetch(url, {
@@ -53,9 +78,9 @@ export default async function handler(req, res) {
       result: data.result?.posts || [], 
       pitches: data.result?.pitches || [],
       factCheck: data.result?.factCheck || null,
-      breaking: data.result?.breaking || null  // <--- Added this property!
+      breaking: data.result?.breaking || null 
     });
   } catch (error) {
     return res.status(500).json({ error: 'Failed to fetch from Sanity', details: error.message });
   }
-}
+};
