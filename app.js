@@ -1,3 +1,13 @@
+// Check if the user is viewing an individual article page
+window.addEventListener('DOMContentLoaded', () => {
+    const path = window.location.pathname;
+    if (path.startsWith('/article/')) {
+        const slug = path.split('/article/')[1];
+        // Call your function to load and render this specific article by slug
+        renderSingleArticle(slug);
+    }
+});
+
 // Global application state
 let allPosts = [];
 let allPitches = [];
