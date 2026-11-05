@@ -3,6 +3,10 @@ export default async function handler(req, res) {
   const projectId = '5hfaqg7';
   const dataset = 'production';
 
+  if (!slug) {
+    return res.status(400).json({ error: 'Missing slug parameter' });
+  }
+
   const query = `*[_type == "post" && slug.current == "${slug}"][0]{
     title,
     body,
@@ -16,6 +20,11 @@ export default async function handler(req, res) {
   try {
     const response = await fetch(url);
     const data = await response.json();
+    
+    if (!data.result) {
+      return res.status(404).json({ error: 'Article not found in Sanity' });
+    }
+
     return res.status(200).json(data);
   } catch (error) {
     return res.status(500).json({ error: 'Failed to fetch article from Sanity' });
