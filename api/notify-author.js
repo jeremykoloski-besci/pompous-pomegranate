@@ -12,8 +12,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing required pitch details.' });
   }
 
-  // Acknowledge Sanity instantly
+  // Acknowledge Sanity instantly with 200 OK
   res.status(200).json({ success: true });
+
+  console.log('Webhook received for email:', email);
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -21,17 +23,19 @@ export default async function handler(req, res) {
     return;
   }
 
-  const resend = new Resend(apiKey);
-
   try {
+    const resend = new Resend(apiKey);
+    console.log('Attempting to send email via Resend...');
+    
     const data = await resend.emails.send({
       from: 'The Pompous Pomegranate <onboarding@resend.dev>',
-      to: [email], // Note: Must match your Resend account login email during testing
+      to: [email],
       subject: `Your Satire Pitch Has Been Approved: "${articleTitle}"`,
       html: `<p>Your pitch "${articleTitle}" has been approved! <a href="https://thepompouspomegranate.com/article/${slug}">View Article</a></p>`,
     });
-    console.log('Resend success response:', data);
+    
+    console.log('Resend success response data:', JSON.stringify(data));
   } catch (err) {
-    console.error('Resend explicit failure:', err.message || err);
+    console.error('RESEND CRITICAL ERROR:', err);
   }
 }
