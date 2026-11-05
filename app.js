@@ -458,6 +458,12 @@ document.addEventListener('click', (e) => {
     const navLink = e.target.closest('.main-nav .nav-link, .footer-col ul a[data-category]');
     
     if (navLink) {
+        // If we are currently viewing a single article page, clicking a category tab should redirect back home with that category or reload cleanly
+        if (window.location.pathname.startsWith('/article/')) {
+            window.location.href = '/';
+            return;
+        }
+
         e.preventDefault();
         
         const catAttr = navLink.getAttribute('data-category');
@@ -510,14 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
     headerLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
-            if (homeNav) {
-                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-                homeNav.classList.add('active');
-            }
-            currentCategory = 'all';
-            renderFeed();
+            window.location.href = '/';
         });
     });
 
