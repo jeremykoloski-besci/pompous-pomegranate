@@ -1,12 +1,13 @@
 // --- 1. SINGLE ARTICLE ROUTER (Executes on page load if visiting /article/...) ---
 async function renderSingleArticle(slug) {
+    console.log("Attempting to render article with slug:", slug); // <--- Add this line
     try {
-        // Fetch securely through your unified Vercel backend route
         const response = await fetch(`/api/posts?slug=${slug}`);
-        if (!response.ok) throw new Error('Failed to fetch article');
-        
         const data = await response.json();
+        console.log("Article API response:", data); // <--- Add this line
+        
         const post = data.result;
+        // ... rest of your code
 
         // Hide home feed sections
         document.querySelectorAll('main, .hero-section, .feed-container, .trending-section').forEach(el => {
