@@ -32,12 +32,13 @@ export default async function handler(req, res) {
           headline,
           body,
           submittedAt,
-          "imageUrl": coalesce(image.asset->url, mainImage.asset->url, photo.asset->url, picture.asset->url)
+          "imageUrl": image.asset->url
         }
       }`;
 
       const params = new URLSearchParams();
       params.append('query', groqQuery);
+      // Clean up slug parameter in case _id was attached
       const cleanSlug = slugParam.replace(/-[0-9a-fA-F]{10,}$/, '');
       params.append('$slug', `"${cleanSlug}"`);
 
@@ -49,8 +50,11 @@ export default async function handler(req, res) {
 
       let result = data.result?.post || null;
 
+      // If not found in posts, search pitches by matching ID or headline slug
       if (!result && data.result?.pitches) {
+        // Extract potential ID from the end of the slug parameter
         const possibleId = slugParam.split('-').pop();
+
         let matchingPitch = data.result.pitches.find(p => p._id === possibleId);
 
         if (!matchingPitch) {
@@ -63,22 +67,12 @@ export default async function handler(req, res) {
         if (matchingPitch) {
           let bodyText = "";
           const raw = matchingPitch.body;
-
           if (typeof raw === 'string') {
-            if (raw.trim().startsWith('{') || raw.includes('"author":')) {
-              try {
-                const parsed = JSON.parse(raw);
-                bodyText = parsed.body || parsed.text || parsed.content || raw;
-              } catch (e) {
-                bodyText = raw;
-              }
-            } else {
-              bodyText = raw;
-            }
+            bodyText = raw;
           } else if (Array.isArray(raw)) {
             bodyText = raw.map(b => b.children ? b.children.map(c => c.text).join('') : '').join('\n');
           } else if (raw && typeof raw === 'object') {
-            bodyText = raw.body || raw.text || raw.content || JSON.stringify(raw);
+            bodyText = raw.body || raw.text || JSON.stringify(raw);
           }
 
           result = {
@@ -112,7 +106,7 @@ export default async function handler(req, res) {
         headline,
         body,
         submittedAt,
-        "imageUrl": coalesce(image.asset->url, mainImage.asset->url, photo.asset->url, picture.asset->url)
+        "imageUrl": image.asset->url
       },
       "factCheck": *[_type == "factCheck"] | order(publishedAt desc)[0] {
         claim,
