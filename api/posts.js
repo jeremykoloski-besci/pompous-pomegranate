@@ -1,5 +1,4 @@
-module.exports = async function handler(req, res) {
-  // CORS Headers
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -9,7 +8,9 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { slug } = req.query || {};
+    const urlParams = new URL(req.url, `https://${req.headers.host}`).searchParams;
+    const slug = urlParams.get('slug');
+
     const projectId = '5hfaqqg7';
     const dataset = 'production';
     const apiVersion = '2023-05-03';
@@ -18,7 +19,7 @@ module.exports = async function handler(req, res) {
     let groqQuery = '';
 
     if (slug) {
-      groqQuery = `*[_type == "post" && slug.current == $slug][0]{
+      groqQuery = `*[_type == "post" && slug.current == "${slug}"][0]{
         title,
         body,
         "author": author->name,
@@ -56,14 +57,7 @@ module.exports = async function handler(req, res) {
       }`;
     }
 
-    // Safely encode parameters using URLSearchParams
-    const params = new URLSearchParams();
-    params.append('query', groqQuery);
-    if (slug) {
-      params.append('$slug', `"${slug}"`);
-    }
-
-    const sanityUrl = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?${params.toString()}`;
+    const sanityUrl = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${encodeURIComponent(groqQuery)}`;
 
     const sanityResponse = await fetch(sanityUrl, {
       headers: { 
@@ -72,6 +66,10 @@ module.exports = async function handler(req, res) {
     });
 
     const data = await sanityResponse.json();
+
+    if (!sanityResponse.ok) {
+      return res.status(sanityResponse.status).json({ error: data.error || 'Sanity query failed' });
+    }
 
     if (slug) {
       return res.status(200).json({ result: data.result || null });
@@ -86,8 +84,8 @@ module.exports = async function handler(req, res) {
 
   } catch (error) {
     return res.status(500).json({ 
-      error: 'Server function crash caught', 
+      error: 'Function execution failed', 
       message: error.message 
     });
   }
-};
+}
