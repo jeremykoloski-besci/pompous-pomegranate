@@ -10,36 +10,36 @@ module.exports = async function handler(req, res) {
   const { slug } = req.query;
   const projectId = '5hfaqqg7';
   const dataset = 'production';
-  const apiVersion = '2026-10-29';
+  const apiVersion = '2023-05-03'; // Using a stable API version
   const token = 'skUaP8VnZYnUOJV7kpwTHWWBwpORkNkhEuAmO3idhBkNOl4APE5bwRBtpUisdgQiIpgXaxBpQV1Or7FKCUlnHzSHb7hQG9rFUYzVfA7XWD8mkLLMGlbCMIZFsMV9sUD1mXrHLRkP7o7Up8OInPFfGNee1KbOqHBkRE6xkrrLnJrWEPBy4fX6';
 
   try {
-    // --- 1. SINGLE ARTICLE QUERY (If a slug is passed) ---
+    // --- 1. SINGLE ARTICLE QUERY ---
     if (slug) {
-      const singleQuery = encodeURIComponent(`*[_type == "post" && slug.current == "${slug}"][0]{
+      const singleQuery = `*[_type == "post" && slug.current == "${slug}"][0]{
         title,
         body,
         "author": coalesce(author->name, "Anonymous Pomp"),
         "imageUrl": mainImage.asset->url,
         publishedAt
-      }`);
+      }`;
 
-      const singleUrl = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${singleQuery}`;
+      const singleUrl = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${encodeURIComponent(singleQuery)}`;
 
       const response = await fetch(singleUrl, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
       
-      if (data.error) {
-        return res.status(400).json({ error: data.error.message });
+      if (!response.ok) {
+        return res.status(response.status).json({ error: data.error?.message || 'Sanity API error' });
       }
 
       return res.status(200).json({ result: data.result || null });
     }
 
-    // --- 2. STANDARD FEED QUERY (Safe Coalescing for References) ---
-    const query = encodeURIComponent(`{
+    // --- 2. STANDARD FEED QUERY ---
+    const query = `{
       "posts": *[_type == "post"] | order(publishedAt desc) {
         _id,
         title,
@@ -66,9 +66,9 @@ module.exports = async function handler(req, res) {
         title,
         slug
       }
-    }`);
+    }`;
 
-    const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${query}`;
+    const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${encodeURIComponent(query)}`;
 
     const response = await fetch(url, {
       headers: { 'Authorization': `Bearer ${token}` }
@@ -76,8 +76,8 @@ module.exports = async function handler(req, res) {
     
     const data = await response.json();
     
-    if (data.error) {
-      return res.status(400).json({ error: data.error.message, details: data.error });
+    if (!response.ok) {
+      return res.status(response.status).json({ error: data.error?.message || 'Sanity API error' });
     }
 
     return res.status(200).json({ 
@@ -88,6 +88,6 @@ module.exports = async function handler(req, res) {
     });
 
   } catch (error) {
-    return res.status(500).json({ error: 'Failed to fetch from Sanity', details: error.message });
+    return res.status(500).json({ error: 'Internal server proxy error', details: error.message });
   }
 };
