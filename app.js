@@ -1,17 +1,19 @@
 // --- 1. SINGLE ARTICLE ROUTER (Executes on page load if visiting /article/...) ---
 async function renderSingleArticle(slug) {
-    console.log("Attempting to render article with slug:", slug); // <--- Add this line
+    console.log("Attempting to render article with slug:", slug);
     try {
         const response = await fetch(`/api/posts?slug=${slug}`);
+        if (!response.ok) throw new Error('Failed to fetch article');
+        
         const data = await response.json();
-        console.log("Article API response:", data); // <--- Add this line
+        console.log("Article API response:", data);
         
         const post = data.result;
-        // ... rest of your code
 
-        // Hide home feed sections
-        document.querySelectorAll('main, .hero-section, .feed-container, .trending-section').forEach(el => {
-            if (el) el.style.display = 'none';
+        // Hide all home feed sections & articles grid
+        const homeElements = document.querySelectorAll('main, .hero-section, .feed-container, .trending-section, #articlesGrid');
+        homeElements.forEach(el => {
+            if (el) el.style.setProperty('display', 'none', 'important');
         });
 
         let articleView = document.getElementById('singleArticleView');
@@ -21,7 +23,7 @@ async function renderSingleArticle(slug) {
             articleView.style.cssText = 'max-width: 800px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);';
             document.body.appendChild(articleView);
         }
-        articleView.style.display = 'block';
+        articleView.style.setProperty('display', 'block', 'important');
 
         if (!post) {
             articleView.innerHTML = `
@@ -46,7 +48,7 @@ async function renderSingleArticle(slug) {
             <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:#18181b; color:#fff; border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
             <h1 style="font-size: 32px; margin-bottom: 12px; font-weight: 700;">${post.title}</h1>
             <div style="color: #666; margin-bottom: 24px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 12px;">
-                By ${post.author || 'Anonymous Pomp'} • ${new Date(post.publishedAt).toLocaleDateString()}
+                By ${post.author \vert{}\vert{} 'Anonymous Pomp'} •${new Date(post.publishedAt).toLocaleDateString()}
             </div>
             ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Article image" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;">` : ''}
             <div style="font-size: 18px; color: #27272a;">${htmlContent}</div>
@@ -348,223 +350,4 @@ function renderFeed(searchTerm = '') {
             </div>
             <div class="card-content">
                 <div class="article-meta">
-                    <span><i class="fa-regular fa-clock"></i> ${postDate}</span>
-                </div>
-                <h3 class="article-headline">${postTitle}</h3>
-                <p class="article-excerpt">${postExcerpt}</p>
-            </div>
-        `;
-        newCard.addEventListener('click', (e) => {
-            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-            window.location.href = articleUrl;
-        });
-        articlesGrid.appendChild(newCard);
-    });
-
-    // 2. If we are on Home / All, also append community pitches into the grid
-    if (currentCategory === 'all' || currentCategory === 'home') {
-        const filteredPitches = allPitches.filter(p => {
-            const headline = (p.headline || '').toLowerCase();
-            return headline.includes(searchTerm);
-        });
-
-        filteredPitches.forEach((pitch) => {
-            const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
-            const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
-            const pitchTitle = pitch.headline || "Untitled Article";
-            const pitchDate = formatArticleDate(pitch.submittedAt || pitch.publishedAt);
-            const articleUrl = "/article/" + pitchSlug;
-            const pitchExcerpt = extractTextFromPortableText(pitch);
-
-            const pitchCard = document.createElement('article');
-            pitchCard.className = 'article-card card';
-            pitchCard.innerHTML = `
-                <div class="card-image-wrapper">
-                    <span class="category-tag">Community Pitch</span>
-                    <img src="${pitchImage}" alt="Article thumbnail">
-                </div>
-                <div class="card-content">
-                    <div class="article-meta">
-                        <span><i class="fa-regular fa-clock"></i> ${pitchDate}</span>
-                    </div>
-                    <h3 class="article-headline">${pitchTitle}</h3>
-                    <p class="article-excerpt">${pitchExcerpt}</p>
-                </div>
-            `;
-            pitchCard.addEventListener('click', (e) => {
-                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-                window.location.href = articleUrl;
-            });
-            articlesGrid.appendChild(pitchCard);
-        });
-    }
-
-    if (filteredPosts.length === 0 && allPitches.length === 0) {
-        articlesGrid.innerHTML = '<p style="padding: 20px; color: var(--text-secondary);">No articles found.</p>';
-    }
-}
-
-// --- SANITY CMS DYNAMIC FETCHING ---
-async function fetchArticlesFromSanity() {
-    try {
-        const response = await fetch('/api/posts');
-        const data = await response.json();
-        allPosts = data.result || [];
-        allPitches = data.pitches || []; 
-        const factCheckData = data.factCheck; 
-        const breakingData = data.breaking;
-
-        // Fact Check Widget Rendering
-        const factCheckContainer = document.getElementById('factCheckContainer');
-        if (factCheckContainer && factCheckData) {
-            const claimText = factCheckData.claim || "";
-            const verdictText = factCheckData.verdict || "";
-            factCheckContainer.innerHTML = 
-                '<p><strong>Claim:</strong> "' + claimText + '"</p>' +
-                '<p style="margin-top: 8px;"><strong>Verdict:</strong> <span style="color:var(--accent-color); font-weight:bold;">' + verdictText + '</span></p>';
-        } else if (factCheckContainer) {
-            factCheckContainer.innerHTML = '<p>No fact checks published yet.</p>';
-        }
-
-        // Breaking News Banner Rendering
-        const breakingBar = document.getElementById('breakingBar');
-        const breakingContent = document.getElementById('breakingContent');
-        if (breakingBar && breakingContent && breakingData) {
-            const breakingSlug = breakingData.slug?.current || '#';
-            const breakingTitle = breakingData.title || "Breaking Satirical Update";
-            
-            breakingContent.innerHTML = 
-                '🚨 BREAKING: ' + breakingTitle + 
-                ' <a href="/article/' + breakingSlug + '">Read Story &rarr;</a>';
-            breakingBar.style.display = 'block';
-        } else if (breakingBar) {
-            breakingBar.style.display = 'none';
-        }
-        
-        renderFeed();
-        window.scrollTo(0, 0);
-    } catch (error) {
-        console.error("Error fetching live articles from Sanity proxy:", error);
-    }
-}
-
-// --- UNIVERSAL EVENT DELEGATION FOR TABS & FOOTER SECTIONS ---
-document.addEventListener('click', (e) => {
-    const navLink = e.target.closest('.main-nav .nav-link, .footer-col ul a[data-category]');
-    
-    if (navLink) {
-        e.preventDefault();
-        
-        const catAttr = navLink.getAttribute('data-category');
-        if (catAttr) {
-            currentCategory = catAttr.trim().toLowerCase();
-        } else {
-            currentCategory = 'all';
-        }
-
-        if (navLink.closest('.site-footer')) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            const matchingNav = document.querySelector(`.main-nav .nav-link[data-category="${currentCategory}"]`);
-            if (matchingNav) {
-                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-                matchingNav.classList.add('active');
-            }
-        } else if (navLink.closest('.main-nav')) {
-            document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-            navLink.classList.add('active');
-        }
-        
-        const searchInput = document.getElementById('searchInput');
-        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-        
-        renderFeed(searchTerm);
-    }
-
-    if (e.target.id === 'openAboutModal') { e.preventDefault(); openLegalModal('about'); }
-    if (e.target.id === 'openStandardsModal') { e.preventDefault(); openLegalModal('standards'); }
-    if (e.target.id === 'openPrivacyModal') { e.preventDefault(); openLegalModal('privacy'); }
-    if (e.target.id === 'openContactModal') { e.preventDefault(); openLegalModal('contact'); }
-});
-
-// --- INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', () => {
-    window.scrollTo(0, 0);
-    
-    if (window.location.hash) {
-        history.replaceState(null, null, window.location.pathname + window.location.search);
-    }
-
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            renderFeed(e.target.value.toLowerCase());
-        });
-    }
-
-    const headerLinks = document.querySelectorAll('header a.site-title-link, .logo-area a');
-    headerLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            const homeNav = document.querySelector('.main-nav .nav-link[data-category="all"]');
-            if (homeNav) {
-                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-                homeNav.classList.add('active');
-            }
-            currentCategory = 'all';
-            renderFeed();
-        });
-    });
-
-    const pitchForm = document.getElementById('pitchForm');
-    if (pitchForm) {
-        pitchForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const author = document.getElementById('pitchAuthor').value;
-            const email = document.getElementById('pitchEmail').value;
-            const headline = document.getElementById('pitchHeadline').value;
-            const body = document.getElementById('pitchBody').value;
-
-            try {
-                const response = await fetch('/api/submit-pitch', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ author, email, headline, body })
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    showToast('Your satirical article has been submitted to the editors for peer review!');
-                    pitchForm.reset();
-                    if (pitchModal) pitchModal.classList.remove('active');
-                } else {
-                    showToast('Error submitting article: ' + (result.error || 'Please try again.'));
-                }
-            } catch (err) {
-                console.error('Submission error:', err);
-                showToast('Something went wrong. Please try again later.');
-            }
-        });
-    }
-
-    fetchArticlesFromSanity();
-});
-
-function showToast(message) {
-    const toast = document.getElementById('toastNotification');
-    const toastMsg = document.getElementById('toastMessage');
-    if (!toast) return;
-
-    if (toastMsg) toastMsg.textContent = message;
-    toast.classList.add('show');
-
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 4000);
-}
-
-// Expose state globally for debugging
-window.allPosts = allPosts;
-window.allPitches = allPitches;
-window.renderFeed = renderFeed;
+                    <span><i class="
