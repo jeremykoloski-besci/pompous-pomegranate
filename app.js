@@ -1,22 +1,9 @@
 // --- 1. SINGLE ARTICLE ROUTER (Executes on page load if visiting /article/...) ---
 async function renderSingleArticle(slug) {
-    const projectId = '5hfaqg7';
-    const dataset = 'production';
-    
-    // Clean GROQ query matching the exact slug string
-    const query = `*[_type == "post" && slug.current == "${slug}"][0]{
-        title,
-        body,
-        "author": author->name,
-        "imageUrl": mainImage.asset->url,
-        publishedAt
-    }`;
-    
-    const url = `https://${projectId}.api.sanity.io/v2024-03-01/data/query/${dataset}?query=${encodeURIComponent(query)}`;
-
     try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Failed to fetch from Sanity');
+        // Fetch securely through your own Vercel backend route (no CORS blocks!)
+        const response = await fetch(`/api/article-detail?slug=${slug}`);
+        if (!response.ok) throw new Error('Failed to fetch article');
         
         const data = await response.json();
         const post = data.result;
@@ -26,7 +13,6 @@ async function renderSingleArticle(slug) {
             if (el) el.style.display = 'none';
         });
 
-        // Ensure the single article view container exists or create it dynamically
         let articleView = document.getElementById('singleArticleView');
         if (!articleView) {
             articleView = document.createElement('div');
@@ -45,7 +31,6 @@ async function renderSingleArticle(slug) {
             return;
         }
 
-        // Render article content
         let htmlContent = '<p>No content provided.</p>';
         if (Array.isArray(post.body)) {
             htmlContent = post.body.map(block => {
