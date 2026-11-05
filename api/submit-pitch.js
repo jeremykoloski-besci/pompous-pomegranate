@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
   const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/mutate/${dataset}`;
 
-  const mutationPayload = {
+const mutationPayload = {
     mutations: [
       {
         create: {
@@ -32,7 +32,18 @@ export default async function handler(req, res) {
           author: author,
           email: email || '',
           headline: headline,
-          body: body || '',
+          // Wrap body string into a standard Sanity Portable Text block array
+          body: body ? [
+            {
+              _type: 'block',
+              children: [
+                {
+                  _type: 'span',
+                  text: body
+                }
+              ]
+            }
+          ] : [],
           status: 'pending',
           submittedAt: new Date().toISOString()
         }
