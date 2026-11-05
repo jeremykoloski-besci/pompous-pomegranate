@@ -25,8 +25,8 @@ export default async function handler(req, res) {
 
   try {
     const data = await resend.emails.send({
-      from: 'The Pompous Pomegranate <editors@thepompouspomegranate.com>',
-      to: [email],
+      from: 'The Pompous Pomegranate <onboarding@resend.dev>',
+      to: [email], // Note: Must match your Resend account login email during testing
       subject: `Your Satire Pitch Has Been Approved: "${articleTitle}"`,
       html: `<p>Your pitch "${articleTitle}" has been approved! <a href="https://thepompouspomegranate.com/article/${slug}">View Article</a></p>`,
     });
