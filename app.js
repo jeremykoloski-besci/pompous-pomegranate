@@ -2,18 +2,22 @@
 async function renderSingleArticle(slug) {
     const projectId = '5hfaqg7';
     const dataset = 'production';
-    const query = encodeURIComponent(`*[_type == "post" && slug.current == "${slug}"][0]{
+    
+    // Clean GROQ query matching the exact slug string
+    const query = `*[_type == "post" && slug.current == "${slug}"][0]{
         title,
         body,
         "author": author->name,
         "imageUrl": mainImage.asset->url,
         publishedAt
-    }`);
+    }`;
     
-    const url = `https://${projectId}.api.sanity.io/v2024-03-01/data/query/${dataset}?query=${query}`;
+    const url = `https://${projectId}.api.sanity.io/v2024-03-01/data/query/${dataset}?query=${encodeURIComponent(query)}`;
 
     try {
         const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to fetch from Sanity');
+        
         const data = await response.json();
         const post = data.result;
 
