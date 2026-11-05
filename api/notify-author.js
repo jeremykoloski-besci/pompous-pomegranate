@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     
     // Await the email dispatch *before* returning the response to Sanity
     const data = await resend.emails.send({
-      from: 'The Pompous Pomegranate <onboarding@resend.dev>',
+      from: 'The Pompous Pomegranate <editors@thepompouspomegranate.com>',
       to: [email],
       subject: `Your Satire Pitch Has Been Approved: "${articleTitle}"`,
       html: `<p>Your pitch "${articleTitle}" has been approved! <a href="https://thepompouspomegranate.com/article/${slug}">View Article</a></p>`,
