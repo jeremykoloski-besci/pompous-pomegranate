@@ -19,7 +19,7 @@ module.exports = async function handler(req, res) {
       const singleQuery = encodeURIComponent(`*[_type == "post" && slug.current == "${slug}"][0]{
         title,
         body,
-        "author": author->name,
+        "author": coalesce(author->name, "Anonymous Pomp"),
         "imageUrl": mainImage.asset->url,
         publishedAt
       }`);
@@ -30,18 +30,23 @@ module.exports = async function handler(req, res) {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
+      
+      if (data.error) {
+        return res.status(400).json({ error: data.error.message });
+      }
+
       return res.status(200).json({ result: data.result || null });
     }
 
-    // --- 2. STANDARD FEED QUERY ---
+    // --- 2. STANDARD FEED QUERY (Safe Coalescing for References) ---
     const query = encodeURIComponent(`{
       "posts": *[_type == "post"] | order(publishedAt desc) {
         _id,
         title,
         slug,
         body,
-        "category": categories[0]->title,
-        "author": author->name,
+        "category": coalesce(categories[0]->title, "General Satire"),
+        "author": coalesce(author->name, "Anonymous Pomp"),
         "imageUrl": mainImage.asset->url,
         publishedAt
       },
@@ -70,6 +75,11 @@ module.exports = async function handler(req, res) {
     });
     
     const data = await response.json();
+    
+    if (data.error) {
+      return res.status(400).json({ error: data.error.message, details: data.error });
+    }
+
     return res.status(200).json({ 
       result: data.result?.posts || [], 
       pitches: data.result?.pitches || [],
