@@ -27,14 +27,7 @@ export default async function handler(req, res) {
           publishedAt
         },
         "pitches": *[_type == "pitch"]{
-          _id,
-          author,
-          headline,
-          body,
-          text,
-          content,
-          submittedAt,
-          "imageUrl": coalesce(image.asset->url, mainImage.asset->url, photo.asset->url, picture.asset->url)
+          ...
         }
       }`;
 
@@ -50,7 +43,6 @@ export default async function handler(req, res) {
 
       let result = data.result?.post || null;
 
-      // If not found in posts, search community pitches by slugifying their headlines
       if (!result && data.result?.pitches) {
         const matchingPitch = data.result.pitches.find(p => {
           const pSlug = (p.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || p._id;
@@ -58,18 +50,36 @@ export default async function handler(req, res) {
         });
 
         if (matchingPitch) {
-          // Extract text from wherever it might be stored inside the pitch document
-          let pitchBodyText = matchingPitch.body || matchingPitch.text || matchingPitch.content || "";
-          if (typeof pitchBodyText === 'object') {
-            pitchBodyText = pitchBodyText.body || pitchBodyText.text || pitchBodyText.content || JSON.stringify(pitchBodyText);
+          console.log("MATCHED PITCH RAW DATA:", JSON.stringify(matchingPitch, null, 2));
+
+          // Extract text and image dynamically from any possible property name
+          const textVal = matchingPitch.body || matchingPitch.text || matchingPitch.content || matchingPitch.description || "";
+          let finalBody = "";
+          if (typeof textVal === 'string') {
+            finalBody = textVal;
+          } else if (typeof textVal === 'object' && textVal !== null) {
+            finalBody = textVal.body || textVal.text || textVal.content || textVal.message || JSON.stringify(textVal);
+          }
+
+          // Check all possible image fields in Sanity
+          let imageUrl = null;
+          const imgField = matchingPitch.image || matchingPitch.mainImage || matchingPitch.photo || matchingPitch.picture || matchingPitch.file;
+          if (imgField && imgField.asset && imgField.asset._ref) {
+            // Convert Sanity asset reference to a CDN URL if it's a raw ref
+            // Format: image-{assetId}-{dimensions}-{extension}
+            const ref = imgField.asset._ref;
+            const [, id, dimensions, extension] = ref.split('-');
+            imageUrl = `https://cdn.sanity.io/images/${projectId}/${dataset}/${id}-${dimensions}.${extension}`;
+          } else if (imgField && imgField.asset && imgField.asset->url) {
+            imageUrl = imgField.asset->url;
           }
 
           result = {
-            title: matchingPitch.headline,
-            body: pitchBodyText,
-            author: matchingPitch.author,
-            imageUrl: matchingPitch.imageUrl || null,
-            publishedAt: matchingPitch.submittedAt
+            title: matchingPitch.headline || matchingPitch.title || "Untitled Pitch",
+            body: finalBody,
+            author: matchingPitch.author || matchingPitch.name || "Anonymous Pomp",
+            imageUrl: imageUrl || null,
+            publishedAt: matchingPitch.submittedAt || matchingPitch._createdAt
           };
         }
       }
@@ -89,13 +99,13 @@ export default async function handler(req, res) {
         "imageUrl": mainImage.asset->url,
         publishedAt
       },
-      "pitches": *[_type == "pitch"] | order(submittedAt desc) {
+      "pitches": *[_type == "pitch"] | order(_createdAt desc) {
         _id,
         author,
         headline,
         body,
         submittedAt,
-        "imageUrl": coalesce(image.asset->url, mainImage.asset->url, photo.asset->url, picture.asset->url)
+        _createdAt
       },
       "factCheck": *[_type == "factCheck"] | order(publishedAt desc)[0] {
         claim,
@@ -113,10 +123,6 @@ export default async function handler(req, res) {
     });
     
     const data = await sanityResponse.json();
-
-    if (!sanityResponse.ok) {
-      return res.status(sanityResponse.status).json({ error: data.error || 'Sanity query failed' });
-    }
 
     return res.status(200).json({ 
       result: data.result?.posts || [], 
