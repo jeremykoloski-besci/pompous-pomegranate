@@ -1,34 +1,32 @@
 import { Resend } from 'resend';
-import crypto from 'crypto';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Optional: Verify the request is coming securely from Sanity using your Webhook Secret
-  const webhookSecret = process.env.SANITY_WEBHOOK_SECRET;
-  if (webhookSecret) {
-    const signature = req.headers['sanity-webhook-signature'];
-    
-    // If you configured a secret in your Sanity webhook dashboard, 
-    // you can verify the signature or a custom header token:
-    // (Note: If passing via custom header or standard Sanity signature verification)
-  }
-
-  // Sanity Webhook payload structure
+  // 1. Immediately extract payload data from Sanity
   const { title, email, slug } = req.body;
 
   if (!email || !title) {
     return res.status(400).json({ error: 'Missing required pitch details for email.' });
   }
 
+  // 2. Acknowledge Sanity instantly so the webhook never times out or returns null
+  res.status(200).json({ success: true, message: 'Webhook received, dispatching email.' });
+
+  // 3. Process the email send asynchronously in the background
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (!resendApiKey) {
+    console.error('RESEND_API_KEY is missing in Vercel environment variables.');
+    return;
+  }
+
+  const resend = new Resend(resendApiKey);
   const articleUrl = `https://thepompouspomegranate.com/article/${slug}`;
 
   try {
-    const data = await resend.emails.send({
+    await resend.emails.send({
       from: 'The Pompous Pomegranate <editors@thepompouspomegranate.com>',
       to: [email],
       subject: `Your Satire Pitch Has Been Approved: "${title}"`,
@@ -45,10 +43,8 @@ export default async function handler(req, res) {
         </div>
       `,
     });
-
-    return res.status(200).json({ success: true, data });
+    console.log(`Approval email successfully sent to ${email}`);
   } catch (error) {
-    console.error('Email sending error:', error);
-    return res.status(500).json({ error: 'Failed to send approval email', details: error.message });
+    console.error('Background email sending error:', error);
   }
 }
