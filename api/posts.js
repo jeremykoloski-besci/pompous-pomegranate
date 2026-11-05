@@ -16,63 +16,98 @@ export default async function handler(req, res) {
     const apiVersion = '2023-05-03';
     const token = 'skUaP8VnZYnUOJV7kpwTHWWBwpORkNkhEuAmO3idhBkNOl4APE5bwRBtpUisdgQiIpgXaxBpQV1Or7FKCUlnHzSHb7hQG9rFUYzVfA7XWD8mkLLMGlbCMIZFsMV9sUD1mXrHLRkP7o7Up8OInPFfGNee1KbOqHBkRE6xkrrLnJrWEPBy4fX6';
 
-    let groqQuery = '';
-
+    // --- 1. SINGLE ARTICLE / PITCH QUERY ---
     if (slug) {
-      groqQuery = `*[_type == "post" && slug.current == "${slug}"][0]{
-        title,
-        body,
-        "author": author->name,
-        "imageUrl": mainImage.asset->url,
-        publishedAt
-      }`;
-    } else {
-      groqQuery = `{
-        "posts": *[_type == "post"] | order(publishedAt desc) {
-          _id,
+      const groqQuery = `{
+        "post": *[_type == "post" && slug.current == $slug][0]{
           title,
-          slug,
           body,
-          "category": categories[0]->title,
           "author": author->name,
           "imageUrl": mainImage.asset->url,
           publishedAt
         },
-        "pitches": *[_type == "pitch"] | order(submittedAt desc) {
+        "pitches": *[_type == "pitch"]{
           _id,
           author,
           headline,
           body,
           submittedAt,
           "imageUrl": image.asset->url
-        },
-        "factCheck": *[_type == "factCheck"] | order(publishedAt desc)[0] {
-          claim,
-          verdict
-        },
-        "breaking": *[_type == "post"] | order(publishedAt desc)[0] {
-          title,
-          slug
         }
       }`;
+
+      const params = new URLSearchParams();
+      params.append('query', groqQuery);
+      params.append('$slug', `"${slug}"`);
+
+      const sanityUrl = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?${params.toString()}`;
+      const sanityResponse = await fetch(sanityUrl, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await sanityResponse.json();
+
+      let result = data.result?.post || null;
+
+      // If not found in posts, search community pitches by slugifying their headlines
+      if (!result && data.result?.pitches) {
+        const matchingPitch = data.result.pitches.find(p => {
+          const pSlug = (p.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || p._id;
+          return pSlug === slug || p._id === slug;
+        });
+
+        if (matchingPitch) {
+          result = {
+            title: matchingPitch.headline,
+            body: matchingPitch.body,
+            author: matchingPitch.author,
+            imageUrl: matchingPitch.imageUrl,
+            publishedAt: matchingPitch.submittedAt
+          };
+        }
+      }
+
+      return res.status(200).json({ result });
     }
 
-    const sanityUrl = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${encodeURIComponent(groqQuery)}`;
-
-    const sanityResponse = await fetch(sanityUrl, {
-      headers: { 
-        'Authorization': `Bearer ${token}` 
+    // --- 2. STANDARD FEED QUERY ---
+    const groqQuery = `{
+      "posts": *[_type == "post"] | order(publishedAt desc) {
+        _id,
+        title,
+        slug,
+        body,
+        "category": categories[0]->title,
+        "author": author->name,
+        "imageUrl": mainImage.asset->url,
+        publishedAt
+      },
+      "pitches": *[_type == "pitch"] | order(submittedAt desc) {
+        _id,
+        author,
+        headline,
+        body,
+        submittedAt,
+        "imageUrl": image.asset->url
+      },
+      "factCheck": *[_type == "factCheck"] | order(publishedAt desc)[0] {
+        claim,
+        verdict
+      },
+      "breaking": *[_type == "post"] | order(publishedAt desc)[0] {
+        title,
+        slug
       }
-    });
+    }`;
 
+    const sanityUrl = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${encodeURIComponent(groqQuery)}`;
+    const sanityResponse = await fetch(sanityUrl, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
     const data = await sanityResponse.json();
 
     if (!sanityResponse.ok) {
       return res.status(sanityResponse.status).json({ error: data.error || 'Sanity query failed' });
-    }
-
-    if (slug) {
-      return res.status(200).json({ result: data.result || null });
     }
 
     return res.status(200).json({ 
