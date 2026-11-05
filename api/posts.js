@@ -31,8 +31,10 @@ export default async function handler(req, res) {
           author,
           headline,
           body,
+          text,
+          content,
           submittedAt,
-          "imageUrl": image.asset->url
+          "imageUrl": coalesce(image.asset->url, mainImage.asset->url, photo.asset->url, picture.asset->url)
         }
       }`;
 
@@ -56,11 +58,17 @@ export default async function handler(req, res) {
         });
 
         if (matchingPitch) {
+          // Extract text from wherever it might be stored inside the pitch document
+          let pitchBodyText = matchingPitch.body || matchingPitch.text || matchingPitch.content || "";
+          if (typeof pitchBodyText === 'object') {
+            pitchBodyText = pitchBodyText.body || pitchBodyText.text || pitchBodyText.content || JSON.stringify(pitchBodyText);
+          }
+
           result = {
             title: matchingPitch.headline,
-            body: matchingPitch.body,
+            body: pitchBodyText,
             author: matchingPitch.author,
-            imageUrl: matchingPitch.imageUrl,
+            imageUrl: matchingPitch.imageUrl || null,
             publishedAt: matchingPitch.submittedAt
           };
         }
@@ -87,7 +95,7 @@ export default async function handler(req, res) {
         headline,
         body,
         submittedAt,
-        "imageUrl": image.asset->url
+        "imageUrl": coalesce(image.asset->url, mainImage.asset->url, photo.asset->url, picture.asset->url)
       },
       "factCheck": *[_type == "factCheck"] | order(publishedAt desc)[0] {
         claim,
