@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const { slug } = req.query;
   const projectId = '5hfaqg7';
   const dataset = 'production';
@@ -20,13 +20,8 @@ export default async function handler(req, res) {
   try {
     const response = await fetch(url);
     const data = await response.json();
-    
-    if (!data.result) {
-      return res.status(404).json({ error: 'Article not found in Sanity' });
-    }
-
     return res.status(200).json(data);
   } catch (error) {
     return res.status(500).json({ error: 'Failed to fetch article from Sanity' });
   }
-}
+};
