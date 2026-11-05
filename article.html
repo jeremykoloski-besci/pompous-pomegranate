@@ -47,7 +47,7 @@
                 return;
             }
 
-            // Robustly handle both plain text strings and Sanity Portable Text arrays
+            // Handle strings, Portable Text arrays, and object payloads robustly
             let htmlContent = '<p>No content provided.</p>';
             const rawBody = post.body;
 
@@ -60,6 +60,14 @@
                     }
                     return '';
                 }).join('');
+            } else if (rawBody && typeof rawBody === 'object') {
+                // If it's a nested object, extract the actual text property if it exists
+                const actualText = rawBody.body || rawBody.text || rawBody.content || '';
+                if (typeof actualText === 'string' && actualText.trim().length > 0) {
+                    htmlContent = `<p style="margin-bottom: 16px; line-height: 1.8;">${actualText.replace(/\n/g, '<br>')}</p>`;
+                } else {
+                    htmlContent = `<p>No content provided.</p>`;
+                }
             }
 
             container.innerHTML = `
