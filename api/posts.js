@@ -9,7 +9,7 @@ export default async function handler(req, res) {
 
   try {
     const urlParams = new URL(req.url, `https://${req.headers.host}`).searchParams;
-    const slug = urlParams.get('slug');
+    const slugParam = urlParams.get('slug') || '';
 
     const projectId = '5hfaqqg7';
     const dataset = 'production';
@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     const token = 'skUaP8VnZYnUOJV7kpwTHWWBwpORkNkhEuAmO3idhBkNOl4APE5bwRBtpUisdgQiIpgXaxBpQV1Or7FKCUlnHzSHb7hQG9rFUYzVfA7XWD8mkLLMGlbCMIZFsMV9sUD1mXrHLRkP7o7Up8OInPFfGNee1KbOqHBkRE6xkrrLnJrWEPBy4fX6';
 
     // --- 1. SINGLE ARTICLE / PITCH QUERY ---
-    if (slug) {
+    if (slugParam) {
       const groqQuery = `{
         "post": *[_type == "post" && slug.current == $slug][0]{
           title,
@@ -31,16 +31,16 @@ export default async function handler(req, res) {
           author,
           headline,
           body,
-          text,
-          content,
           submittedAt,
-          "imageUrl": coalesce(image.asset->url, mainImage.asset->url, photo.asset->url, picture.asset->url)
+          "imageUrl": image.asset->url
         }
       }`;
 
       const params = new URLSearchParams();
       params.append('query', groqQuery);
-      params.append('$slug', `"${slug}"`);
+      // Clean up slug parameter in case _id was attached
+      const cleanSlug = slugParam.replace(/-[0-9a-fA-F]{10,}$/, '');
+      params.append('$slug', `"${cleanSlug}"`);
 
       const sanityUrl = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?${params.toString()}`;
       const sanityResponse = await fetch(sanityUrl, {
@@ -50,26 +50,37 @@ export default async function handler(req, res) {
 
       let result = data.result?.post || null;
 
-      // If not found in posts, search community pitches by slugifying their headlines
+      // If not found in posts, search pitches by matching ID or headline slug
       if (!result && data.result?.pitches) {
-        const matchingPitch = data.result.pitches.find(p => {
-          const pSlug = (p.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || p._id;
-          return pSlug === slug || p._id === slug;
-        });
+        // Extract potential ID from the end of the slug parameter
+        const possibleId = slugParam.split('-').pop();
+
+        let matchingPitch = data.result.pitches.find(p => p._id === possibleId);
+
+        if (!matchingPitch) {
+          matchingPitch = data.result.pitches.find(p => {
+            const pSlug = (p.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || p._id;
+            return slugParam.startsWith(pSlug);
+          });
+        }
 
         if (matchingPitch) {
-          // Extract text from wherever it might be stored inside the pitch document
-          let pitchBodyText = matchingPitch.body || matchingPitch.text || matchingPitch.content || "";
-          if (typeof pitchBodyText === 'object') {
-            pitchBodyText = pitchBodyText.body || pitchBodyText.text || pitchBodyText.content || JSON.stringify(pitchBodyText);
+          let bodyText = "";
+          const raw = matchingPitch.body;
+          if (typeof raw === 'string') {
+            bodyText = raw;
+          } else if (Array.isArray(raw)) {
+            bodyText = raw.map(b => b.children ? b.children.map(c => c.text).join('') : '').join('\n');
+          } else if (raw && typeof raw === 'object') {
+            bodyText = raw.body || raw.text || JSON.stringify(raw);
           }
 
           result = {
-            title: matchingPitch.headline,
-            body: pitchBodyText,
-            author: matchingPitch.author,
+            title: matchingPitch.headline || "Untitled Pitch",
+            body: bodyText,
+            author: matchingPitch.author || "Anonymous Pomp",
             imageUrl: matchingPitch.imageUrl || null,
-            publishedAt: matchingPitch.submittedAt
+            publishedAt: matchingPitch.submittedAt || matchingPitch._createdAt
           };
         }
       }
@@ -95,7 +106,7 @@ export default async function handler(req, res) {
         headline,
         body,
         submittedAt,
-        "imageUrl": coalesce(image.asset->url, mainImage.asset->url, photo.asset->url, picture.asset->url)
+        "imageUrl": image.asset->url
       },
       "factCheck": *[_type == "factCheck"] | order(publishedAt desc)[0] {
         claim,
@@ -113,10 +124,6 @@ export default async function handler(req, res) {
     });
     
     const data = await sanityResponse.json();
-
-    if (!sanityResponse.ok) {
-      return res.status(sanityResponse.status).json({ error: data.error || 'Sanity query failed' });
-    }
 
     return res.status(200).json({ 
       result: data.result?.posts || [], 
