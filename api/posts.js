@@ -18,9 +18,11 @@ export default async function handler(req, res) {
 
     // --- 1. SINGLE ARTICLE / PITCH QUERY ---
     if (slugParam) {
-      // Extract potential unique ID from the end of the slug parameter (e.g., "-abc123xyz")
-      const possibleId = slugParam.split('-').pop();
+      // Extract the unique ID from the end of the slug (e.g. "my-headline-abc123xyz" -> "abc123xyz")
+      const pitchId = slugParam.split('-').pop();
+      const cleanSlug = slugParam.replace(/-[0-9a-fA-F]{10,}$/, '');
 
+      // Query Sanity directly for EITHER a regular post by slug OR a pitch by exact _id
       const groqQuery = `{
         "post": *[_type == "post" && slug.current == $slug][0]{
           title,
@@ -36,22 +38,13 @@ export default async function handler(req, res) {
           body,
           submittedAt,
           "imageUrl": coalesce(image.asset->url, mainImage.asset->url, photo.asset->url, picture.asset->url)
-        },
-        "allPitches": *[_type == "pitch"]{
-          _id,
-          author,
-          headline,
-          body,
-          submittedAt,
-          "imageUrl": coalesce(image.asset->url, mainImage.asset->url, photo.asset->url, picture.asset->url)
         }
       }`;
 
       const params = new URLSearchParams();
       params.append('query', groqQuery);
-      const cleanSlug = slugParam.replace(/-[0-9a-fA-F]{10,}$/, '');
       params.append('$slug', `"${cleanSlug}"`);
-      params.append('$pitchId', `"${possibleId}"`);
+      params.append('$pitchId', `"${pitchId}"`);
 
       const sanityUrl = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?${params.toString()}`;
       const sanityResponse = await fetch(sanityUrl, {
@@ -59,23 +52,16 @@ export default async function handler(req, res) {
       });
       const data = await sanityResponse.json();
 
-      let result = data.result?.post || null;
+      let result = null;
 
-      // If found directly via exact pitch ID, use it
-      let matchingPitch = data.result?.pitch;
-
-      // Fallback: search by headline slug if ID didn't match directly
-      if (!result && !matchingPitch && data.result?.allPitches) {
-        matchingPitch = data.result.allPitches.find(p => {
-          const pSlug = (p.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || p._id;
-          return slugParam.startsWith(pSlug) || p._id === possibleId;
-        });
-      }
-
-      if (!result && matchingPitch) {
+      if (data.result?.post) {
+        result = data.result.post;
+      } else if (data.result?.pitch) {
+        const p = data.result.pitch;
+        
+        // Normalize body text safely regardless of how it was submitted
         let bodyText = "";
-        const raw = matchingPitch.body;
-
+        const raw = p.body;
         if (typeof raw === 'string') {
           if (raw.trim().startsWith('{') || raw.includes('"author":')) {
             try {
@@ -94,11 +80,11 @@ export default async function handler(req, res) {
         }
 
         result = {
-          title: matchingPitch.headline || "Untitled Pitch",
+          title: p.headline || "Untitled Pitch",
           body: bodyText,
-          author: matchingPitch.author || "Anonymous Pomp",
-          imageUrl: matchingPitch.imageUrl || null,
-          publishedAt: matchingPitch.submittedAt || matchingPitch._createdAt
+          author: p.author || "Anonymous Pomp",
+          imageUrl: p.imageUrl || null,
+          publishedAt: p.submittedAt || p._createdAt
         };
       }
 
