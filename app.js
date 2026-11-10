@@ -525,15 +525,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Newsletter Subscription Handler (Using Toast Instead of Alert) ---
+    // --- Newsletter Subscription Handler ---
     const newsletterForm = document.getElementById('newsletterForm');
     if (newsletterForm) {
-        newsletterForm.addEventListener('submit', (e) => {
+        newsletterForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const emailInput = document.getElementById('newsletterEmail');
+            const submitBtn = newsletterForm.querySelector('button[type="submit"]');
+            
             if (emailInput && emailInput.value) {
-                showToast('Subscribed successfully to The Daily Seed!');
-                newsletterForm.reset();
+                const email = emailInput.value;
+                if (submitBtn) submitBtn.disabled = true;
+
+                try {
+                    const response = await fetch('/api/subscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showToast('Subscribed successfully! Check your inbox for confirmation.');
+                        newsletterForm.reset();
+                    } else {
+                        showToast('Error: ' + (result.error || 'Please try again.'));
+                    }
+                } catch (err) {
+                    console.error('Newsletter submission error:', err);
+                    showToast('Something went wrong. Please try again.');
+                } finally {
+                    if (submitBtn) submitBtn.disabled = false;
+                }
             }
         });
     }
