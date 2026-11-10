@@ -41,15 +41,57 @@ async function renderSingleArticle(slug) {
             }).join('');
         }
 
+        const currentLikes = post.likes || 0;
+        const hasLiked = localStorage.getItem(`liked_${post._id}`) === 'true';
+
         articleView.innerHTML = `
             <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:#18181b; color:#fff; border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
             <h1 style="font-size: 32px; margin-bottom: 12px; font-weight: 700;">${post.title}</h1>
             <div style="color: #666; margin-bottom: 24px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 12px;">
-                By ${post.author || 'Anonymous Pomp'} • ${new Date(post.publishedAt).toLocaleDateString()}
+                By ${post.author || 'Anonymous Pomp'} • ${new Date(post.publishedAt || post.submittedAt).toLocaleDateString()}
             </div>
             ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Article image" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;">` : ''}
-            <div style="font-size: 18px; color: #27272a;">${htmlContent}</div>
+            <div style="font-size: 18px; color: #27272a; margin-bottom: 30px;">${htmlContent}</div>
+            
+            <div class="article-footer-actions" style="padding-top: 20px; border-top: 1px solid #eee; display: flex; align-items: center; justify-content: space-between;">
+                <button id="likeBtn" data-id="${post._id}" style="background: #8b0000; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; ${hasLiked ? 'opacity: 0.7;' : ''}">
+                    ❤️ Applaud / Like (<span id="likeCount">${currentLikes}</span>)
+                </button>
+                <span style="font-size: 0.85rem; color: #666;">Share the nonsense responsibly.</span>
+            </div>
         `;
+
+        // Wire up like button functionality inside single article view
+        const likeBtn = document.getElementById('likeBtn');
+        const likeCountSpan = document.getElementById('likeCount');
+        if (likeBtn) {
+            likeBtn.addEventListener('click', async () => {
+                const postId = likeBtn.getAttribute('data-id');
+                if (localStorage.getItem(`liked_${postId}`)) {
+                    showToast('You have already applauded this piece of fine journalism!');
+                    return;
+                }
+
+                try {
+                    const res = await fetch('/api/like', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ postId })
+                    });
+                    const result = await res.json();
+                    if (res.ok) {
+                        likeCountSpan.textContent = result.likes;
+                        localStorage.setItem(`liked_${postId}`, 'true');
+                        likeBtn.style.opacity = '0.7';
+                        showToast('Thanks for validating our satire!');
+                    } else {
+                        showToast('Could not register like.');
+                    }
+                } catch (err) {
+                    console.error('Like request failed:', err);
+                }
+            });
+        }
 
     } catch (err) {
         console.error("Error loading article:", err);
