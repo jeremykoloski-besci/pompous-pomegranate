@@ -1,11 +1,11 @@
 import { createClient } from '@sanity/client';
 
 const client = createClient({
-    projectId: process.env.SANITY_PROJECT_ID || 'your_project_id',
-    dataset: process.env.SANITY_DATASET || 'production',
-    apiVersion: '2026-03-01',
-    token: process.env.SANITY_API_TOKEN, // Requires write permissions
-    useCdn: false,
+  projectId: '5hfaqqg7', // Hardcoded safely here
+  dataset: process.env.SANITY_DATASET || 'production',
+  apiVersion: '2026-03-01',
+  token: process.env.SANITY_API_TOKEN,
+  useCdn: false,
 });
 
 export default async function handler(req, res) {
