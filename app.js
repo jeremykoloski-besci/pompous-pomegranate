@@ -284,7 +284,7 @@ function renderFeed(searchTerm = '') {
             const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;            const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
             const pitchTitle = pitch.headline || "Untitled Article";
             const pitchDate = formatArticleDate(pitch.submittedAt || pitch.publishedAt);
-            const articleUrl = "/article/" + pitchSlug + "-" + pitch._id; // <--- Appends _id to guarantee uniqueness            
+            const articleUrl = "/article/" + pitchSlug; 
             const pitchExcerpt = extractTextFromPortableText(pitch);
             const pitchCard = document.createElement('article');
             pitchCard.className = 'article-card card';
