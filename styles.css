@@ -1,24 +1,16 @@
-/* 1. Prevent browser scroll memory entirely */
+/* ==========================================
+   1. GLOBAL RESET & BASE STYLES
+   ========================================== */
 html {
     scroll-restoration: manual;
 }
 
-/* 2. Lock the viewport height and prevent initial render shifts */
 html, body {
     width: 100%;
     min-height: 100vh;
     margin: 0;
     padding: 0;
     overflow-x: hidden;
-}
-
-/* 3. Add padding to body to prevent content from hiding under the fixed header */
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-primary);
-    line-height: 1.6;
-    padding-top: 155px; /* Adjust this value if your header height changes */
 }
 
 :root {
@@ -53,11 +45,22 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    line-height: 1.6;
+    /* Keeps page content from sliding under the fixed header stack */
+    padding-top: 175px;
+}
+
 h1, h2, h3, h4, .article-headline {
     font-family: 'Merriweather', serif;
 }
 
-/* Announcement Ticker */
+/* ==========================================
+   2. ANNOUNCEMENT & TICKER BAR
+   ========================================== */
 .announcement-bar {
     background-color: var(--accent-color);
     color: #ffffff;
@@ -65,6 +68,7 @@ h1, h2, h3, h4, .article-headline {
     padding: 8px 15px;
     font-size: 0.9rem;
     font-weight: 500;
+    width: 100%;
 }
 
 .announcement-bar a {
@@ -73,47 +77,12 @@ h1, h2, h3, h4, .article-headline {
     margin-left: 5px;
 }
 
-/* Custom Toast Notification */
-.toast-notification {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: var(--card-bg, #fff);
-    color: var(--text-primary, #1a1a1a);
-    border: 2px solid var(--accent-color, #8B0000);
-    padding: 15px 25px;
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    z-index: 10000;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(20px);
-    transition: all 0.3s ease;
-}
-
-.toast-notification.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-.toast-notification i {
-    color: #10b981;
-    font-size: 1.2rem;
-}
-
-/* Fixed Header */
+/* ==========================================
+   3. FIXED HEADER & NAVIGATION
+   ========================================== */
 .site-header {
-    position: fixed;
-    top: 0;
-    left: 0;
+    position: relative;
     width: 100%;
-    z-index: 999;
     background-color: var(--header-bg);
     color: var(--header-text);
     border-bottom: 3px solid var(--accent-color);
@@ -249,7 +218,7 @@ h1, h2, h3, h4, .article-headline {
     opacity: 0.9;
 }
 
-/* Navigation */
+/* Navigation Links */
 .main-nav {
     background-color: rgba(0, 0, 0, 0.2);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -278,7 +247,9 @@ h1, h2, h3, h4, .article-headline {
     padding-bottom: 2px;
 }
 
-/* Layout */
+/* ==========================================
+   4. LAYOUT & CONTAINERS
+   ========================================== */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -292,21 +263,9 @@ h1, h2, h3, h4, .article-headline {
     margin-top: 20px;
 }
 
-@media(max-width: 900px) {
-    .main-layout {
-        grid-template-columns: 1fr;
-    }
-    .header-container {
-        flex-direction: column;
-        gap: 15px;
-    }
-    .main-nav ul {
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-}
-
-/* Cards */
+/* ==========================================
+   5. ARTICLE CARDS & GRIDS
+   ========================================== */
 .card {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -423,7 +382,6 @@ h1, h2, h3, h4, .article-headline {
     color: var(--accent-color);
 }
 
-/* Grid */
 .articles-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -438,7 +396,9 @@ h1, h2, h3, h4, .article-headline {
     font-size: 1.2rem;
 }
 
-/* Feed Controls */
+/* ==========================================
+   6. CONTROLS, SEARCH & FORM ELEMENTS
+   ========================================== */
 .feed-controls {
     display: flex;
     justify-content: space-between;
@@ -481,22 +441,22 @@ h1, h2, h3, h4, .article-headline {
     font-weight: 600;
 }
 
-/* Pitch Form Section & Modals Form Alignment */
 .pitch-section, .modal-form {
     padding: 25px;
     background-color: var(--card-bg);
 }
 
 .modal-form .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 18px;
     display: flex;
     flex-direction: column;
 }
 
 .modal-form label {
+    display: block;
     font-size: 0.85rem;
     font-weight: 600;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
     color: var(--text-primary);
 }
 
@@ -526,7 +486,7 @@ h1, h2, h3, h4, .article-headline {
     background-color: var(--bg-color);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 0.95rem;
     font-family: 'Inter', sans-serif;
 }
@@ -552,7 +512,9 @@ h1, h2, h3, h4, .article-headline {
     opacity: 0.9;
 }
 
-/* Sidebar */
+/* ==========================================
+   7. SIDEBAR WIDGETS
+   ========================================== */
 .sidebar-widget {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -646,7 +608,217 @@ h1, h2, h3, h4, .article-headline {
     font-weight: 700;
 }
 
-/* Modals */
+/* ==========================================
+   8. NOTIFICATIONS & MODALS
+   ========================================== */
+.toast-notification {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--card-bg, #fff);
+    color: var(--text-primary, #1a1a1a);
+    border: 2px solid var(--accent-color, #8B0000);
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.toast-notification.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.toast-notification i {
+    color: #10b981;
+    font-size: 1.2rem;
+}
+
 .modal-overlay {
     position: fixed;
-    top
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-container, .modal {
+    background-color: var(--card-bg);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 8px;
+    padding: 35px;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.sub-modal-container {
+    max-width: 500px;
+    text-align: center;
+}
+
+.badge-gold {
+    background-color: var(--gold-color);
+    color: #1a1a1a;
+    padding: 5px 12px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.sub-modal-content h2 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.perks-list {
+    list-style: none;
+    text-align: left;
+    margin: 20px 0;
+}
+
+.perks-list li {
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.perks-list i {
+    color: #2e7d32;
+}
+
+.price-tag {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin-bottom: 20px;
+}
+
+.upgrade-btn {
+    background-color: var(--gold-color);
+    color: #1a1a1a;
+    border: none;
+    padding: 14px;
+    width: 100%;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* ==========================================
+   9. FOOTER STYLES
+   ========================================== */
+.site-footer {
+    background-color: var(--header-bg);
+    color: #cccccc;
+    margin-top: 60px;
+    border-top: 3px solid var(--accent-color);
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 40px;
+    padding: 40px 20px;
+}
+
+.footer-col h3, .footer-col h4 {
+    color: #ffffff;
+    margin-bottom: 15px;
+}
+
+.footer-col p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.footer-col ul {
+    list-style: none;
+}
+
+.footer-col ul li {
+    margin-bottom: 8px;
+}
+
+.footer-col ul a {
+    color: #cccccc;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.footer-col ul a:hover {
+    color: #ffffff;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.85rem;
+    color: #888888;
+}
+
+/* ==========================================
+   10. MEDIA QUERIES
+   ========================================== */
+@media(max-width: 900px) {
+    .main-layout {
+        grid-template-columns: 1fr;
+    }
+    .header-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+    .main-nav ul {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+}
+
+@media(max-width: 768px) {
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
