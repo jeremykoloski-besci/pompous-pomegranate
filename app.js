@@ -663,3 +663,4 @@ function showToast(message) {
 window.allPosts = allPosts;
 window.allPitches = allPitches;
 window.renderFeed = renderFeed;
+window.renderSingleArticle = renderSingleArticle; 
