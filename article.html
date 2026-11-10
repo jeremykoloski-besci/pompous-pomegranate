@@ -3,25 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Pompous Pomegranate</title>
-    <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>The Pompous Pomegranate - Fake news to cure the blues</title>
+    <link rel="stylesheet" href="/styles.css">    
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="The Pompous Pomegranate">
+    <meta property="og:description" content="Fake news to cure the blues.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80">
+    <meta property="og:url" content="https://pompouspomegranate.com">
+    
+    <!-- Google Fonts for Editorial Serif & Zilla Slab Title -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400&family=Zilla+Slab:wght@700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/style.css">
 </head>
-<body style="background: var(--bg-primary, #f9fafb); font-family: 'Inter', sans-serif; margin: 0; padding: 0;">
+<body>
+    <!-- Custom Notification Toast -->
+    <div id="toastNotification" class="toast-notification">
+          <i class="fa-solid fa-circle-check"></i>
+          <span id="toastMessage">Your satirical article has been submitted to the editors for peer review!</span>
+    </div>
 
-    <!-- Top Navigation Bar -->
-    <header style="background: #18181b; color: #fff; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
-        <a href="/" style="color: #fff; text-decoration: none; font-family: 'Zilla Slab', serif; font-size: 24px; font-weight: bold;">The Pompous Pomegranate</a>
-        <button onclick="window.location.href='/'" style="background: #27272a; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: 500;">&larr; Back to Home</button>
-    </header>
+    <!-- Fixed Header Stack Wrapper (Announcement Bar + Header) -->
+    <div style="position: fixed; top: 0; left: 0; width: 100%; z-index: 999;">
+        <!-- Top Announcement Bar -->
+        <div class="announcement-bar" id="breakingBar" style="display: none;">
+            <span id="breakingContent">Loading breaking news...</span>
+        </div>
+
+        <!-- Header & Navigation -->
+        <header class="site-header">
+            <div class="header-container">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+                    <div class="current-date" id="currentDate"></div>
+                </div>
+                
+                <!-- Branded Logo & Clickable Title -->
+                <div class="logo-area">
+                    <a href="/" class="site-title-link">
+                        <div class="brand-logo-wrapper">
+                            <!-- Custom Stylized Pomegranate Icon -->
+                            <svg class="pomegranate-icon" viewBox="0 0 100 100" width="46" height="46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Crown / Sepal top -->
+                                <path d="M40 18 L50 6 L60 18 L68 12 L64 24 L36 24 L32 12 Z" fill="#8B0000" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round"/>
+                                <!-- Main Pomegranate Body -->
+                                <circle cx="50" cy="56" r="36" fill="#8B0000" stroke="#1A1A1A" stroke-width="4"/>
+                                <!-- Inner Stylized Cutout / Crown Detail -->
+                                <path d="M35 48 C35 40, 65 40, 65 48 C65 65, 35 65, 35 48 Z" fill="#D4AF37" opacity="0.9"/>
+                                <!-- Internal Seeds Accent -->
+                                <circle cx="44" cy="48" r="3" fill="#600000"/>
+                                <circle cx="54" cy="48" r="3" fill="#600000"/>
+                                <circle cx="49" cy="56" r="3.5" fill="#600000"/>
+                            </svg>
+
+                            <!-- Stylized Brand Title -->
+                            <div class="brand-title-text">
+                                <span class="title-prefix">The</span>
+                                <span class="title-main">Pompous Pomegranate</span>
+                            </div>
+                        </div>
+                    </a>
+                    <p class="site-tagline">Fake news to cure the blues</p>
+                </div>
+
+                <div class="header-right">
+                    <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    <button class="subscribe-btn" id="openModalBtn" style="display: none;">
+                        <i class="fa-solid fa-crown"></i> Pomegranate Plus
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation Categories -->
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/" class="nav-link" data-category="all">Home</a></li>
+                    <li><a href="/" class="nav-link" data-category="politics">Politics</a></li>
+                    <li><a href="/" class="nav-link" data-category="tech">Tech & AI</a></li>
+                    <li><a href="/" class="nav-link" data-category="culture">Culture</a></li>
+                    <li><a href="/" class="nav-link" data-category="opinion">Opinion</a></li>
+                    <li><a href="/" class="nav-link" data-category="pitches">Community Pitches</a></li>
+                </ul>
+            </nav>
+        </header>
+    </div>
 
     <!-- Article Container -->
-    <main id="singleArticleContainer" style="max-width: 800px; margin: 40px auto; padding: 32px; background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-        <p style="color: #666; text-align: center;">Loading satire...</p>
+    <main id="singleArticleContainer" style="max-width: 800px; margin: 40px auto; padding: 32px; background: var(--card-bg, #fff); border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border-color, #e6e2d8);">
+        <p style="color: var(--text-secondary, #666); text-align: center;">Loading satire...</p>
     </main>
 
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <div class="footer-col">
+                <h3>The Pompous Pomegranate</h3>
+                <p>Fake news to cure the blues. All events depicted in this publication are fictional, satirical, or the result of someone daydreaming during a meeting.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Sections</h4>
+                <ul>
+                    <li><a href="/">Politics</a></li>
+                    <li><a href="/">Tech & AI</a></li>
+                    <li><a href="/">Culture</a></li>
+                    <li><a href="/">Opinion</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Legal & About</h4>
+                <ul>
+                    <li><a href="#" onclick="window.location.href='/'">About Us</a></li>
+                    <li><a href="#" onclick="window.location.href='/'">Editorial Standards</a></li>
+                    <li><a href="#" onclick="window.location.href='/'">Privacy Policy</a></li>
+                    <li><a href="#" onclick="window.location.href='/'">Contact Editors</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 The Pompous Pomegranate. All rights reserved. Satire is protected under free speech.</p>
+        </div>
+    </footer>
+
 <script>
+    // Current Date Display in Header
+    const dateEl = document.getElementById('currentDate');
+    if (dateEl) {
+        dateEl.textContent = new Date().toLocaleDateString('en-US', { 
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+        });
+    }
+
+    // Dark/Light Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+            }
+        });
+    }
+
     async function loadArticleDetail() {
         const path = window.location.pathname;
         const slug = path.split('/article/')[1];
@@ -39,8 +171,21 @@
             const data = await response.json();
             const post = data.result;
 
+            // Fetch breaking news ticker for the header
+            if (data.breaking) {
+                const breakingBar = document.getElementById('breakingBar');
+                const breakingContent = document.getElementById('breakingContent');
+                if (breakingBar && breakingContent) {
+                    const breakingSlug = data.breaking.slug?.current || '#';
+                    const breakingTitle = data.breaking.title || "Breaking Satirical Update";
+                    breakingContent.innerHTML = '🚨 BREAKING: ' + breakingTitle + ' <a href="/article/' + breakingSlug + '">Read Story &rarr;</a>';
+                    breakingBar.style.display = 'block';
+                }
+            }
+
             if (!post) {
                 container.innerHTML = `
+                    <button onclick="window.location.href='/'" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:var(--text-primary); color:var(--card-bg); border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
                     <h1>Article Not Found</h1>
                     <p>This satire piece couldn't be found or is still awaiting publication.</p>
                 `;
@@ -61,16 +206,16 @@
                 }).join('');
             }
 
-            // Fallback image matching the homepage cards if no custom image was uploaded
             const articleImage = post.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=800&q=80";
 
             container.innerHTML = `
-                <h1 style="font-size: 36px; margin-bottom: 12px; font-weight: 700; font-family: 'Zilla Slab', serif;">${post.title}</h1>
-                <div style="color: #666; margin-bottom: 24px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 12px;">
+                <button onclick="window.location.href='/'" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:var(--text-primary); color:var(--card-bg); border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
+                <h1 style="font-size: 36px; margin-bottom: 12px; font-weight: 700; font-family: 'Zilla Slab', serif; color: var(--text-primary);">${post.title}</h1>
+                <div style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
                     By ${post.author || 'Anonymous Pomp'} • ${new Date(post.publishedAt || post.submittedAt).toLocaleDateString()}
                 </div>
                 <img src="${articleImage}" alt="Article image" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;">
-                <div style="font-size: 18px; color: #27272a; line-height: 1.7;">${htmlContent}</div>
+                <div style="font-size: 18px; color: var(--text-primary); line-height: 1.7;">${htmlContent}</div>
             `;
         } catch (err) {
             console.error("Error loading article:", err);
