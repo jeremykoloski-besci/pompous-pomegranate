@@ -6,11 +6,8 @@ async function renderSingleArticle(slug) {
         if (!response.ok) throw new Error('Failed to fetch article');
         
         const data = await response.json();
-        console.log("Article API response:", data);
-        
         const post = data.result;
 
-        // Hide all home feed sections & articles grid
         const homeElements = document.querySelectorAll('main, .hero-section, .feed-container, .trending-section, #articlesGrid');
         homeElements.forEach(el => {
             if (el) el.style.setProperty('display', 'none', 'important');
@@ -76,12 +73,10 @@ let allPosts = [];
 let allPitches = [];
 let currentCategory = 'all';
 
-// Force manual scroll restoration immediately
 if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
 }
 
-// Current Date Display in Header
 const dateEl = document.getElementById('currentDate');
 if (dateEl) {
     dateEl.textContent = new Date().toLocaleDateString('en-US', { 
@@ -89,7 +84,6 @@ if (dateEl) {
     });
 }
 
-// Dark/Light Theme Toggle
 const themeToggle = document.getElementById('themeToggle');
 const body = document.body;
 
@@ -105,7 +99,6 @@ if (themeToggle) {
     });
 }
 
-// Subscriptions & Modals
 const subModal = document.getElementById('subModal');
 const openModalBtn = document.getElementById('openModalBtn');
 const closeSubModalBtn = document.getElementById('closeSubModalBtn');
@@ -117,7 +110,6 @@ if (closeSubModalBtn && subModal) {
     closeSubModalBtn.addEventListener('click', () => subModal.classList.remove('active'));
 }
 
-// --- Community Pitch Modal Management ---
 const pitchModal = document.getElementById('pitchModal');
 const openPitchModalBtn = document.getElementById('openPitchModalBtn');
 const closePitchModalBtn = document.getElementById('closePitchModalBtn');
@@ -137,7 +129,6 @@ if (pitchModal) {
     });
 }
 
-// --- Legal & About Modals Management ---
 const legalModal = document.getElementById('legalAboutModal');
 const closeLegalModalBtn = document.getElementById('closeLegalModalBtn');
 const legalModalContentBody = document.getElementById('legalModalContentBody');
@@ -187,7 +178,6 @@ if (legalModal) {
     });
 }
 
-// --- CSS STYLING FOR BOTTOM-LEFT BADGE & CLEAN CARDS ---
 const dynamicStyle = document.createElement('style');
 dynamicStyle.textContent = `
     .card-image-wrapper {
@@ -218,10 +208,8 @@ dynamicStyle.textContent = `
 `;
 document.head.appendChild(dynamicStyle);
 
-// --- HELPER TO EXTRACT & TRUNCATE TEXT FROM SANITY PORTABLE TEXT OR STRINGS ---
 function extractTextFromPortableText(item, maxLength = 160) {
     let plainText = "";
-    
     const raw = item?.body || item?.excerpt || item?.text || item?.description || item;
 
     if (!raw) {
@@ -247,11 +235,9 @@ function extractTextFromPortableText(item, maxLength = 160) {
     if (plainText.length > maxLength) {
         return plainText.substring(0, maxLength).trim() + '...';
     }
-    
     return plainText;
 }
 
-// --- HELPER TO FORMAT DATE STRICTLY AS M/D/YYYY ---
 function formatArticleDate(rawDateString) {
     if (!rawDateString) {
         return new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
@@ -259,7 +245,6 @@ function formatArticleDate(rawDateString) {
     return new Date(rawDateString).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
 }
 
-// --- RENDER FEED FUNCTION ---
 function renderFeed(searchTerm = '') {
     const articlesGrid = document.getElementById('articlesGrid');
     const heroArticle = document.querySelector('.hero-article');
@@ -267,7 +252,6 @@ function renderFeed(searchTerm = '') {
     if (!articlesGrid) return;
     articlesGrid.innerHTML = '';
 
-    // Handle Community Pitches tab view (Only Pitches)
     if (currentCategory === 'pitches') {
         if (heroArticle) heroArticle.style.display = 'none';
         
@@ -313,7 +297,6 @@ function renderFeed(searchTerm = '') {
         return;
     }
 
-    // Standard feed / Category filtering (or Home/All view)
     if (heroArticle) {
         heroArticle.style.display = (currentCategory === 'all' || currentCategory === 'home') ? 'block' : 'none';
     }
@@ -331,7 +314,6 @@ function renderFeed(searchTerm = '') {
         return matchesSearch && isMatch;
     });
 
-    // 1. Render regular articles first
     filteredPosts.forEach((post, index) => {
         const articleSlug = post.slug?.current || post._id || index + 1;
         const postTitle = post.title || "Untitled Satire";
@@ -363,7 +345,6 @@ function renderFeed(searchTerm = '') {
         articlesGrid.appendChild(newCard);
     });
 
-    // 2. If we are on Home / All, also append community pitches into the grid
     if (currentCategory === 'all' || currentCategory === 'home') {
         const filteredPitches = allPitches.filter(p => {
             const headline = (p.headline || '').toLowerCase();
@@ -406,7 +387,6 @@ function renderFeed(searchTerm = '') {
     }
 }
 
-// --- SANITY CMS DYNAMIC FETCHING ---
 async function fetchArticlesFromSanity() {
     try {
         const response = await fetch('/api/posts');
@@ -416,7 +396,6 @@ async function fetchArticlesFromSanity() {
         const factCheckData = data.factCheck; 
         const breakingData = data.breaking;
 
-        // Fact Check Widget Rendering
         const factCheckContainer = document.getElementById('factCheckContainer');
         if (factCheckContainer && factCheckData) {
             const claimText = factCheckData.claim || "";
@@ -428,7 +407,6 @@ async function fetchArticlesFromSanity() {
             factCheckContainer.innerHTML = '<p>No fact checks published yet.</p>';
         }
 
-        // Breaking News Banner Rendering
         const breakingBar = document.getElementById('breakingBar');
         const breakingContent = document.getElementById('breakingContent');
         if (breakingBar && breakingContent && breakingData) {
@@ -443,7 +421,6 @@ async function fetchArticlesFromSanity() {
             breakingBar.style.display = 'none';
         }
 
-        // --- Trending Nonsense Widget Rendering ---
         const trendingList = document.getElementById('trendingList');
         if (trendingList) {
             if (allPosts.length > 0) {
@@ -463,7 +440,6 @@ async function fetchArticlesFromSanity() {
             }
         }
         
-        // Only render feed if NOT visiting an article route
         if (!window.location.pathname.startsWith('/article/')) {
             renderFeed();
             window.scrollTo(0, 0);
@@ -473,7 +449,6 @@ async function fetchArticlesFromSanity() {
     }
 }
 
-// --- UNIVERSAL EVENT DELEGATION FOR TABS & FOOTER SECTIONS ---
 document.addEventListener('click', (e) => {
     const navLink = e.target.closest('.main-nav .nav-link, .footer-col ul a[data-category]');
     
@@ -481,7 +456,6 @@ document.addEventListener('click', (e) => {
         const catAttr = navLink.getAttribute('data-category');
         const targetCat = catAttr ? catAttr.trim().toLowerCase() : 'all';
 
-        // If we are currently viewing a single article page, redirect home with the category query string
         if (window.location.pathname.startsWith('/article/')) {
             e.preventDefault();
             window.location.href = `/?category=${targetCat}`;
@@ -515,7 +489,6 @@ document.addEventListener('click', (e) => {
     if (e.target.id === 'openContactModal') { e.preventDefault(); openLegalModal('contact'); }
 });
 
-// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
     
@@ -523,7 +496,6 @@ document.addEventListener('DOMContentLoaded', () => {
         history.replaceState(null, null, window.location.pathname + window.location.search);
     }
 
-    // Check if we arrived back home with a category query parameter (e.g. /?category=politics)
     const urlParams = new URLSearchParams(window.location.search);
     const targetCategory = urlParams.get('category');
     if (targetCategory) {
@@ -552,6 +524,19 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = '/';
         });
     });
+
+    // --- Newsletter Subscription Handler ---
+    const newsletterForm = document.getElementById('newsletterForm');
+    if (newsletterForm) {
+        newsletterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const emailInput = document.getElementById('newsletterEmail');
+            if (emailInput && emailInput.value) {
+                showToast('Successfully subscribed to The Daily Seed!');
+                newsletterForm.reset();
+            }
+        });
+    }
 
     const pitchForm = document.getElementById('pitchForm');
     if (pitchForm) {
@@ -601,7 +586,6 @@ function showToast(message) {
     }, 4000);
 }
 
-// Expose state globally for debugging
 window.allPosts = allPosts;
 window.allPitches = allPitches;
 window.renderFeed = renderFeed;
