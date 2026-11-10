@@ -544,7 +544,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify({ email })
                     });
 
-                    const result = await response.json();
+                    const text = await response.text();
+                    let result;
+                    try {
+                        result = JSON.parse(text);
+                    } catch (parseErr) {
+                        console.error('Server response was not JSON:', text);
+                        throw new Error('Server returned an invalid response (500 Error). Check Vercel logs.');
+                    }
 
                     if (response.ok) {
                         showToast('Subscribed successfully! Check your inbox for confirmation.');
@@ -554,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 } catch (err) {
                     console.error('Newsletter submission error:', err);
-                    showToast('Something went wrong. Please try again.');
+                    showToast(err.message || 'Something went wrong. Please try again.');
                 } finally {
                     if (submitBtn) submitBtn.disabled = false;
                 }
