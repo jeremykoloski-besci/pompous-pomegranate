@@ -18,11 +18,6 @@ export default async function handler(req, res) {
 
     // --- 1. SINGLE ARTICLE / PITCH QUERY ---
     if (slugParam) {
-      // Extract the unique ID from the end of the slug (e.g. "my-headline-abc123xyz" -> "abc123xyz")
-      const pitchId = slugParam.split('-').pop();
-      const cleanSlug = slugParam.replace(/-[0-9a-fA-F]{10,}$/, '');
-
-      // Query Sanity directly for EITHER a regular post by slug OR a pitch by exact _id
       const groqQuery = `{
         "post": *[_type == "post" && slug.current == $slug][0]{
           title,
@@ -31,7 +26,7 @@ export default async function handler(req, res) {
           "imageUrl": mainImage.asset->url,
           publishedAt
         },
-        "pitch": *[_type == "pitch" && _id == $pitchId][0]{
+        "pitches": *[_type == "pitch"]{
           _id,
           author,
           headline,
@@ -43,8 +38,7 @@ export default async function handler(req, res) {
 
       const params = new URLSearchParams();
       params.append('query', groqQuery);
-      params.append('$slug', `"${cleanSlug}"`);
-      params.append('$pitchId', `"${pitchId}"`);
+      params.append('$slug', `"${slugParam}"`);
 
       const sanityUrl = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?${params.toString()}`;
       const sanityResponse = await fetch(sanityUrl, {
@@ -52,40 +46,44 @@ export default async function handler(req, res) {
       });
       const data = await sanityResponse.json();
 
-      let result = null;
+      let result = data.result?.post || null;
 
-      if (data.result?.post) {
-        result = data.result.post;
-      } else if (data.result?.pitch) {
-        const p = data.result.pitch;
-        
-        // Normalize body text safely regardless of how it was submitted
-        let bodyText = "";
-        const raw = p.body;
-        if (typeof raw === 'string') {
-          if (raw.trim().startsWith('{') || raw.includes('"author":')) {
-            try {
-              const parsed = JSON.parse(raw);
-              bodyText = parsed.body || parsed.text || parsed.content || raw;
-            } catch (e) {
+      // If not found in regular posts, search community pitches by matching slugified headline
+      if (!result && data.result?.pitches) {
+        const matchingPitch = data.result.pitches.find(p => {
+          const pSlug = (p.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          return pSlug === slugParam;
+        });
+
+        if (matchingPitch) {
+          let bodyText = "";
+          const raw = matchingPitch.body;
+
+          if (typeof raw === 'string') {
+            if (raw.trim().startsWith('{') || raw.includes('"author":')) {
+              try {
+                const parsed = JSON.parse(raw);
+                bodyText = parsed.body || parsed.text || parsed.content || raw;
+              } catch (e) {
+                bodyText = raw;
+              }
+            } else {
               bodyText = raw;
             }
-          } else {
-            bodyText = raw;
+          } else if (Array.isArray(raw)) {
+            bodyText = raw.map(b => b.children ? b.children.map(c => c.text).join('') : '').join('\n');
+          } else if (raw && typeof raw === 'object') {
+            bodyText = raw.body || raw.text || raw.content || JSON.stringify(raw);
           }
-        } else if (Array.isArray(raw)) {
-          bodyText = raw.map(b => b.children ? b.children.map(c => c.text).join('') : '').join('\n');
-        } else if (raw && typeof raw === 'object') {
-          bodyText = raw.body || raw.text || raw.content || JSON.stringify(raw);
-        }
 
-        result = {
-          title: p.headline || "Untitled Pitch",
-          body: bodyText,
-          author: p.author || "Anonymous Pomp",
-          imageUrl: p.imageUrl || null,
-          publishedAt: p.submittedAt || p._createdAt
-        };
+          result = {
+            title: matchingPitch.headline || "Untitled Pitch",
+            body: bodyText,
+            author: matchingPitch.author || "Anonymous Pomp",
+            imageUrl: matchingPitch.imageUrl || null,
+            publishedAt: matchingPitch.submittedAt || matchingPitch._createdAt
+          };
+        }
       }
 
       return res.status(200).json({ result });
