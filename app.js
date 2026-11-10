@@ -104,8 +104,10 @@ function goHome() {
 
 window.addEventListener('DOMContentLoaded', () => {
     const path = window.location.pathname;
+    console.log("Current path on load:", path);
     if (path.startsWith('/article/')) {
         const slug = path.split('/article/')[1];
+        console.log("Extracted slug:", slug);
         renderSingleArticle(slug);
     }
 });
