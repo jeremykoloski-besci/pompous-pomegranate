@@ -1,3 +1,4 @@
+// --- 1. SINGLE ARTICLE ROUTER (Executes on page load if visiting /article/...) ---
 async function renderSingleArticle(slug) {
     console.log("Attempting to render article with slug:", slug);
     try {
