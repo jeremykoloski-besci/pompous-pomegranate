@@ -525,14 +525,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Newsletter Subscription Handler ---
+    // --- Newsletter Subscription Handler (Using Toast Instead of Alert) ---
     const newsletterForm = document.getElementById('newsletterForm');
     if (newsletterForm) {
         newsletterForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const emailInput = document.getElementById('newsletterEmail');
             if (emailInput && emailInput.value) {
-                showToast('Successfully subscribed to The Daily Seed!');
+                showToast('Subscribed successfully to The Daily Seed!');
                 newsletterForm.reset();
             }
         });
@@ -540,6 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pitchForm = document.getElementById('pitchForm');
     if (pitchForm) {
+        pitchForm.appendEventListener?.('submit', async (e) => {}); // placeholder guard
         pitchForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const author = document.getElementById('pitchAuthor').value;
