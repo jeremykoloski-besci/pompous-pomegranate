@@ -281,11 +281,13 @@ function renderFeed(searchTerm = '') {
         }
 
         filteredPitches.forEach((pitch) => {
-            const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;            const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
+            const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
+            const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
             const pitchTitle = pitch.headline || "Untitled Article";
             const pitchDate = formatArticleDate(pitch.submittedAt || pitch.publishedAt);
-            const articleUrl = "/article/" + pitchSlug; 
+            const articleUrl = "/article/" + pitchSlug;
             const pitchExcerpt = extractTextFromPortableText(pitch);
+            
             const pitchCard = document.createElement('article');
             pitchCard.className = 'article-card card';
             pitchCard.innerHTML = `
@@ -456,20 +458,18 @@ document.addEventListener('click', (e) => {
     const navLink = e.target.closest('.main-nav .nav-link, .footer-col ul a[data-category]');
     
     if (navLink) {
-        // If we are currently viewing a single article page, clicking a category tab should redirect back home with that category or reload cleanly
+        const catAttr = navLink.getAttribute('data-category');
+        const targetCat = catAttr ? catAttr.trim().toLowerCase() : 'all';
+
+        // If we are currently viewing a single article page, redirect home with the category query string
         if (window.location.pathname.startsWith('/article/')) {
-            window.location.href = '/';
+            e.preventDefault();
+            window.location.href = `/?category=${targetCat}`;
             return;
         }
 
         e.preventDefault();
-        
-        const catAttr = navLink.getAttribute('data-category');
-        if (catAttr) {
-            currentCategory = catAttr.trim().toLowerCase();
-        } else {
-            currentCategory = 'all';
-        }
+        currentCategory = targetCat;
 
         if (navLink.closest('.site-footer')) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -501,6 +501,21 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (window.location.hash) {
         history.replaceState(null, null, window.location.pathname + window.location.search);
+    }
+
+    // Check if we arrived back home with a category query parameter (e.g. /?category=politics)
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetCategory = urlParams.get('category');
+    if (targetCategory) {
+        currentCategory = targetCategory.trim().toLowerCase();
+        
+        document.querySelectorAll('.main-nav .nav-link').forEach(l => {
+            if (l.getAttribute('data-category') === currentCategory) {
+                l.classList.add('active');
+            } else {
+                l.classList.remove('active');
+            }
+        });
     }
 
     const searchInput = document.getElementById('searchInput');
