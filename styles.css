@@ -183,11 +183,27 @@ h1, h2, h3, h4, .article-headline {
     color: var(--gold-color);
 }
 
+/* Modern Professional Tagline Styling */
 .site-tagline {
-    font-size: 0.8rem;
-    color: #d4af37;
-    font-style: italic;
-    margin-top: 2px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: var(--gold-color);
+    margin-top: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.site-tagline::before,
+.site-tagline::after {
+    content: "";
+    display: inline-block;
+    width: 30px;
+    height: 1px;
+    background-color: rgba(212, 175, 55, 0.4);
 }
 
 .theme-toggle {
