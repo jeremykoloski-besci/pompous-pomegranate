@@ -442,6 +442,26 @@ async function fetchArticlesFromSanity() {
         } else if (breakingBar) {
             breakingBar.style.display = 'none';
         }
+
+        // --- Trending Nonsense Widget Rendering ---
+        const trendingList = document.getElementById('trendingList');
+        if (trendingList) {
+            if (allPosts.length > 0) {
+                const topTrending = allPosts.slice(0, 3);
+                trendingList.innerHTML = topTrending.map((post, index) => {
+                    const postSlug = post.slug?.current || post._id || index + 1;
+                    const postTitle = post.title || "Untitled Satire";
+                    return `
+                        <li>
+                            <span class="trend-number">${index + 1}</span>
+                            <a href="/article/${postSlug}">${postTitle}</a>
+                        </li>
+                    `;
+                }).join('');
+            } else {
+                trendingList.innerHTML = '<li><span class="trend-number">1</span> <span style="color:var(--text-secondary); font-size:0.9rem;">Awaiting published articles...</span></li>';
+            }
+        }
         
         // Only render feed if NOT visiting an article route
         if (!window.location.pathname.startsWith('/article/')) {
