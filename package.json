@@ -2,5 +2,7 @@
   "name": "pompous-pomegranate",
   "version": "1.0.0",
   "type": "module",
-  "dependencies": {}
+  "dependencies": {
+    "@sanity/client": "^6.27.0"
+  }
 }
