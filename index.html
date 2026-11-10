@@ -166,6 +166,32 @@
 
     </div>
 
+    <!-- Full Article Modal Reader View (Includes Like/Applause System) -->
+    <div class="modal-overlay" id="articleModal">
+        <div class="modal-container" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+            <button class="modal-close" id="closeArticleModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="article-modal-content" style="padding: 20px;">
+                <span id="modalCategory" class="badge-gold" style="display: inline-block; margin-bottom: 10px;">Category</span>
+                <h1 id="modalTitle" style="font-family: 'Merriweather', serif; font-size: 1.8rem; margin-bottom: 15px;">Article Title</h1>
+                <div class="article-meta" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+                    By <span id="modalAuthor">Author</span> • <span id="modalDate">Date</span>
+                </div>
+                <img id="modalImage" src="" alt="" style="width: 100%; max-height: 350px; object-fit: cover; border-radius: 6px; margin-bottom: 20px; display: none;">
+                <div id="modalBody" style="line-height: 1.8; font-size: 1.05rem;">
+                    <!-- Full article body rendered here -->
+                </div>
+                
+                <!-- Article Footer Actions (Like / Applaud Button) -->
+                <div class="article-footer-actions" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+                    <button id="likeBtn" class="btn-like" data-id="" style="background: #8b0000; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                        ❤️ Applaud / Like (<span id="likeCount">0</span>)
+                    </button>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">Share the nonsense responsibly.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Community Article Submission Modal Overlay -->
     <div class="modal-overlay" id="pitchModal">
         <div class="modal-container sub-modal-container" style="max-width: 600px;">
