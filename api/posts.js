@@ -26,7 +26,7 @@ export default async function handler(req, res) {
           "imageUrl": mainImage.asset->url,
           publishedAt
         },
-        "pitches": *[_type == "pitch"]{
+        "pitches": *[_type == "pitch"] | order(submittedAt desc) {
           _id,
           author,
           headline,
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
 
       let result = data.result?.post || null;
 
-      // If not found in regular posts, search community pitches by slugifying their headline on the fly
+      // Match community pitch by exact slugified headline
       if (!result && data.result?.pitches) {
         const matchingPitch = data.result.pitches.find(p => {
           const pSlug = (p.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -60,16 +60,7 @@ export default async function handler(req, res) {
           const raw = matchingPitch.body;
 
           if (typeof raw === 'string') {
-            if (raw.trim().startsWith('{') || raw.includes('"author":')) {
-              try {
-                const parsed = JSON.parse(raw);
-                bodyText = parsed.body || parsed.text || parsed.content || raw;
-              } catch (e) {
-                bodyText = raw;
-              }
-            } else {
-              bodyText = raw;
-            }
+            bodyText = raw;
           } else if (Array.isArray(raw)) {
             bodyText = raw.map(b => b.children ? b.children.map(c => c.text).join('') : '').join('\n');
           } else if (raw && typeof raw === 'object') {
