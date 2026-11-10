@@ -22,20 +22,31 @@ export default async function handler(req, res) {
     }
 
     const { email } = req.body;
+    const cleanEmail = email ? email.trim().toLowerCase() : '';
 
-    if (!email || !email.includes('@')) {
+    if (!cleanEmail || !cleanEmail.includes('@')) {
         return res.status(400).json({ error: 'Valid email address is required.' });
     }
 
     try {
-        // 1. Save subscriber to Sanity CMS
+        // 1. Check if the email already exists in Sanity
+        const existingSubscriber = await client.fetch(
+            `*[_type == "subscriber" && email == $email][0]`,
+            { email: cleanEmail }
+        );
+
+        if (existingSubscriber) {
+            return res.status(400).json({ error: 'This email is already subscribed to The Daily Seed!' });
+        }
+
+        // 2. Save new subscriber to Sanity CMS
         await client.create({
             _type: 'subscriber',
-            email: email.trim(),
+            email: cleanEmail,
             subscribedAt: new Date().toISOString(),
         });
 
-        // 2. Send automated confirmation email using Resend with styled HTML
+        // 3. Send automated confirmation email using Resend
         const resendResponse = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
@@ -43,8 +54,8 @@ export default async function handler(req, res) {
                 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
             },
             body: JSON.stringify({
-                from: 'The Pompous Pomegranate <onboarding@resend.dev>', // Change to your verified domain sender once set up in Resend
-                to: [email.trim()],
+                from: 'The Pompous Pomegranate <onboarding@resend.dev>',
+                to: [cleanEmail],
                 subject: 'Welcome to The Daily Seed 🌿',
                 html: `
                     <!DOCTYPE html>
@@ -75,7 +86,7 @@ export default async function handler(req, res) {
                               Expect our finest fabricated headlines and briefings delivered straight to your inbox so you never have to face reality unprotected.
                             </div>
                             <div class="button-container">
-                              <a href="https://pompous-pomegranate-qo0hzm3x6-jeremy.vercel.app" class="btn">Visit The Daily Feed</a>
+                              <a href="https://pompous-pomegranate.vercel.app" class="btn">Visit The Daily Feed</a>
                             </div>
                             <p style="font-size: 13px; color: #71717a; margin-top: 30px;">If you didn't sign up for this, someone who thinks you're funny probably did it for you.</p>
                           </div>
@@ -88,11 +99,6 @@ export default async function handler(req, res) {
                 `
             })
         });
-
-        if (!resendResponse.ok) {
-            const errorData = await resendResponse.json();
-            console.error('Resend API Error:', errorData);
-        }
 
         return res.status(200).json({ success: true, message: 'Subscribed successfully!' });
     } catch (err) {
