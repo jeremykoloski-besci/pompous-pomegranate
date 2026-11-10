@@ -31,69 +31,73 @@
           <i class="fa-solid fa-circle-check"></i>
           <span id="toastMessage">Your satirical article has been submitted to the editors for peer review!</span>
     </div>
-    <!-- Top Announcement Bar -->
-    <div class="announcement-bar" id="breakingBar" style="display: none;">
-        <span id="breakingContent">Loading breaking news...</span>
-    </div>
 
-    <!-- Header & Navigation -->
-    <header class="site-header">
-        <div class="header-container">
-            <div class="header-left">
-                <button class="menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
-                <div class="current-date" id="currentDate"></div>
-            </div>
-            
-            <!-- Branded Logo & Clickable Title -->
-            <div class="logo-area">
-                <a href="#" class="site-title-link">
-                    <div class="brand-logo-wrapper">
-                        <!-- Custom Stylized Pomegranate Icon -->
-                        <svg class="pomegranate-icon" viewBox="0 0 100 100" width="46" height="46" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <!-- Crown / Sepal top -->
-                            <path d="M40 18 L50 6 L60 18 L68 12 L64 24 L36 24 L32 12 Z" fill="#8B0000" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round"/>
-                            <!-- Main Pomegranate Body -->
-                            <circle cx="50" cy="56" r="36" fill="#8B0000" stroke="#1A1A1A" stroke-width="4"/>
-                            <!-- Inner Stylized Cutout / Crown Detail -->
-                            <path d="M35 48 C35 40, 65 40, 65 48 C65 65, 35 65, 35 48 Z" fill="#D4AF37" opacity="0.9"/>
-                            <!-- Internal Seeds Accent -->
-                            <circle cx="44" cy="48" r="3" fill="#600000"/>
-                            <circle cx="54" cy="48" r="3" fill="#600000"/>
-                            <circle cx="49" cy="56" r="3.5" fill="#600000"/>
-                        </svg>
-
-                        <!-- Stylized Brand Title -->
-                        <div class="brand-title-text">
-                            <span class="title-prefix">The</span>
-                            <span class="title-main">Pompous Pomegranate</span>
-                        </div>
-                    </div>
-                </a>
-                <p class="site-tagline">Fake news to cure the blues</p>
-            </div>
-
-            <div class="header-right">
-                <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
-                    <i class="fa-solid fa-moon"></i>
-                </button>
-                <button class="subscribe-btn" id="openModalBtn" style="display: none;">
-                    <i class="fa-solid fa-crown"></i> Pomegranate Plus
-                </button>
-            </div>
+    <!-- Fixed Header Stack Wrapper (Announcement Bar + Header) -->
+    <div style="position: fixed; top: 0; left: 0; width: 100%; z-index: 999;">
+        <!-- Top Announcement Bar -->
+        <div class="announcement-bar" id="breakingBar" style="display: none;">
+            <span id="breakingContent">Loading breaking news...</span>
         </div>
 
-        <!-- Navigation Categories -->
-        <nav class="main-nav">
-            <ul>
-                <li><a href="#" class="nav-link active" data-category="all">Home</a></li>
-                <li><a href="#" class="nav-link" data-category="politics">Politics</a></li>
-                <li><a href="#" class="nav-link" data-category="tech">Tech & AI</a></li>
-                <li><a href="#" class="nav-link" data-category="culture">Culture</a></li>
-                <li><a href="#" class="nav-link" data-category="opinion">Opinion</a></li>
-                <li><a href="#" class="nav-link" data-category="pitches">Community Pitches</a></li>
-            </ul>
-        </nav>
-    </header>
+        <!-- Header & Navigation -->
+        <header class="site-header">
+            <div class="header-container">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+                    <div class="current-date" id="currentDate"></div>
+                </div>
+                
+                <!-- Branded Logo & Clickable Title -->
+                <div class="logo-area">
+                    <a href="#" class="site-title-link">
+                        <div class="brand-logo-wrapper">
+                            <!-- Custom Stylized Pomegranate Icon -->
+                            <svg class="pomegranate-icon" viewBox="0 0 100 100" width="46" height="46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Crown / Sepal top -->
+                                <path d="M40 18 L50 6 L60 18 L68 12 L64 24 L36 24 L32 12 Z" fill="#8B0000" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round"/>
+                                <!-- Main Pomegranate Body -->
+                                <circle cx="50" cy="56" r="36" fill="#8B0000" stroke="#1A1A1A" stroke-width="4"/>
+                                <!-- Inner Stylized Cutout / Crown Detail -->
+                                <path d="M35 48 C35 40, 65 40, 65 48 C65 65, 35 65, 35 48 Z" fill="#D4AF37" opacity="0.9"/>
+                                <!-- Internal Seeds Accent -->
+                                <circle cx="44" cy="48" r="3" fill="#600000"/>
+                                <circle cx="54" cy="48" r="3" fill="#600000"/>
+                                <circle cx="49" cy="56" r="3.5" fill="#600000"/>
+                            </svg>
+
+                            <!-- Stylized Brand Title -->
+                            <div class="brand-title-text">
+                                <span class="title-prefix">The</span>
+                                <span class="title-main">Pompous Pomegranate</span>
+                            </div>
+                        </div>
+                    </a>
+                    <p class="site-tagline">Fake news to cure the blues</p>
+                </div>
+
+                <div class="header-right">
+                    <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    <button class="subscribe-btn" id="openModalBtn" style="display: none;">
+                        <i class="fa-solid fa-crown"></i> Pomegranate Plus
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation Categories -->
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#" class="nav-link active" data-category="all">Home</a></li>
+                    <li><a href="#" class="nav-link" data-category="politics">Politics</a></li>
+                    <li><a href="#" class="nav-link" data-category="tech">Tech & AI</a></li>
+                    <li><a href="#" class="nav-link" data-category="culture">Culture</a></li>
+                    <li><a href="#" class="nav-link" data-category="opinion">Opinion</a></li>
+                    <li><a href="#" class="nav-link" data-category="pitches">Community Pitches</a></li>
+                </ul>
+            </nav>
+        </header>
+    </div>
 
     <!-- Main Layout Container -->
     <div class="container main-layout">
@@ -188,10 +192,10 @@
                         <label for="pitchBody">Article Body / Excerpt</label>
                         <textarea id="pitchBody" rows="4" required placeholder="Write your satirical article body here..."></textarea>
                     </div>
-    <button type="submit" class="submit-pitch-btn" style="margin-top: 10px;">
-        <i class="fa-solid fa-paper-plane"></i> Send to Editors
-    </button>
-</form>
+                    <button type="submit" class="submit-pitch-btn" style="margin-top: 10px;">
+                        <i class="fa-solid fa-paper-plane"></i> Send to Editors
+                    </button>
+                </form>
             </div>
         </div>
     </div>
