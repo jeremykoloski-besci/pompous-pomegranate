@@ -1,4 +1,3 @@
-// --- 1. SINGLE ARTICLE ROUTER (Executes on page load if visiting /article/...) ---
 async function renderSingleArticle(slug) {
     console.log("Attempting to render article with slug:", slug);
     try {
@@ -42,7 +41,8 @@ async function renderSingleArticle(slug) {
         }
 
         const currentLikes = post.likes || 0;
-        const hasLiked = localStorage.getItem(`liked_${post._id}`) === 'true';
+        const postId = post._id || slug;
+        const hasLiked = localStorage.getItem(`liked_${postId}`) === 'true';
 
         articleView.innerHTML = `
             <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:#18181b; color:#fff; border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
@@ -54,19 +54,18 @@ async function renderSingleArticle(slug) {
             <div style="font-size: 18px; color: #27272a; margin-bottom: 30px;">${htmlContent}</div>
             
             <div class="article-footer-actions" style="padding-top: 20px; border-top: 1px solid #eee; display: flex; align-items: center; justify-content: space-between;">
-                <button id="likeBtn" data-id="${post._id}" style="background: #8b0000; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; ${hasLiked ? 'opacity: 0.7;' : ''}">
+                <button id="likeBtn" data-id="${postId}" style="background: #8b0000; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; ${hasLiked ? 'opacity: 0.7;' : ''}">
                     ❤️ Applaud / Like (<span id="likeCount">${currentLikes}</span>)
                 </button>
                 <span style="font-size: 0.85rem; color: #666;">Share the nonsense responsibly.</span>
             </div>
         `;
 
-        // Wire up like button functionality inside single article view
+        // Wire up like button click listener
         const likeBtn = document.getElementById('likeBtn');
         const likeCountSpan = document.getElementById('likeCount');
         if (likeBtn) {
             likeBtn.addEventListener('click', async () => {
-                const postId = likeBtn.getAttribute('data-id');
                 if (localStorage.getItem(`liked_${postId}`)) {
                     showToast('You have already applauded this piece of fine journalism!');
                     return;
