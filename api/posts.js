@@ -48,7 +48,7 @@ export default async function handler(req, res) {
 
       let result = data.result?.post || null;
 
-      // If not found in regular posts, search community pitches by matching slugified headline
+      // If not found in regular posts, search community pitches by slugifying their headline on the fly
       if (!result && data.result?.pitches) {
         const matchingPitch = data.result.pitches.find(p => {
           const pSlug = (p.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
