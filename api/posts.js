@@ -20,10 +20,12 @@ export default async function handler(req, res) {
     if (slugParam) {
       const groqQuery = `{
         "post": *[_type == "post" && slug.current == $slug][0]{
+          _id,
           title,
           body,
           "author": author->name,
           "imageUrl": mainImage.asset->url,
+          "likes": coalesce(likes, 0),
           publishedAt
         },
         "pitches": *[_type == "pitch"] | order(submittedAt desc) {
@@ -68,10 +70,12 @@ export default async function handler(req, res) {
           }
 
           result = {
+            _id: matchingPitch._id,
             title: matchingPitch.headline || "Untitled Pitch",
             body: bodyText,
             author: matchingPitch.author || "Anonymous Pomp",
             imageUrl: matchingPitch.imageUrl || null,
+            likes: 0,
             publishedAt: matchingPitch.submittedAt || matchingPitch._createdAt
           };
         }
@@ -90,6 +94,7 @@ export default async function handler(req, res) {
         "category": categories[0]->title,
         "author": author->name,
         "imageUrl": mainImage.asset->url,
+        "likes": coalesce(likes, 0),
         publishedAt
       },
       "pitches": *[_type == "pitch"] | order(submittedAt desc) {
