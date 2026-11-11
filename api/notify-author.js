@@ -27,7 +27,7 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        from: 'The Pompous Pomegranate <onboarding@resend.dev>',
+        from: 'The Pompous Pomegranate <editors@thepompouspomegranate.com>',
         to: [email],
         subject: `🎉 Your Satire Pitch Has Been Approved: "${articleTitle}"`,
         html: `
