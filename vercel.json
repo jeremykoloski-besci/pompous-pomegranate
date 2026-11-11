@@ -1,9 +1,7 @@
 {
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/app.js", "dest": "/app.js" },
-    { "src": "/styles.css", "dest": "/styles.css" },
-    { "src": "/(.*\\.(ico|png|jpg|jpeg|svg|css|js))", "dest": "/$1" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/api/:match*", "destination": "/api/:match*" },
+    { "source": "/((?!api/|app\\.js|styles\\.css|favicon\\.ico).*)", "destination": "/index.html" }
   ]
 }
