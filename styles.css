@@ -952,9 +952,103 @@ h1, h2, h3, h4, .article-headline {
         justify-content: flex-start;
     }
 }
-
 /* ==========================================
-   11. FOOTER STYLES
+   11. MOBILE COLLAPSIBLE MENU STYLES
+   ========================================== */
+@media (max-width: 900px) {
+    /* Show the hamburger menu button on mobile */
+    .menu-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        color: var(--header-text);
+        font-size: 1.3rem;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    /* Stack header contents nicely on mobile */
+    .header-container {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+    }
+
+    .header-left {
+        flex: 0;
+        gap: 10px;
+    }
+
+    .current-date {
+        display: none; /* Hide date on mobile header to save space like Babylon Bee */
+    }
+
+    .logo-area {
+        flex: 1;
+        text-align: center;
+    }
+
+    .brand-logo-wrapper {
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .title-main {
+        font-size: 1.5rem !important;
+    }
+
+    .site-tagline {
+        display: none; /* Hide tagline on mobile for clean look */
+    }
+
+    /* Collapse the navigation links list by default on mobile */
+    .main-nav .nav-inner-container {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0;
+    }
+
+    .main-nav ul {
+        display: none; /* Hidden by default */
+        flex-direction: column;
+        gap: 0;
+        width: 100%;
+        background-color: var(--header-bg);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px 0;
+    }
+
+    /* When toggled open via JS class */
+    .main-nav ul.mobile-open {
+        display: flex !important;
+    }
+
+    .main-nav ul li {
+        text-align: left;
+        width: 100%;
+    }
+
+    .main-nav ul li a {
+        display: block;
+        padding: 12px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .main-nav a:hover, .main-nav a.active {
+        border-bottom: none;
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--gold-color);
+    }
+    
+    body {
+        padding-top: 110px; /* Adjust top padding for smaller mobile header */
+    }
+}
+/* ==========================================
+   12. FOOTER STYLES
    ========================================== */
 .site-footer {
     background-color: var(--header-bg);
