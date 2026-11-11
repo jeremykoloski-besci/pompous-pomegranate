@@ -1,3 +1,28 @@
+// --- SANITY IMAGE BUILDER HELPER ---
+function urlForSanityImage(source) {
+    if (!source) return '';
+    if (typeof source === 'string' && (source.startsWith('http://') || source.startsWith('https://'))) {
+        return source;
+    }
+    
+    const imageAsset = source.asset || source;
+    const ref = imageAsset._ref || imageAsset._id;
+    if (!ref) return '';
+
+    const parts = ref.split('-');
+    if (parts.length < 4) return '';
+    
+    const assetId = parts[1];
+    const dimensions = parts[2];
+    const extension = parts[3];
+
+    // Configured with your exact Project ID
+    const projectId = "5hfaqqg7"; 
+    const dataset = "production";
+
+    return `https://cdn.sanity.io/images/${projectId}/${dataset}/${assetId}-${dimensions}.${extension}`;
+}
+
 // --- 1. SINGLE ARTICLE ROUTER (Executes on page load if visiting /article/...) ---
 async function renderSingleArticle(slug) {
     console.log("Attempting to render article with slug:", slug);
@@ -51,8 +76,9 @@ async function renderSingleArticle(slug) {
 
         const hasLiked = checkIfLiked(post._id);
 
-        // Check all possible image properties safely outside the template string
-        const imageSource = post.imageUrl || post.imageURL || post.image || (post.image?.asset?._ref ? post.image.asset._ref : '');
+        // Process image safely using the Sanity asset URL builder
+        const rawImageSource = post.imageUrl || post.imageURL || post.image;
+        const imageSource = urlForSanityImage(rawImageSource);
         const imageHtml = imageSource ? `
             <img src="${imageSource}" alt="Article image" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;" onerror="this.style.display='none'">
         ` : '';
@@ -331,7 +357,7 @@ function renderFeed(searchTerm = '') {
 
         filteredPitches.forEach((pitch) => {
             const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
-            const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
+            const pitchImage = urlForSanityImage(pitch.imageUrl || pitch.image) || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
             const pitchTitle = pitch.headline || "Untitled Article";
             const pitchDate = formatArticleDate(pitch.submittedAt || pitch.publishedAt);
             const articleUrl = "/article/" + pitchSlug;
@@ -384,7 +410,7 @@ function renderFeed(searchTerm = '') {
         const postTitle = post.title || "Untitled Satire";
         const postCategory = post.category || "General Satire";
         const postDate = formatArticleDate(post.publishedAt || post.submittedAt);
-        const postImage = post.imageUrl || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
+        const postImage = urlForSanityImage(post.imageUrl || post.image) || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
         const articleUrl = "/article/" + articleSlug;
         const postExcerpt = extractTextFromPortableText(post);
 
@@ -418,7 +444,7 @@ function renderFeed(searchTerm = '') {
 
         filteredPitches.forEach((pitch) => {
             const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
-            const pitchImage = pitch.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
+            const pitchImage = urlForSanityImage(pitch.imageUrl || pitch.image) || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
             const pitchTitle = pitch.headline || "Untitled Article";
             const pitchDate = formatArticleDate(pitch.submittedAt || pitch.publishedAt);
             const articleUrl = "/article/" + pitchSlug;
