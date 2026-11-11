@@ -660,6 +660,33 @@ window.addEventListener('DOMContentLoaded', async () => {
             window.location.href = '/';
         });
     });
+    // --- MOBILE MENU TOGGLE HANDLER ---
+    const menuToggle = document.getElementById('menuToggle');
+    const navLinksList = document.querySelector('.main-nav ul');
+
+    if (menuToggle && navLinksList) {
+        menuToggle.addEventListener('click', () => {
+            navLinksList.classList.toggle('mobile-open');
+            // Switch icon between bars and 'X' close icon
+            const icon = menuToggle.querySelector('i');
+            if (icon) {
+                if (navLinksList.classList.contains('mobile-open')) {
+                    icon.className = 'fa-solid fa-xmark';
+                } else {
+                    icon.className = 'fa-solid fa-bars';
+                }
+            }
+        });
+
+        // Close menu automatically when clicking any link
+        navLinksList.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinksList.classList.remove('mobile-open');
+                const icon = menuToggle.querySelector('i');
+                if (icon) icon.className = 'fa-solid fa-bars';
+            });
+        });
+    }
 
     // --- Newsletter Subscription Handler ---
     const newsletterForm = document.getElementById('newsletterForm');
