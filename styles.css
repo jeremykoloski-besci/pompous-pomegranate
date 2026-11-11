@@ -1,6 +1,16 @@
 /* ==========================================
    1. GLOBAL RESET & BASE STYLES
    ========================================== */
+/* Force document to lock at top on initial load */
+html, body {
+    scroll-restoration: manual !important;
+    overflow-anchor: none !important;
+}
+
+/* Optional: hide content container momentarily until JS mounts to prevent paint shift */
+body.loading .main-layout {
+    visibility: hidden;
+}
 /* Prevent flash of bottom content on load */
 html {
     scroll-restoration: manual;
