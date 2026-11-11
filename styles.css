@@ -38,7 +38,7 @@ html, body {
     --header-text: #ffffff;
 }
 
-* {
+*, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -763,7 +763,76 @@ h1, h2, h3, h4, .article-headline {
 }
 
 /* ==========================================
-   9. FOOTER STYLES
+   9. ARTICLE PAGINATION (PREV / NEXT)
+   ========================================== */
+.article-pagination {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.nav-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: inherit;
+    padding: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.nav-card:hover {
+    background: var(--bg-color);
+}
+
+.next-card {
+    text-align: right;
+    justify-content: flex-end;
+}
+
+.nav-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.nav-card h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.nav-card img {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    .article-pagination {
+        grid-template-columns: 1fr;
+    }
+    .next-card {
+        text-align: left;
+        justify-content: flex-start;
+    }
+}
+
+/* ==========================================
+   10. FOOTER STYLES
    ========================================== */
 .site-footer {
     background-color: var(--header-bg);
@@ -816,7 +885,7 @@ h1, h2, h3, h4, .article-headline {
 }
 
 /* ==========================================
-   10. MEDIA QUERIES
+   11. MEDIA QUERIES
    ========================================== */
 @media(max-width: 900px) {
     .main-layout {
