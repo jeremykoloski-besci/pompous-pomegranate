@@ -134,6 +134,7 @@ h1, h2, h3, h4, .article-headline {
 .logo-area {
     text-align: center;
     flex: 2;
+    transition: all 0.3s ease;
 }
 
 .site-title-link {
@@ -248,21 +249,29 @@ h1, h2, h3, h4, .article-headline {
     opacity: 0.9;
 }
 
-/* Navigation Links */
+/* Navigation Bar */
 .main-nav {
     background-color: rgba(0, 0, 0, 0.2);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
-.main-nav ul {
+.nav-inner-container {
     max-width: 1200px;
     margin: 0 auto;
     display: flex;
-    list-style: none;
     justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.main-nav ul {
+    list-style: none;
+    display: flex;
     gap: 30px;
-    padding: 10px 20px;
+    padding: 10px 0;
 }
 
 .main-nav a {
@@ -278,50 +287,63 @@ h1, h2, h3, h4, .article-headline {
     padding-bottom: 2px;
 }
 
-/* --- SCROLLED HEADER STATE (Bee Style Compact & Frosted) --- */
+/* --- Compact Left Brand Logo (Hidden by default) --- */
+.nav-left-brand {
+    position: absolute;
+    left: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-10px);
+    transition: all 0.25s ease;
+}
+
+.title-main-compact {
+    font-family: 'Zilla Slab', serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+}
+
+/* --- SCROLLED HEADER STATE (Babylon Bee Style) --- */
 .site-header.scrolled {
-    background-color: rgba(31, 31, 31, 0.92);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    background-color: rgba(20, 20, 20, 0.94);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
 [data-theme="dark"] .site-header.scrolled {
-    background-color: rgba(10, 10, 10, 0.92);
+    background-color: rgba(10, 10, 10, 0.94);
 }
 
-.site-header.scrolled .header-container {
-    padding: 8px 20px;
-}
-
-.site-header.scrolled .announcement-bar {
+/* Hide the top massive header row completely */
+.site-header.scrolled .announcement-bar,
+.site-header.scrolled .header-container,
+.site-header.scrolled .logo-area {
     max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
+    padding: 0;
+    margin: 0;
     overflow: hidden;
     opacity: 0;
+    border: none;
 }
 
-.site-header.scrolled .site-tagline {
-    max-height: 0;
-    opacity: 0;
-    margin-top: 0;
+/* Reveal the compact brand logo on the left of the nav bar */
+.site-header.scrolled .nav-left-brand {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
 }
 
-.site-header.scrolled .title-main {
-    font-size: 1.3rem;
-}
-
-.site-header.scrolled .pomegranate-icon {
-    width: 28px;
-    height: 28px;
-}
-
-.site-header.scrolled .title-prefix {
-    font-size: 0.75rem;
+/* Adjust nav inner spacing when scrolled (pushes links right like Babylon Bee) */
+.site-header.scrolled .nav-inner-container {
+    justify-content: flex-end;
+    padding: 6px 20px;
 }
 
 .site-header.scrolled .main-nav {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: transparent;
+    border-top: none;
 }
 
 /* ==========================================
