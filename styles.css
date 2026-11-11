@@ -416,7 +416,6 @@ h1, h2, h3, h4, .article-headline {
     transition: transform 0.3s ease;
 }
 
-/* Only scale the image, keep the category badge stable and visible */
 .card-image-wrapper:hover img {
     transform: scale(1.02);
 }
@@ -433,7 +432,7 @@ h1, h2, h3, h4, .article-headline {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border-radius: 3px;
-    z-index: 2; /* Ensures it always stays on top of the image */
+    z-index: 2;
 }
 
 .card-content {
@@ -952,75 +951,101 @@ h1, h2, h3, h4, .article-headline {
         justify-content: flex-start;
     }
 }
+
 /* ==========================================
-   MOBILE HEADER & COLLAPSIBLE MENU (Bee Style)
+   EXACT BEE-STYLE SINGLE LINE MOBILE HEADER
    ========================================== */
 @media (max-width: 900px) {
     body {
-        padding-top: 85px; /* Compact top padding for mobile */
+        padding-top: 70px; /* Slimmer top padding */
     }
 
-    /* Ensure main header container stays single-line and compact */
+    /* Force the header container into a single horizontal line */
     .header-container {
-        padding: 10px 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 8px 12px !important;
+        width: 100%;
+        box-sizing: border-box;
     }
 
-    /* Hide the full desktop logo area from the main banner on mobile */
+    /* Hide the desktop logo area entirely */
     .header-container .logo-area {
         display: none !important;
     }
 
-    /* Show a compact logo on the left of the mobile header */
+    /* Hide the date container completely on mobile */
+    .current-date {
+        display: none !important;
+    }
+
+    /* Left Side: Logo + Title in one inline row */
     .header-left {
-        display: flex;
-        align-items: center;
-        gap: 12px;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        flex: 1;
+        min-width: 0;
     }
 
     .mobile-header-logo {
         display: flex !important;
-        align-items: center;
-        gap: 8px;
-        text-decoration: none;
-        color: #fff;
+        align-items: center !important;
+        gap: 8px !important;
+        text-decoration: none !important;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .mobile-header-logo .pomegranate-icon {
+        width: 24px !important;
+        height: 24px !important;
+        flex-shrink: 0;
     }
 
     .mobile-header-logo .title-main-compact {
-        font-family: 'Zilla Slab', serif;
-        font-size: 1.1rem;
-        font-weight: 900;
-        color: #ffffff;
+        font-family: 'Zilla Slab', serif !important;
+        font-size: 0.95rem !important;
+        font-weight: 900 !important;
+        color: #ffffff !important;
         letter-spacing: -0.5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    /* Right side controls: Subscribe button + Hamburger */
+    /* Right Side: Theme toggle + Hamburger button */
     .header-right {
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        flex-shrink: 0;
     }
 
-    .subscribe-btn {
-        padding: 6px 12px;
-        font-size: 0.8rem;
+    .theme-toggle {
+        display: flex !important;
+        background: none !important;
+        border: none !important;
+        color: var(--header-text) !important;
+        font-size: 1.1rem !important;
+        cursor: pointer;
+        padding: 4px;
     }
 
     .menu-toggle {
         display: flex !important;
-        background: none;
-        border: none;
-        color: var(--header-text);
-        font-size: 1.4rem;
+        background: none !important;
+        border: none !important;
+        color: var(--header-text) !important;
+        font-size: 1.3rem !important;
         cursor: pointer;
-        padding: 5px;
+        padding: 4px;
     }
 
-    /* Hide the default desktop nav bar */
+    /* Ensure desktop nav is completely hidden on mobile */
     .main-nav {
-        display: none; 
+        display: none !important;
     }
 
     /* --- MOBILE DRAWER / DROPDOWN MENU --- */
@@ -1104,7 +1129,7 @@ h1, h2, h3, h4, .article-headline {
     }
 }
 
-/* Hide mobile logo on desktop */
+/* Hide mobile logo and drawer on desktop */
 @media (min-width: 901px) {
     .mobile-header-logo,
     .mobile-menu-drawer,
@@ -1112,6 +1137,7 @@ h1, h2, h3, h4, .article-headline {
         display: none !important;
     }
 }
+
 /* ==========================================
    12. FOOTER STYLES
    ========================================== */
@@ -1166,19 +1192,11 @@ h1, h2, h3, h4, .article-headline {
 }
 
 /* ==========================================
-   12. MEDIA QUERIES
+   13. ADDITIONAL MEDIA QUERIES
    ========================================== */
 @media(max-width: 900px) {
     .main-layout {
         grid-template-columns: 1fr;
-    }
-    .header-container {
-        flex-direction: column;
-        gap: 15px;
-    }
-    .main-nav ul {
-        flex-wrap: wrap;
-        gap: 15px;
     }
 }
 
