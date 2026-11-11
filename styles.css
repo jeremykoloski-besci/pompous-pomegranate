@@ -92,7 +92,13 @@ h1, h2, h3, h4, .article-headline {
     color: var(--header-text);
     border-bottom: 3px solid var(--accent-color);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
+}
+
+.header-main-banner {
+    transition: all 0.3s ease;
+    overflow: hidden;
+    max-height: 150px;
 }
 
 .header-container {
@@ -102,7 +108,6 @@ h1, h2, h3, h4, .article-headline {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: padding 0.3s ease;
 }
 
 .header-left, .header-right {
@@ -134,7 +139,6 @@ h1, h2, h3, h4, .article-headline {
 .logo-area {
     text-align: center;
     flex: 2;
-    transition: all 0.3s ease;
 }
 
 .site-title-link {
@@ -148,7 +152,6 @@ h1, h2, h3, h4, .article-headline {
     align-items: center;
     justify-content: center;
     gap: 14px;
-    transition: transform 0.3s ease;
 }
 
 .pomegranate-icon {
@@ -177,7 +180,6 @@ h1, h2, h3, h4, .article-headline {
     letter-spacing: 1.5px;
     color: #cccccc;
     margin-bottom: 3px;
-    transition: font-size 0.3s ease;
 }
 
 .title-main {
@@ -187,7 +189,6 @@ h1, h2, h3, h4, .article-headline {
     letter-spacing: -0.5px;
     color: #ffffff;
     text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
-    transition: font-size 0.3s ease;
 }
 
 .site-title-link:hover .title-main {
@@ -206,10 +207,6 @@ h1, h2, h3, h4, .article-headline {
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    opacity: 1;
-    max-height: 30px;
-    overflow: hidden;
-    transition: all 0.3s ease;
 }
 
 .site-tagline::before,
@@ -260,18 +257,18 @@ h1, h2, h3, h4, .article-headline {
     max-width: 1200px;
     margin: 0 auto;
     display: flex;
-    justify-content: center;
+    justify-content: space-between; /* Keeps compact brand left and links right when scrolled */
     align-items: center;
     padding: 0 20px;
-    position: relative;
     transition: all 0.3s ease;
 }
 
-.main-nav ul {
+.nav-links-list {
     list-style: none;
     display: flex;
     gap: 30px;
     padding: 10px 0;
+    transition: all 0.3s ease;
 }
 
 .main-nav a {
@@ -287,22 +284,40 @@ h1, h2, h3, h4, .article-headline {
     padding-bottom: 2px;
 }
 
-/* --- Compact Left Brand Logo (Hidden by default) --- */
+/* --- Compact Left Brand Logo (Inline & Yellow Hover) --- */
 .nav-left-brand {
-    position: absolute;
-    left: 20px;
     opacity: 0;
     visibility: hidden;
     transform: translateX(-10px);
     transition: all 0.25s ease;
 }
 
+.compact-brand-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #ffffff;
+    border-bottom: none !important; /* Prevents unwanted underlines */
+    padding-bottom: 0 !important;
+}
+
+.compact-brand-link:hover {
+    color: var(--gold-color);
+    border-bottom: none !important;
+}
+
+.compact-brand-link:hover .title-main-compact {
+    color: var(--gold-color);
+}
+
 .title-main-compact {
     font-family: 'Zilla Slab', serif;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 900;
     color: #ffffff;
     letter-spacing: -0.5px;
+    transition: color 0.2s ease;
 }
 
 /* --- SCROLLED HEADER STATE (Babylon Bee Style) --- */
@@ -316,34 +331,31 @@ h1, h2, h3, h4, .article-headline {
     background-color: rgba(10, 10, 10, 0.94);
 }
 
-/* Hide the top massive header row completely */
+/* Hide announcement bar and top main banner entirely */
 .site-header.scrolled .announcement-bar,
-.site-header.scrolled .header-container,
-.site-header.scrolled .logo-area {
+.site-header.scrolled .header-main-banner {
     max-height: 0;
     padding: 0;
     margin: 0;
-    overflow: hidden;
     opacity: 0;
+    overflow: hidden;
     border: none;
 }
 
-/* Reveal the compact brand logo on the left of the nav bar */
+/* Reveal compact brand logo inline on the left */
 .site-header.scrolled .nav-left-brand {
     opacity: 1;
     visibility: visible;
     transform: translateX(0);
 }
 
-/* Adjust nav inner spacing when scrolled (pushes links right like Babylon Bee) */
-.site-header.scrolled .nav-inner-container {
-    justify-content: flex-end;
-    padding: 6px 20px;
-}
-
 .site-header.scrolled .main-nav {
     background-color: transparent;
     border-top: none;
+}
+
+.site-header.scrolled .nav-inner-container {
+    padding: 8px 20px;
 }
 
 /* ==========================================
