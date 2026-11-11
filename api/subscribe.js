@@ -46,7 +46,7 @@ export default async function handler(req, res) {
             subscribedAt: new Date().toISOString(),
         });
 
-        // 3. Send automated confirmation email using Resend
+        // 3. Send automated confirmation email using Resend with your verified domain
         const resendResponse = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
@@ -54,7 +54,7 @@ export default async function handler(req, res) {
                 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
             },
             body: JSON.stringify({
-                from: 'The Pompous Pomegranate <onboarding@resend.dev>',
+                from: 'The Pompous Pomegranate <editors@thepompouspomegranate.com>',
                 to: [cleanEmail],
                 subject: 'Welcome to The Daily Seed 🌿',
                 html: `
