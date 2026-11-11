@@ -35,15 +35,20 @@ async function renderSingleArticle(slug) {
             return;
         }
 
-        let htmlContent = '<p>No content provided.</p>';
-        if (Array.isArray(post.body)) {
-            htmlContent = post.body.map(block => {
-                if (block._type === 'block' && block.children) {
-                    return `<p style="margin-bottom: 16px; line-height: 1.8;">${block.children.map(c => c.text).join('')}</p>`;
-                }
-                return '';
-            }).join('');
-        }
+         let htmlContent = '<p>No content provided.</p>';
+            const rawBody = post.body || post.text || post.description;
+    
+            if (Array.isArray(rawBody)) {
+                htmlContent = rawBody.map(block => {
+                    if (block._type === 'block' && block.children) {
+                        return `<p style="margin-bottom: 16px; line-height: 1.8;">${block.children.map(c => c.text).join('')}</p>`;
+                    }
+                    return '';
+                }).join('');
+            } else if (typeof rawBody === 'string' && rawBody.trim() !== '') {
+                // Handle plain text strings (like community pitches)
+                htmlContent = `<p style="margin-bottom: 16px; line-height: 1.8;">${rawBody}</p>`;
+            }
 
         const hasLiked = checkIfLiked(post._id);
 
