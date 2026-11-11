@@ -80,7 +80,7 @@ async function handleLike(postId) {
     likeCountSpan.textContent = currentLikes + 1;
 
     try {
-        const response = await fetch('/api/like-post', {
+        const response = await fetch('/api/like', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ postId })
