@@ -8,13 +8,17 @@ async function renderSingleArticle(slug) {
         const data = await response.json();
         const post = data.result;
 
-        // ONLY hide the homepage feed items, leaving the sidebar and main-layout grid fully visible
-        const feedElements = document.querySelectorAll('.feed-controls, .hero-article, .articles-grid, .pitch-cta-section');
-        feedElements.forEach(el => {
-            if (el) el.style.setProperty('display', 'none', 'important');
-        });
+        // BULLETPROOF HIDE: Hide everything inside the content feed except our article view
+        const contentFeed = document.querySelector('.content-feed');
+        if (contentFeed) {
+            Array.from(contentFeed.children).forEach(child => {
+                if (child.id !== 'singleArticleView') {
+                    child.style.setProperty('display', 'none', 'important');
+                }
+            });
+        }
 
-        // Ensure the single article container inside content-feed is active and visible
+        // Activate the single article container
         let articleView = document.getElementById('singleArticleView');
         if (articleView) {
             articleView.style.setProperty('display', 'block', 'important');
