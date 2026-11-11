@@ -120,11 +120,11 @@ async function renderSingleArticle(slug) {
 
         const nextNav = post.nextPost ? `
           <a href="/article/${post.nextPost.slug}" class="nav-card next-card">
+            ${post.nextPost.imageUrl ? `<img src="${urlForSanityImage(post.nextPost.imageUrl)}" alt="">` : ''}
             <div>
               <span class="nav-label">NEXT &rarr;</span>
               <h4>${post.nextPost.title}</h4>
             </div>
-            ${post.nextPost.imageUrl ? `<img src="${urlForSanityImage(post.nextPost.imageUrl)}" alt="">` : ''}
           </a>
         ` : '<div></div>';
 
