@@ -49,8 +49,14 @@ async function renderSingleArticle(slug) {
             articleView.innerHTML = `
                 <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:var(--text-primary); color:var(--card-bg); border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
                 <h1 style="font-size: 36px; margin-bottom: 12px; font-weight: 700; font-family: 'Zilla Slab', serif; color: var(--text-primary);">${post.title}</h1>
-                <div style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-                    By ${post.author || 'Anonymous Pomp'} • ${new Date(post.publishedAt || post.submittedAt).toLocaleDateString()}
+                <div style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>By ${post.author || 'Anonymous Pomp'} • ${new Date(post.publishedAt || post.submittedAt).toLocaleDateString()}</span>
+                    
+                    <!-- Like Button Component -->
+                    <button id="likeArticleBtn" onclick="handleLike('${post._id}')" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); padding: 6px 12px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600;">
+                        <i class="fa-solid fa-heart" style="color: var(--accent-color);"></i> 
+                        <span id="likeCount">${post.likes || 0}</span> Likes
+                    </button>
                 </div>
                 ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Article image" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;">` : ''}
                 <div style="font-size: 18px; color: var(--text-primary); line-height: 1.7;">${htmlContent}</div>
@@ -59,6 +65,35 @@ async function renderSingleArticle(slug) {
 
     } catch (err) {
         console.error("Error loading article:", err);
+    }
+}
+
+async function handleLike(postId) {
+    const likeBtn = document.getElementById('likeArticleBtn');
+    const likeCountSpan = document.getElementById('likeCount');
+    if (!likeBtn || likeBtn.dataset.liked === "true") return;
+
+    // Optimistically update UI immediately for instant feedback
+    likeBtn.dataset.liked = "true";
+    likeBtn.style.borderColor = "var(--accent-color)";
+    let currentLikes = parseInt(likeCountSpan.textContent) || 0;
+    likeCountSpan.textContent = currentLikes + 1;
+
+    try {
+        const response = await fetch('/api/like-post', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ postId })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to record like');
+        }
+    } catch (err) {
+        console.error("Error liking article:", err);
+        // Revert UI if server request fails
+        likeCountSpan.textContent = currentLikes;
+        likeBtn.dataset.liked = "false";
     }
 }
 
