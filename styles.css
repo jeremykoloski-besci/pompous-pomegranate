@@ -273,11 +273,12 @@ h1, h2, h3, h4, .article-headline {
     transition: all 0.3s ease;
 }
 
+/* Default Unscrolled Navigation (Centered) */
 .nav-inner-container {
     max-width: 1200px;
     margin: 0 auto;
     display: flex;
-    justify-content: space-between;
+    justify-content: center; /* Centered by default before scrolling */
     align-items: center;
     padding: 0 20px;
     transition: all 0.3s ease;
@@ -289,6 +290,12 @@ h1, h2, h3, h4, .article-headline {
     gap: 30px;
     padding: 10px 0;
     transition: all 0.3s ease;
+}
+
+/* Scrolled State: Switch to space-between so logo stays left and links shift right */
+.site-header.scrolled .nav-inner-container {
+    justify-content: space-between !important; /* Pushes brand left, links/tabs right */
+    padding: 8px 20px;
 }
 
 .main-nav a {
