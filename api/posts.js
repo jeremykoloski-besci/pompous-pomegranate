@@ -22,10 +22,18 @@ export default async function handler(req, res) {
         "post": *[_type == "post" && slug.current == $slug][0]{
           _id,
           title,
+          slug,
           body,
           "author": author->name,
           "imageUrl": mainImage.asset->url,
           "likes": coalesce(likes, 0),
+          publishedAt
+        },
+        "allPosts": *[_type == "post"] | order(publishedAt desc) {
+          _id,
+          title,
+          slug,
+          "imageUrl": mainImage.asset->url,
           publishedAt
         },
         "pitches": *[_type == "pitch"] | order(submittedAt desc) {
@@ -40,6 +48,30 @@ export default async function handler(req, res) {
           picture
         }
       }`;
+
+      // ... fetch from Sanity ...
+      const data = await sanityResponse.json();
+
+      let result = data.result?.post || null;
+      let allPosts = data.result?.allPosts || [];
+
+      if (result) {
+        // Find currentIndex in the chronological feed to determine Prev / Next
+        const currentIndex = allPosts.findIndex(p => p.slug?.current === slugParam);
+        
+        // Note: Because feed is ordered desc (newest first):
+        // "Next" (newer article) is at index - 1
+        // "Previous" (older article) is at index + 1
+        const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
+        const prevPost = currentIndex >= 0 && currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+
+        result.prevPost = prevPost ? { title: prevPost.title, slug: prevPost.slug?.current, imageUrl: prevPost.imageUrl } : null;
+        result.nextPost = nextPost ? { title: nextPost.title, slug: nextPost.slug?.current, imageUrl: nextPost.imageUrl } : null;
+      }
+
+      // ... community pitch fallback check ...
+      return res.status(200).json({ result });
+    }
 
       const params = new URLSearchParams();
       params.append('query', groqQuery);
