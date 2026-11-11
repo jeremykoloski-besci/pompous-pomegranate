@@ -95,7 +95,7 @@ async function renderSingleArticle(slug) {
                       <i class="fa-brands fa-facebook-f"></i>
                   </a>
                   <a href="https://twitter.com/intent/tweet?url=${currentUrl}&text=${shareTitle}" target="_blank" rel="noopener noreferrer" class="share-btn" title="Share on X">
-                      <i class="fa-brands fa-x-twitter"></i>
+                      <i class="fa-brands fa-twitter"></i>
                   </a>
                   <a href="mailto:?subject=${shareTitle}&body=Check out this satirical piece: ${currentUrl}" class="share-btn" title="Share via Email">
                       <i class="fa-solid fa-envelope"></i>
