@@ -50,7 +50,6 @@ body {
     background-color: var(--bg-color);
     color: var(--text-primary);
     line-height: 1.6;
-    /* Initial padding for the expanded sticky header stack */
     padding-top: 195px;
     transition: padding-top 0.3s ease;
 }
@@ -257,7 +256,7 @@ h1, h2, h3, h4, .article-headline {
     max-width: 1200px;
     margin: 0 auto;
     display: flex;
-    justify-content: space-between; /* Keeps compact brand left and links right when scrolled */
+    justify-content: space-between;
     align-items: center;
     padding: 0 20px;
     transition: all 0.3s ease;
@@ -284,7 +283,7 @@ h1, h2, h3, h4, .article-headline {
     padding-bottom: 2px;
 }
 
-/* --- Compact Left Brand Logo (Inline & Yellow Hover) --- */
+/* --- Compact Left Brand Logo (Inline, Vertically Centered & Yellow Hover) --- */
 .nav-left-brand {
     opacity: 0;
     visibility: hidden;
@@ -294,11 +293,11 @@ h1, h2, h3, h4, .article-headline {
 
 .compact-brand-link {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    align-items: center; /* Vertically centers icon and text block */
+    gap: 12px;
     text-decoration: none;
     color: #ffffff;
-    border-bottom: none !important; /* Prevents unwanted underlines */
+    border-bottom: none !important;
     padding-bottom: 0 !important;
 }
 
@@ -307,8 +306,28 @@ h1, h2, h3, h4, .article-headline {
     border-bottom: none !important;
 }
 
-.compact-brand-link:hover .title-main-compact {
+.compact-brand-link:hover .title-main-compact,
+.compact-brand-link:hover .title-prefix-compact {
     color: var(--gold-color);
+}
+
+.brand-title-text-compact {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1;
+    text-align: left;
+}
+
+.title-prefix-compact {
+    font-family: 'Zilla Slab', serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #cccccc;
+    margin-bottom: 2px;
+    transition: color 0.2s ease;
 }
 
 .title-main-compact {
@@ -331,7 +350,6 @@ h1, h2, h3, h4, .article-headline {
     background-color: rgba(10, 10, 10, 0.94);
 }
 
-/* Hide announcement bar and top main banner entirely */
 .site-header.scrolled .announcement-bar,
 .site-header.scrolled .header-main-banner {
     max-height: 0;
@@ -342,7 +360,6 @@ h1, h2, h3, h4, .article-headline {
     border: none;
 }
 
-/* Reveal compact brand logo inline on the left */
 .site-header.scrolled .nav-left-brand {
     opacity: 1;
     visibility: visible;
