@@ -16,7 +16,13 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Server configuration error' });
   }
 
-  const articleSlug = slug || articleTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  // Ensure the slug is properly generated with hyphens instead of spaces
+  const rawSlugSource = slug || articleTitle;
+  const articleSlug = rawSlugSource
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+
   const articleUrl = `https://thepompouspomegranate.com/article/${articleSlug}`;
 
   try {
