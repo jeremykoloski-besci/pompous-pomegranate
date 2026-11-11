@@ -8,13 +8,13 @@ async function renderSingleArticle(slug) {
         const data = await response.json();
         const post = data.result;
 
-        // ONLY hide the feed controls, hero, and article grid (leave sidebar & layout intact)
+        // ONLY hide the homepage feed items, leaving the sidebar and main-layout grid fully visible
         const feedElements = document.querySelectorAll('.feed-controls, .hero-article, .articles-grid, .pitch-cta-section');
         feedElements.forEach(el => {
             if (el) el.style.setProperty('display', 'none', 'important');
         });
 
-        // Target your existing singleArticleView container inside the content-feed
+        // Ensure the single article container inside content-feed is active and visible
         let articleView = document.getElementById('singleArticleView');
         if (articleView) {
             articleView.style.setProperty('display', 'block', 'important');
@@ -23,7 +23,7 @@ async function renderSingleArticle(slug) {
         if (!post) {
             if (articleView) {
                 articleView.innerHTML = `
-                    <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px;">&larr; Back to Home</button>
+                    <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:var(--text-primary); color:var(--card-bg); border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
                     <h1>Article Not Found</h1>
                     <p>This satire piece couldn't be found or is still awaiting publication.</p>
                 `;
@@ -51,6 +51,11 @@ async function renderSingleArticle(slug) {
                 ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Article image" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;">` : ''}
                 <div style="font-size: 18px; color: var(--text-primary); line-height: 1.7;">${htmlContent}</div>
             `;
+        }
+
+        // Also ensure sidebar widgets fetch and populate their data (Trending, Fact Check)
+        if (typeof fetchArticlesFromSanity === 'function' && allPosts.length === 0) {
+            await fetchArticlesFromSanity();
         }
 
     } catch (err) {
