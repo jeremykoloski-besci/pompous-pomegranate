@@ -24,7 +24,13 @@ export default async function handler(req, res) {
 
   const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/mutate/${dataset}`;
 
-const mutationPayload = {
+  // Ensure body is stored as a clean string matching the 'text' schema type
+  let bodyString = body;
+  if (typeof body === 'object') {
+    bodyString = body.text || body.content || JSON.stringify(body);
+  }
+
+  const mutationPayload = {
     mutations: [
       {
         create: {
@@ -32,18 +38,7 @@ const mutationPayload = {
           author: author,
           email: email || '',
           headline: headline,
-          // Wrap body string into a standard Sanity Portable Text block array
-          body: body ? [
-            {
-              _type: 'block',
-              children: [
-                {
-                  _type: 'span',
-                  text: body
-                }
-              ]
-            }
-          ] : [],
+          body: String(bodyString || ''), // Plain text string
           status: 'pending',
           submittedAt: new Date().toISOString()
         }
