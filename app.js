@@ -18,7 +18,10 @@ async function renderSingleArticle(slug) {
             articleView = document.createElement('div');
             articleView.id = 'singleArticleView';
             articleView.style.cssText = 'max-width: 800px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);';
-            document.body.appendChild(articleView);
+            
+            // CHANGE THIS LINE: Find your main container or content wrapper instead of document.body
+            const mainContainer = document.querySelector('main') || document.body;
+            mainContainer.appendChild(articleView);
         }
         articleView.style.setProperty('display', 'block', 'important');
 
