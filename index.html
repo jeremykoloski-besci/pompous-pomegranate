@@ -32,76 +32,68 @@
           <span id="toastMessage">Your satirical article has been submitted to the editors for peer review!</span>
     </div>
 
-    <!-- Fixed Header Stack Wrapper (Announcement Bar + Header) with ID for Shrink-on-Scroll -->
+    <!-- Fixed Header Stack Wrapper -->
     <header class="site-header" id="siteHeader">
         <!-- Top Announcement Bar -->
         <div class="announcement-bar" id="breakingBar" style="display: none;">
             <span id="breakingContent">Loading breaking news...</span>
         </div>
 
-        <!-- Header & Navigation Container -->
-        <div class="header-container">
-            <div class="header-left">
-                <button class="menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
-                <div class="current-date" id="currentDate"></div>
-            </div>
-            
-            <!-- Branded Logo & Clickable Title -->
-            <div class="logo-area">
-                <a href="/" class="site-title-link">
-                    <div class="brand-logo-wrapper">
-                        <!-- Custom Stylized Pomegranate Icon -->
-                        <svg class="pomegranate-icon" viewBox="0 0 100 100" width="42" height="42" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <!-- Crown / Sepal top -->
-                            <path d="M40 18 L50 6 L60 18 L68 12 L64 24 L36 24 L32 12 Z" fill="#8B0000" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round"/>
-                            <!-- Main Pomegranate Body -->
-                            <circle cx="50" cy="56" r="36" fill="#8B0000" stroke="#1A1A1A" stroke-width="4"/>
-                            <!-- Inner Stylized Cutout / Crown Detail -->
-                            <path d="M35 48 C35 40, 65 40, 65 48 C65 65, 35 65, 35 48 Z" fill="#D4AF37" opacity="0.9"/>
-                            <!-- Internal Seeds Accent -->
-                            <circle cx="44" cy="48" r="3" fill="#600000"/>
-                            <circle cx="54" cy="48" r="3" fill="#600000"/>
-                            <circle cx="49" cy="56" r="3.5" fill="#600000"/>
-                        </svg>
-
-                        <!-- Stylized Brand Title -->
-                        <div class="brand-title-text">
-                            <span class="title-prefix">The</span>
-                            <span class="title-main">Pompous Pomegranate</span>
-                        </div>
-                    </div>
-                </a>
-                <p class="site-tagline">Fake news to cure the blues</p>
-            </div>
-
-            <div class="header-right">
-                <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
-                    <i class="fa-solid fa-moon"></i>
-                </button>
-                <button class="subscribe-btn" id="openModalBtn" style="display: none;">
-                    <i class="fa-solid fa-crown"></i> Pomegranate Plus
-                </button>
-            </div>
-        </div>
-
-        <!-- Navigation Categories -->
-        <nav class="main-nav">
-            <div class="nav-inner-container">
-                <!-- Compact Brand Logo that slides into view on the left when scrolled -->
-                <div class="nav-left-brand">
+        <!-- Main Top Banner Header (Visible at top) -->
+        <div class="header-main-banner">
+            <div class="header-container">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+                    <div class="current-date" id="currentDate"></div>
+                </div>
+                
+                <div class="logo-area">
                     <a href="/" class="site-title-link">
                         <div class="brand-logo-wrapper">
-                            <svg class="pomegranate-icon" viewBox="0 0 100 100" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="pomegranate-icon" viewBox="0 0 100 100" width="42" height="42" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M40 18 L50 6 L60 18 L68 12 L64 24 L36 24 L32 12 Z" fill="#8B0000" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round"/>
                                 <circle cx="50" cy="56" r="36" fill="#8B0000" stroke="#1A1A1A" stroke-width="4"/>
                                 <path d="M35 48 C35 40, 65 40, 65 48 C65 65, 35 65, 35 48 Z" fill="#D4AF37" opacity="0.9"/>
+                                <circle cx="44" cy="48" r="3" fill="#600000"/>
+                                <circle cx="54" cy="48" r="3" fill="#600000"/>
+                                <circle cx="49" cy="56" r="3.5" fill="#600000"/>
                             </svg>
-                            <span class="title-main-compact">Pompous Pomegranate</span>
+                            <div class="brand-title-text">
+                                <span class="title-prefix">The</span>
+                                <span class="title-main">Pompous Pomegranate</span>
+                            </div>
                         </div>
+                    </a>
+                    <p class="site-tagline">Fake news to cure the blues</p>
+                </div>
+
+                <div class="header-right">
+                    <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    <button class="subscribe-btn" id="openModalBtn" style="display: none;">
+                        <i class="fa-solid fa-crown"></i> Pomegranate Plus
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Categories Bar -->
+        <nav class="main-nav">
+            <div class="nav-inner-container">
+                <!-- Compact Left Brand Logo (Appears inline when scrolled) -->
+                <div class="nav-left-brand">
+                    <a href="/" class="compact-brand-link">
+                        <svg class="pomegranate-icon" viewBox="0 0 100 100" width="26" height="26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M40 18 L50 6 L60 18 L68 12 L64 24 L36 24 L32 12 Z" fill="#8B0000" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round"/>
+                            <circle cx="50" cy="56" r="36" fill="#8B0000" stroke="#1A1A1A" stroke-width="4"/>
+                            <path d="M35 48 C35 40, 65 40, 65 48 C65 65, 35 65, 35 48 Z" fill="#D4AF37" opacity="0.9"/>
+                        </svg>
+                        <span class="title-main-compact">Pompous Pomegranate</span>
                     </a>
                 </div>
 
-                <ul>
+                <ul class="nav-links-list">
                     <li><a href="/?category=all" class="nav-link active" data-category="all">Home</a></li>
                     <li><a href="/?category=politics" class="nav-link" data-category="politics">Politics</a></li>
                     <li><a href="/?category=tech" class="nav-link" data-category="tech">Tech & AI</a></li>
