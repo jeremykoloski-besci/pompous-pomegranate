@@ -8,22 +8,22 @@ async function renderSingleArticle(slug) {
         const data = await response.json();
         const post = data.result;
 
+        // Hide home page elements
         const homeElements = document.querySelectorAll('main, .hero-section, .feed-container, .trending-section, #articlesGrid');
         homeElements.forEach(el => {
             if (el) el.style.setProperty('display', 'none', 'important');
         });
 
+        // Ensure singleArticleView container exists and is visible
         let articleView = document.getElementById('singleArticleView');
         if (!articleView) {
             articleView = document.createElement('div');
             articleView.id = 'singleArticleView';
-            articleView.style.cssText = 'max-width: 800px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);';
-            
-            // CHANGE THIS LINE: Find your main container or content wrapper instead of document.body
-            const mainContainer = document.querySelector('main') || document.body;
-            mainContainer.appendChild(articleView);
+            articleView.style.cssText = 'max-width: 800px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: block;';
+            document.body.appendChild(articleView);
+        } else {
+            articleView.style.setProperty('display', 'block', 'important');
         }
-        articleView.style.setProperty('display', 'block', 'important');
 
         if (!post) {
             articleView.innerHTML = `
@@ -48,6 +48,7 @@ async function renderSingleArticle(slug) {
         const postId = post._id || slug;
         const hasLiked = localStorage.getItem(`liked_${postId}`) === 'true';
 
+        // Render everything including the like button footer in one go
         articleView.innerHTML = `
             <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:#18181b; color:#fff; border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
             <h1 style="font-size: 32px; margin-bottom: 12px; font-weight: 700;">${post.title}</h1>
@@ -65,7 +66,7 @@ async function renderSingleArticle(slug) {
             </div>
         `;
 
-        // Wire up like button click listener
+        // Wire up the like button event listener immediately after injection
         const likeBtn = document.getElementById('likeBtn');
         const likeCountSpan = document.getElementById('likeCount');
         if (likeBtn) {
@@ -100,7 +101,6 @@ async function renderSingleArticle(slug) {
         console.error("Error loading article:", err);
     }
 }
-
 function goHome() {
     window.location.href = '/';
 }
