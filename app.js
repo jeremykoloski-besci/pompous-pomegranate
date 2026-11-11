@@ -111,6 +111,19 @@ async function renderSingleArticle(slug) {
           </div>
         `;
 
+        // --- COMMUNITY PITCH CALLOUT BOX ---
+        const pitchCalloutHTML = `
+          <div class="pitch-section card" style="margin-top: 40px; text-align: center;">
+              <div class="pitch-header">
+                  <h2 style="font-family: 'Merriweather', serif; font-size: 1.3rem; margin-bottom: 5px;"><i class="fa-solid fa-lightbulb"></i> Got a Satirical Scoop?</h2>
+                  <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">Think you can out-satire us? Send your headline and full article to our editors.</p>
+              </div>
+              <button onclick="document.getElementById('pitchModal').classList.add('active')" class="submit-pitch-btn" style="max-width: 400px; margin: 0 auto;">
+                  <i class="fa-solid fa-pen-nib"></i> Submit a Community Article
+              </button>
+          </div>
+        `;
+
         if (articleView) {
             articleView.innerHTML = `
                 <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:var(--text-primary); color:var(--card-bg); border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
@@ -127,6 +140,7 @@ async function renderSingleArticle(slug) {
                 ${imageHtml}
                 <div style="font-size: 18px; color: var(--text-primary); line-height: 1.7;">${htmlContent}</div>
                 ${paginationHTML}
+                ${pitchCalloutHTML}
             `;
         }
 
