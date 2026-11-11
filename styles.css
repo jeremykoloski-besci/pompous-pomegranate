@@ -529,7 +529,38 @@ h1, h2, h3, h4, .article-headline {
 }
 
 /* ==========================================
-   7. SIDEBAR WIDGETS
+   7. SOCIAL SHARE BUTTONS
+   ========================================== */
+.social-share-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.social-share-icon:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+.social-share-icon.copy {
+    background: none;
+    border: 1px solid var(--border-color);
+}
+
+/* ==========================================
+   8. SIDEBAR WIDGETS
    ========================================== */
 .sidebar-widget {
     background-color: var(--card-bg);
@@ -625,7 +656,7 @@ h1, h2, h3, h4, .article-headline {
 }
 
 /* ==========================================
-   8. NOTIFICATIONS & MODALS
+   9. NOTIFICATIONS & MODALS
    ========================================== */
 .toast-notification {
     position: fixed;
@@ -763,7 +794,7 @@ h1, h2, h3, h4, .article-headline {
 }
 
 /* ==========================================
-   9. ARTICLE PAGINATION (PREV / NEXT)
+   10. ARTICLE PAGINATION (PREV / NEXT)
    ========================================== */
 .article-pagination {
     display: grid;
@@ -832,7 +863,7 @@ h1, h2, h3, h4, .article-headline {
 }
 
 /* ==========================================
-   10. FOOTER STYLES
+   11. FOOTER STYLES
    ========================================== */
 .site-footer {
     background-color: var(--header-bg);
@@ -885,7 +916,7 @@ h1, h2, h3, h4, .article-headline {
 }
 
 /* ==========================================
-   11. MEDIA QUERIES
+   12. MEDIA QUERIES
    ========================================== */
 @media(max-width: 900px) {
     .main-layout {
