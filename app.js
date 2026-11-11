@@ -458,7 +458,7 @@ function renderFeed(searchTerm = '') {
                 <img src="${postImage}" alt="Article thumbnail">
             </div>
             <div class="card-content">
-                <<div class="article-meta">${formatArticleDate(article.publishedAt)}</div>
+                <<div class="article-meta">${formatDate(article.publishedAt)}</div>
                 <h3 class="article-headline">${postTitle}</h3>
                 <p class="article-excerpt">${postExcerpt}</p>
             </div>
