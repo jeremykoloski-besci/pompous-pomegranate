@@ -573,7 +573,7 @@ async function fetchArticlesFromSanity() {
 }
 
 document.addEventListener('click', (e) => {
-    const navLink = e.target.closest('.main-nav .nav-link, .footer-col ul a[data-category]');
+    const navLink = e.target.closest('.main-nav .nav-link, .footer-col ul a[data-category], .mobile-nav-links a');
     
     if (navLink) {
         const catAttr = navLink.getAttribute('data-category');
@@ -588,16 +588,17 @@ document.addEventListener('click', (e) => {
         e.preventDefault();
         currentCategory = targetCat;
 
+        // Update active states across both desktop and mobile navs
+        document.querySelectorAll('.main-nav .nav-link, .mobile-nav-links a').forEach(l => {
+            if (l.getAttribute('data-category') === currentCategory) {
+                l.classList.add('active');
+            } else {
+                l.classList.remove('active');
+            }
+        });
+
         if (navLink.closest('.site-footer')) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            const matchingNav = document.querySelector(`.main-nav .nav-link[data-category="${currentCategory}"]`);
-            if (matchingNav) {
-                document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-                matchingNav.classList.add('active');
-            }
-        } else if (navLink.closest('.main-nav')) {
-            document.querySelectorAll('.main-nav .nav-link').forEach(l => l.classList.remove('active'));
-            navLink.classList.add('active');
         }
         
         const searchInput = document.getElementById('searchInput');
@@ -637,7 +638,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (targetCategory) {
         currentCategory = targetCategory.trim().toLowerCase();
         
-        document.querySelectorAll('.main-nav .nav-link').forEach(l => {
+        document.querySelectorAll('.main-nav .nav-link, .mobile-nav-links a').forEach(l => {
             if (l.getAttribute('data-category') === currentCategory) {
                 l.classList.add('active');
             } else {
@@ -653,40 +654,37 @@ window.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    const headerLinks = document.querySelectorAll('header a.site-title-link, .logo-area a');
+    const headerLinks = document.querySelectorAll('header a.site-title-link, .logo-area a, .mobile-header-logo');
     headerLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             window.location.href = '/';
         });
     });
-    // --- MOBILE MENU TOGGLE HANDLER ---
+
+    // --- BEE-STYLE MOBILE MENU DRAWER TOGGLE ---
     const menuToggle = document.getElementById('menuToggle');
-    const navLinksList = document.querySelector('.main-nav ul');
+    const mobileMenuDrawer = document.getElementById('mobileMenuDrawer');
+    const mobileMenuClose = document.getElementById('mobileMenuClose');
+    const mobileBackdrop = document.getElementById('mobileBackdrop');
 
-    if (menuToggle && navLinksList) {
-        menuToggle.addEventListener('click', () => {
-            navLinksList.classList.toggle('mobile-open');
-            // Switch icon between bars and 'X' close icon
-            const icon = menuToggle.querySelector('i');
-            if (icon) {
-                if (navLinksList.classList.contains('mobile-open')) {
-                    icon.className = 'fa-solid fa-xmark';
-                } else {
-                    icon.className = 'fa-solid fa-bars';
-                }
-            }
-        });
-
-        // Close menu automatically when clicking any link
-        navLinksList.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinksList.classList.remove('mobile-open');
-                const icon = menuToggle.querySelector('i');
-                if (icon) icon.className = 'fa-solid fa-bars';
-            });
-        });
+    function toggleMobileMenu() {
+        if (mobileMenuDrawer && mobileBackdrop) {
+            mobileMenuDrawer.classList.toggle('open');
+            mobileBackdrop.classList.toggle('active');
+        }
     }
+
+    if (menuToggle) menuToggle.addEventListener('click', toggleMobileMenu);
+    if (mobileMenuClose) mobileMenuClose.addEventListener('click', toggleMobileMenu);
+    if (mobileBackdrop) mobileBackdrop.addEventListener('click', toggleMobileMenu);
+
+    // Close drawer when clicking mobile nav links
+    document.querySelectorAll('.mobile-nav-links a').forEach(link => {
+        link.addEventListener('click', () => {
+            toggleMobileMenu();
+        });
+    });
 
     // --- Newsletter Subscription Handler ---
     const newsletterForm = document.getElementById('newsletterForm');
