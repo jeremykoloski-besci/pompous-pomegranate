@@ -50,8 +50,9 @@ body {
     background-color: var(--bg-color);
     color: var(--text-primary);
     line-height: 1.6;
-    /* Keeps page content from sliding under the fixed header stack */
-    padding-top: 175px;
+    /* Initial padding for the expanded sticky header stack */
+    padding-top: 195px;
+    transition: padding-top 0.3s ease;
 }
 
 h1, h2, h3, h4, .article-headline {
@@ -69,6 +70,7 @@ h1, h2, h3, h4, .article-headline {
     font-size: 0.9rem;
     font-weight: 500;
     width: 100%;
+    transition: all 0.3s ease;
 }
 
 .announcement-bar a {
@@ -78,15 +80,19 @@ h1, h2, h3, h4, .article-headline {
 }
 
 /* ==========================================
-   3. FIXED HEADER & NAVIGATION
+   3. STICKY SHRINKING HEADER & NAVIGATION
    ========================================== */
 .site-header {
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
+    z-index: 1000;
     background-color: var(--header-bg);
     color: var(--header-text);
     border-bottom: 3px solid var(--accent-color);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .header-container {
@@ -96,6 +102,7 @@ h1, h2, h3, h4, .article-headline {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: padding 0.3s ease;
 }
 
 .header-left, .header-right {
@@ -140,11 +147,12 @@ h1, h2, h3, h4, .article-headline {
     align-items: center;
     justify-content: center;
     gap: 14px;
+    transition: transform 0.3s ease;
 }
 
 .pomegranate-icon {
     filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.3));
-    transition: transform 0.2s ease;
+    transition: all 0.3s ease;
     flex-shrink: 0;
 }
 
@@ -168,6 +176,7 @@ h1, h2, h3, h4, .article-headline {
     letter-spacing: 1.5px;
     color: #cccccc;
     margin-bottom: 3px;
+    transition: font-size 0.3s ease;
 }
 
 .title-main {
@@ -177,6 +186,7 @@ h1, h2, h3, h4, .article-headline {
     letter-spacing: -0.5px;
     color: #ffffff;
     text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+    transition: font-size 0.3s ease;
 }
 
 .site-title-link:hover .title-main {
@@ -195,6 +205,10 @@ h1, h2, h3, h4, .article-headline {
     display: inline-flex;
     align-items: center;
     gap: 12px;
+    opacity: 1;
+    max-height: 30px;
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .site-tagline::before,
@@ -238,6 +252,7 @@ h1, h2, h3, h4, .article-headline {
 .main-nav {
     background-color: rgba(0, 0, 0, 0.2);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background-color 0.3s ease;
 }
 
 .main-nav ul {
@@ -261,6 +276,52 @@ h1, h2, h3, h4, .article-headline {
     color: #ffffff;
     border-bottom: 2px solid var(--accent-color);
     padding-bottom: 2px;
+}
+
+/* --- SCROLLED HEADER STATE (Bee Style Compact & Frosted) --- */
+.site-header.scrolled {
+    background-color: rgba(31, 31, 31, 0.92);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+[data-theme="dark"] .site-header.scrolled {
+    background-color: rgba(10, 10, 10, 0.92);
+}
+
+.site-header.scrolled .header-container {
+    padding: 8px 20px;
+}
+
+.site-header.scrolled .announcement-bar {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+    opacity: 0;
+}
+
+.site-header.scrolled .site-tagline {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
+}
+
+.site-header.scrolled .title-main {
+    font-size: 1.3rem;
+}
+
+.site-header.scrolled .pomegranate-icon {
+    width: 28px;
+    height: 28px;
+}
+
+.site-header.scrolled .title-prefix {
+    font-size: 0.75rem;
+}
+
+.site-header.scrolled .main-nav {
+    background-color: rgba(0, 0, 0, 0.3);
 }
 
 /* ==========================================
@@ -375,29 +436,6 @@ h1, h2, h3, h4, .article-headline {
     color: #fff;
 }
 
-.social-share {
-    display: flex;
-    gap: 10px;
-}
-
-.social-share button {
-    background: none;
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.social-share button:hover {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-}
-
 .articles-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -490,10 +528,6 @@ h1, h2, h3, h4, .article-headline {
     color: var(--text-secondary);
 }
 
-.pitch-form .form-group {
-    margin-bottom: 15px;
-}
-
 .modal-form input, 
 .modal-form textarea,
 .pitch-form input {
@@ -529,34 +563,52 @@ h1, h2, h3, h4, .article-headline {
 }
 
 /* ==========================================
-   7. SOCIAL SHARE BUTTONS
+   7. ELEGANT ARTICLE SHARE BAR (Onion Style)
    ========================================== */
-.social-share-icon {
+.article-share-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 15px 0 25px 0;
+    padding: 12px 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.share-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+}
+
+.share-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.share-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
     text-decoration: none;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.social-share-icon:hover {
+.share-btn:hover {
     background-color: var(--accent-color);
     border-color: var(--accent-color);
     color: #ffffff;
     transform: translateY(-2px);
-}
-
-.social-share-icon.copy {
-    background: none;
-    border: 1px solid var(--border-color);
 }
 
 /* ==========================================
@@ -639,20 +691,6 @@ h1, h2, h3, h4, .article-headline {
 
 .trending-list a:hover {
     color: var(--accent-color);
-}
-
-.fact-check-box .claim {
-    font-size: 0.9rem;
-    margin-bottom: 10px;
-}
-
-.fact-check-box .verdict {
-    font-size: 0.9rem;
-}
-
-.false-badge {
-    color: #d32f2f;
-    font-weight: 700;
 }
 
 /* ==========================================
@@ -861,54 +899,7 @@ h1, h2, h3, h4, .article-headline {
         justify-content: flex-start;
     }
 }
-/* ==========================================
-   ELEGANT ARTICLE SHARE BAR (Onion Style)
-   ========================================== */
-.article-share-container {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin: 15px 0 25px 0;
-    padding: 12px 0;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
-}
 
-.share-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text-secondary);
-}
-
-.share-buttons {
-    display: flex;
-    gap: 8px;
-}
-
-.share-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    text-decoration: none;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.share-btn:hover {
-    background-color: var(--accent-color);
-    border-color: var(--accent-color);
-    color: #ffffff;
-    transform: translateY(-2px);
-}
 /* ==========================================
    11. FOOTER STYLES
    ========================================== */
