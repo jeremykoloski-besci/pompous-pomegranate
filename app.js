@@ -83,6 +83,36 @@ async function renderSingleArticle(slug) {
             <img src="${imageSource}" alt="Article image" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;" onerror="this.style.display='none'">
         ` : '';
 
+        // --- SOCIAL SHARE LINKS GENERATOR ---
+        const currentUrl = encodeURIComponent(window.location.href);
+        const shareTitle = encodeURIComponent(post.title || post.headline || 'The Pompous Pomegranate');
+
+        const socialShareHTML = `
+          <div class="article-social-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+              <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px;">Share:</span>
+              
+              <!-- Facebook -->
+              <a href="https://www.facebook.com/sharer/sharer.php?u=${currentUrl}" target="_blank" rel="noopener noreferrer" class="social-share-icon fb" title="Share on Facebook">
+                  <i class="fa-brands fa-facebook-f"></i>
+              </a>
+              
+              <!-- X / Twitter -->
+              <a href="https://twitter.com/intent/tweet?url=${currentUrl}&text=${shareTitle}" target="_blank" rel="noopener noreferrer" class="social-share-icon twitter" title="Share on X">
+                  <i class="fa-brands fa-x-twitter"></i>
+              </a>
+              
+              <!-- Email -->
+              <a href="mailto:?subject=${shareTitle}&body=Check out this satirical piece: ${currentUrl}" class="social-share-icon email" title="Share via Email">
+                  <i class="fa-solid fa-envelope"></i>
+              </a>
+              
+              <!-- Copy Link -->
+              <button onclick="navigator.clipboard.writeText(window.location.href); showToast('Article link copied to clipboard!');" class="social-share-icon copy" title="Copy Link">
+                  <i class="fa-solid fa-link"></i>
+              </button>
+          </div>
+        `;
+
         // --- PREVIOUS & NEXT ARTICLE NAVIGATION COMPONENTS ---
         const prevNav = post.prevPost ? `
           <a href="/article/${post.prevPost.slug}" class="nav-card prev-card">
@@ -128,7 +158,7 @@ async function renderSingleArticle(slug) {
             articleView.innerHTML = `
                 <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:var(--text-primary); color:var(--card-bg); border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
                 <h1 style="font-size: 36px; margin-bottom: 12px; font-weight: 700; font-family: 'Zilla Slab', serif; color: var(--text-primary);">${post.title || post.headline}</h1>
-                <div style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px; display: flex; justify-content: space-between; align-items: center;">
                     <span>By ${post.author || 'Anonymous Pomp'} • ${new Date(post.publishedAt || post.submittedAt).toLocaleDateString()}</span>
                     
                     <!-- Like Button Component -->
@@ -137,6 +167,7 @@ async function renderSingleArticle(slug) {
                         <span id="likeCount">${post.likes || 0}</span> Likes
                     </button>
                 </div>
+                ${socialShareHTML}
                 ${imageHtml}
                 <div style="font-size: 18px; color: var(--text-primary); line-height: 1.7;">${htmlContent}</div>
                 ${paginationHTML}
