@@ -49,30 +49,6 @@ export default async function handler(req, res) {
         }
       }`;
 
-      // ... fetch from Sanity ...
-      const data = await sanityResponse.json();
-
-      let result = data.result?.post || null;
-      let allPosts = data.result?.allPosts || [];
-
-      if (result) {
-        // Find currentIndex in the chronological feed to determine Prev / Next
-        const currentIndex = allPosts.findIndex(p => p.slug?.current === slugParam);
-        
-        // Note: Because feed is ordered desc (newest first):
-        // "Next" (newer article) is at index - 1
-        // "Previous" (older article) is at index + 1
-        const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
-        const prevPost = currentIndex >= 0 && currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
-
-        result.prevPost = prevPost ? { title: prevPost.title, slug: prevPost.slug?.current, imageUrl: prevPost.imageUrl } : null;
-        result.nextPost = nextPost ? { title: nextPost.title, slug: nextPost.slug?.current, imageUrl: nextPost.imageUrl } : null;
-      }
-
-      // ... community pitch fallback check ...
-      return res.status(200).json({ result });
-    }
-
       const params = new URLSearchParams();
       params.append('query', groqQuery);
       params.append('$slug', `"${slugParam}"`);
@@ -84,8 +60,9 @@ export default async function handler(req, res) {
       const data = await sanityResponse.json();
 
       let result = data.result?.post || null;
+      let allPosts = data.result?.allPosts || [];
 
-      // Match community pitch by exact slugified headline
+      // Match community pitch by exact slugified headline if not found in posts
       if (!result && data.result?.pitches) {
         const matchingPitch = data.result.pitches.find(p => {
           const pSlug = (p.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -114,6 +91,17 @@ export default async function handler(req, res) {
             publishedAt: matchingPitch.submittedAt || matchingPitch._createdAt
           };
         }
+      }
+
+      if (result && allPosts.length > 0) {
+        // Find currentIndex in the chronological feed to determine Prev / Next
+        const currentIndex = allPosts.findIndex(p => p.slug?.current === slugParam);
+        
+        const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
+        const prevPost = currentIndex >= 0 && currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+
+        result.prevPost = prevPost ? { title: prevPost.title, slug: prevPost.slug?.current, imageUrl: prevPost.imageUrl } : null;
+        result.nextPost = nextPost ? { title: nextPost.title, slug: nextPost.slug?.current, imageUrl: nextPost.imageUrl } : null;
       }
 
       return res.status(200).json({ result });
