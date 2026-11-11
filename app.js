@@ -153,7 +153,7 @@ async function renderSingleArticle(slug) {
                 <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:var(--text-primary); color:var(--card-bg); border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
                 <h1 style="font-size: 36px; margin-bottom: 12px; font-weight: 700; font-family: 'Zilla Slab', serif; color: var(--text-primary);">${post.title || post.headline}</h1>
                 <div style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px; display: flex; justify-content: space-between; align-items: center;">
-                    <span>By ${post.author || 'Anonymous Pomp'} • ${new Date(post.publishedAt || post.submittedAt).toLocaleDateString()}</span>
+                    <span>${formatArticleDate(post.publishedAt || post.submittedAt)}</span>
                     
                     <!-- Like Button Component -->
                     <button id="likeArticleBtn" onclick="handleLike('${post._id}')" ${hasLiked ? 'data-liked="true" style="background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 6px 12px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600;"' : 'data-liked="false" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); padding: 6px 12px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600;"'}>
@@ -459,9 +459,9 @@ function extractTextFromPortableText(item, maxLength = 160) {
 
 function formatArticleDate(rawDateString) {
     if (!rawDateString) {
-        return new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
+        return new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     }
-    return new Date(rawDateString).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
+    return new Date(rawDateString).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
 function renderFeed(searchTerm = '') {
