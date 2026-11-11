@@ -26,6 +26,38 @@ async function renderSingleArticle(slug) {
 
         if (!post) {
             if (articleView) {
+                articleView.innerHTML = `
+                    <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:var(--text-primary); color:var(--card-bg); border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
+                    <h1>Article Not Found</h1>
+                    <p>This satire piece couldn't be found or is still awaiting publication.</p>
+                `;
+            }
+            return;
+        }
+
+        let htmlContent = '<p>No content provided.</p>';
+        const rawBody = post.body || post.text || post.description;
+
+        if (Array.isArray(rawBody)) {
+            htmlContent = rawBody.map(block => {
+                if (block._type === 'block' && block.children) {
+                    return `<p style="margin-bottom: 16px; line-height: 1.8;">${block.children.map(c => c.text).join('')}</p>`;
+                }
+                return '';
+            }).join('');
+        } else if (typeof rawBody === 'string' && rawBody.trim() !== '') {
+            htmlContent = `<p style="margin-bottom: 16px; line-height: 1.8;">${rawBody}</p>`;
+        }
+
+        const hasLiked = checkIfLiked(post._id);
+
+        // Check all possible image properties from posts and community pitches safely outside the template string
+        const imageSource = post.imageUrl || post.imageURL || post.image || (post.image?.asset?._ref ? post.image.asset._ref : '');
+        const imageHtml = imageSource ? `
+            <img src="${imageSource}" alt="Article image" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;" onerror="this.style.display='none'">
+        ` : '';
+
+        if (articleView) {
             articleView.innerHTML = `
                 <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:var(--text-primary); color:var(--card-bg); border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
                 <h1 style="font-size: 36px; margin-bottom: 12px; font-weight: 700; font-family: 'Zilla Slab', serif; color: var(--text-primary);">${post.title || post.headline}</h1>
@@ -39,48 +71,6 @@ async function renderSingleArticle(slug) {
                     </button>
                 </div>
                 ${imageHtml}
-                <div style="font-size: 18px; color: var(--text-primary); line-height: 1.7;">${htmlContent}</div>
-                    `;
-                }
-            return;
-        }
-
-         let htmlContent = '<p>No content provided.</p>';
-            const rawBody = post.body || post.text || post.description;
-    
-            if (Array.isArray(rawBody)) {
-                htmlContent = rawBody.map(block => {
-                    if (block._type === 'block' && block.children) {
-                        return `<p style="margin-bottom: 16px; line-height: 1.8;">${block.children.map(c => c.text).join('')}</p>`;
-                    }
-                    return '';
-                }).join('');
-            } else if (typeof rawBody === 'string' && rawBody.trim() !== '') {
-                // Handle plain text strings (like community pitches)
-                htmlContent = `<p style="margin-bottom: 16px; line-height: 1.8;">${rawBody}</p>`;
-            }
-
-        const hasLiked = checkIfLiked(post._id);
-
-        if (articleView) {
-            articleView.innerHTML = `
-                <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:var(--text-primary); color:var(--card-bg); border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
-                <h1 style="font-size: 36px; margin-bottom: 12px; font-weight: 700; font-family: 'Zilla Slab', serif; color: var(--text-primary);">${post.title}</h1>
-                <div style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-                    <span>By ${post.author || 'Anonymous Pomp'} • ${new Date(post.publishedAt || post.submittedAt).toLocaleDateString()}</span>
-                    
-                    <!-- Like Button Component -->
-                    <button id="likeArticleBtn" onclick="handleLike('${post._id}')" ${hasLiked ? 'data-liked="true" style="background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 6px 12px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600;"' : 'data-liked="false" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); padding: 6px 12px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600;"'}>
-                        <i class="fa-solid fa-heart" style="color: var(--accent-color);"></i> 
-                        <span id="likeCount">${post.likes || 0}</span> Likes
-                    </button>
-                </div>
-                // Check all possible image properties from posts and community pitches
-                const imageSource = post.imageUrl || post.imageURL || post.image || (post.image?.asset?._ref ? post.image.asset._ref : '');
-        
-                const imageHtml = imageSource ? `
-                    <img src="${imageSource}" alt="Article image" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;" onerror="this.style.display='none'">
-                ` : '';
                 <div style="font-size: 18px; color: var(--text-primary); line-height: 1.7;">${htmlContent}</div>
             `;
         }
@@ -120,7 +110,7 @@ async function handleLike(postId) {
     markAsLiked(postId);
 
     try {
-        const response = await fetch('/api/like', {
+        const response = await fetch('/api/like-post', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ postId })
