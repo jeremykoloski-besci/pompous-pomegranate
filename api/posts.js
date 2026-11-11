@@ -34,7 +34,10 @@ export default async function handler(req, res) {
           headline,
           body,
           submittedAt,
-          "imageUrl": coalesce(image.asset._ref, mainImage.asset._ref, photo.asset._ref, picture.asset._ref)
+          image,
+          mainImage,
+          photo,
+          picture
         }
       }`;
 
@@ -74,7 +77,7 @@ export default async function handler(req, res) {
             title: matchingPitch.headline || "Untitled Pitch",
             body: bodyText,
             author: matchingPitch.author || "Anonymous Pomp",
-            imageUrl: matchingPitch.imageUrl || null, // Passes raw asset ref to frontend urlForSanityImage()
+            imageUrl: matchingPitch.image || matchingPitch.mainImage || matchingPitch.photo || matchingPitch.picture || null,
             likes: 0,
             publishedAt: matchingPitch.submittedAt || matchingPitch._createdAt
           };
@@ -103,7 +106,10 @@ export default async function handler(req, res) {
         headline,
         body,
         submittedAt,
-        "imageUrl": coalesce(image.asset._ref, mainImage.asset._ref, photo.asset._ref, picture.asset._ref)
+        image,
+        mainImage,
+        photo,
+        picture
       },
       "factCheck": *[_type == "factCheck"] | order(publishedAt desc)[0] {
         claim,
