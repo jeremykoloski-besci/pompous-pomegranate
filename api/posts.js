@@ -60,45 +60,50 @@ export default async function handler(req, res) {
       const data = await sanityResponse.json();
 
       let result = data.result?.post || null;
-      let allPosts = data.result?.allPosts || [];
+      let rawPosts = data.result?.allPosts || [];
+      let rawPitches = data.result?.pitches || [];
 
-      // Match community pitch by exact slugified headline if not found in posts
-      if (!result && data.result?.pitches) {
-        const matchingPitch = data.result.pitches.find(p => {
-          const pSlug = (p.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-          return pSlug === slugParam;
-        });
+      // Format community pitches into standard post shapes so they can share prev/next navigation seamlessly
+      let formattedPitches = rawPitches.map(p => {
+        let bodyText = "";
+        const raw = p.body;
+        if (typeof raw === 'string') {
+          bodyText = raw;
+        } else if (Array.isArray(raw)) {
+          bodyText = raw.map(b => b.children ? b.children.map(c => c.text).join('') : '').join('\n');
+        } else if (raw && typeof raw === 'object') {
+          bodyText = raw.body || raw.text || raw.content || JSON.stringify(raw);
+        }
 
+        const pSlug = (p.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        return {
+          _id: p._id,
+          title: p.headline || "Untitled Pitch",
+          slug: { current: pSlug },
+          body: bodyText,
+          author: p.author || "Anonymous Pomp",
+          imageUrl: p.image || p.mainImage || p.photo || p.picture || null,
+          likes: 0,
+          publishedAt: p.submittedAt || p._createdAt
+        };
+      });
+
+      // Combine both regular posts and community pitches into a unified chronological feed
+      let unifiedFeed = [...rawPosts, ...formattedPitches].sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+
+      // Match community pitch if not found in official posts
+      if (!result && rawPitches) {
+        const matchingPitch = formattedPitches.find(p => p.slug.current === slugParam);
         if (matchingPitch) {
-          let bodyText = "";
-          const raw = matchingPitch.body;
-
-          if (typeof raw === 'string') {
-            bodyText = raw;
-          } else if (Array.isArray(raw)) {
-            bodyText = raw.map(b => b.children ? b.children.map(c => c.text).join('') : '').join('\n');
-          } else if (raw && typeof raw === 'object') {
-            bodyText = raw.body || raw.text || raw.content || JSON.stringify(raw);
-          }
-
-          result = {
-            _id: matchingPitch._id,
-            title: matchingPitch.headline || "Untitled Pitch",
-            body: bodyText,
-            author: matchingPitch.author || "Anonymous Pomp",
-            imageUrl: matchingPitch.image || matchingPitch.mainImage || matchingPitch.photo || matchingPitch.picture || null,
-            likes: 0,
-            publishedAt: matchingPitch.submittedAt || matchingPitch._createdAt
-          };
+          result = matchingPitch;
         }
       }
 
-      if (result && allPosts.length > 0) {
-        // Find currentIndex in the chronological feed to determine Prev / Next
-        const currentIndex = allPosts.findIndex(p => p.slug?.current === slugParam);
+      if (result && unifiedFeed.length > 0) {
+        const currentIndex = unifiedFeed.findIndex(p => p.slug?.current === slugParam);
         
-        const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
-        const prevPost = currentIndex >= 0 && currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+        const nextPost = currentIndex > 0 ? unifiedFeed[currentIndex - 1] : null;
+        const prevPost = currentIndex >= 0 && currentIndex < unifiedFeed.length - 1 ? unifiedFeed[currentIndex + 1] : null;
 
         result.prevPost = prevPost ? { title: prevPost.title, slug: prevPost.slug?.current, imageUrl: prevPost.imageUrl } : null;
         result.nextPost = nextPost ? { title: nextPost.title, slug: nextPost.slug?.current, imageUrl: nextPost.imageUrl } : null;
