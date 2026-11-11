@@ -65,7 +65,12 @@ async function renderSingleArticle(slug) {
                         <span id="likeCount">${post.likes || 0}</span> Likes
                     </button>
                 </div>
-                ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Article image" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;">` : ''}
+                // Check all possible image properties from posts and community pitches
+                const imageSource = post.imageUrl || post.imageURL || post.image || (post.image?.asset?._ref ? post.image.asset._ref : '');
+        
+                const imageHtml = imageSource ? `
+                    <img src="${imageSource}" alt="Article image" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;" onerror="this.style.display='none'">
+                ` : '';
                 <div style="font-size: 18px; color: var(--text-primary); line-height: 1.7;">${htmlContent}</div>
             `;
         }
