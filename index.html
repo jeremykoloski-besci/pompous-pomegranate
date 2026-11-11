@@ -43,11 +43,18 @@
         <!-- Main Top Banner Header (Visible at top) -->
         <div class="header-main-banner">
             <div class="header-container">
-                <!-- Inside the top header-left container -->
-        <div class="header-left">
-            <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu"><i class="fa-solid fa-bars"></i></button>
-            <div class="current-date" id="currentDate"></div>
-        </div>
+                <!-- Mobile Left Header Area (Compact Logo on Mobile) -->
+                <div class="header-left">
+                    <a href="/" class="mobile-header-logo">
+                        <svg class="pomegranate-icon" viewBox="0 0 100 100" width="26" height="26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M40 18 L50 6 L60 18 L68 12 L64 24 L36 24 L32 12 Z" fill="#8B0000" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round"/>
+                            <circle cx="50" cy="56" r="36" fill="#8B0000" stroke="#1A1A1A" stroke-width="4"/>
+                            <path d="M35 48 C35 40, 65 40, 65 48 C65 65, 35 65, 35 48 Z" fill="#D4AF37" opacity="0.9"/>
+                        </svg>
+                        <span class="title-main-compact">Pompous Pomegranate</span>
+                    </a>
+                    <div class="current-date" id="currentDate"></div>
+                </div>
                 
                 <div class="logo-area">
                     <a href="/" class="site-title-link">
@@ -75,6 +82,10 @@
                     </button>
                     <button class="subscribe-btn" id="openModalBtn" style="display: none;">
                         <i class="fa-solid fa-crown"></i> Pomegranate Plus
+                    </button>
+                    <!-- Mobile Hamburger Toggle Button -->
+                    <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+                        <i class="fa-solid fa-bars"></i>
                     </button>
                 </div>
             </div>
@@ -178,6 +189,23 @@
 
         </aside>
 
+    </div>
+
+    <!-- Mobile Slide-out Menu Drawer -->
+    <div class="mobile-backdrop" id="mobileBackdrop"></div>
+    <div class="mobile-menu-drawer" id="mobileMenuDrawer">
+        <div class="mobile-menu-header">
+            <span style="font-family: 'Zilla Slab', serif; font-weight: 900; font-size: 1.1rem; color: #fff;">Menu</span>
+            <button class="mobile-menu-close" id="mobileMenuClose"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <ul class="mobile-nav-links">
+            <li><a href="#" data-category="home" class="active">Home</a></li>
+            <li><a href="#" data-category="politics">Politics</a></li>
+            <li><a href="#" data-category="tech">Tech & AI</a></li>
+            <li><a href="#" data-category="culture">Culture</a></li>
+            <li><a href="#" data-category="opinion">Opinion</a></li>
+            <li><a href="#" data-category="pitches">Community Pitches</a></li>
+        </ul>
     </div>
 
     <!-- Community Article Submission Modal Overlay -->
