@@ -9,24 +9,21 @@ async function renderSingleArticle(slug) {
         const post = data.result;
 
         // Hide home page elements
-        const homeElements = document.querySelectorAll('main, .hero-section, .feed-container, .trending-section, #articlesGrid');
+        const homeElements = document.querySelectorAll('main:not(#singleArticleContainer), .hero-section, .feed-container, .trending-section, #articlesGrid');
         homeElements.forEach(el => {
             if (el) el.style.setProperty('display', 'none', 'important');
         });
 
-        // Ensure singleArticleView container exists and is visible
-        let articleView = document.getElementById('singleArticleView');
-        if (!articleView) {
-            articleView = document.createElement('div');
-            articleView.id = 'singleArticleView';
-            articleView.style.cssText = 'max-width: 800px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: block;';
-            document.body.appendChild(articleView);
-        } else {
-            articleView.style.setProperty('display', 'block', 'important');
+        let articleContainer = document.getElementById('singleArticleContainer');
+        if (!articleContainer) {
+            articleContainer = document.createElement('main');
+            articleContainer.id = 'singleArticleContainer';
+            document.body.appendChild(articleContainer);
         }
+        articleContainer.style.setProperty('display', 'block', 'important');
 
         if (!post) {
-            articleView.innerHTML = `
+            articleContainer.innerHTML = `
                 <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px;">&larr; Back to Home</button>
                 <h1>Article Not Found</h1>
                 <p>This satire piece couldn't be found or is still awaiting publication.</p>
@@ -48,25 +45,25 @@ async function renderSingleArticle(slug) {
         const postId = post._id || slug;
         const hasLiked = localStorage.getItem(`liked_${postId}`) === 'true';
 
-        // Render everything including the like button footer in one go
-        articleView.innerHTML = `
-            <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:#18181b; color:#fff; border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
-            <h1 style="font-size: 32px; margin-bottom: 12px; font-weight: 700;">${post.title}</h1>
-            <div style="color: #666; margin-bottom: 24px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 12px;">
+        // FULL INNERHTML INCLUDING THE LIKE BUTTON FOOTER
+        articleContainer.innerHTML = `
+            <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:var(--text-primary); color:var(--card-bg); border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
+            <h1 style="font-size: 36px; margin-bottom: 12px; font-weight: 700; font-family: 'Zilla Slab', serif; color: var(--text-primary);">${post.title}</h1>
+            <div style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
                 By ${post.author || 'Anonymous Pomp'} • ${new Date(post.publishedAt || post.submittedAt).toLocaleDateString()}
             </div>
-            ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Article image" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;">` : ''}
-            <div style="font-size: 18px; color: #27272a; margin-bottom: 30px;">${htmlContent}</div>
+            ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Article image" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;">` : ''}
+            <div style="font-size: 18px; color: var(--text-primary); line-height: 1.7;">${htmlContent}</div>
             
-            <div class="article-footer-actions" style="padding-top: 20px; border-top: 1px solid #eee; display: flex; align-items: center; justify-content: space-between;">
+            <div class="article-footer-actions" style="padding-top: 24px; margin-top: 30px; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
                 <button id="likeBtn" data-id="${postId}" style="background: #8b0000; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; ${hasLiked ? 'opacity: 0.7;' : ''}">
                     ❤️ Applaud / Like (<span id="likeCount">${currentLikes}</span>)
                 </button>
-                <span style="font-size: 0.85rem; color: #666;">Share the nonsense responsibly.</span>
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">Share the nonsense responsibly.</span>
             </div>
         `;
 
-        // Wire up the like button event listener immediately after injection
+        // Wire up like button click listener
         const likeBtn = document.getElementById('likeBtn');
         const likeCountSpan = document.getElementById('likeCount');
         if (likeBtn) {
