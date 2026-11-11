@@ -45,6 +45,8 @@ async function renderSingleArticle(slug) {
             }).join('');
         }
 
+        const hasLiked = checkIfLiked(post._id);
+
         if (articleView) {
             articleView.innerHTML = `
                 <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:var(--text-primary); color:var(--card-bg); border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
@@ -53,7 +55,7 @@ async function renderSingleArticle(slug) {
                     <span>By ${post.author || 'Anonymous Pomp'} • ${new Date(post.publishedAt || post.submittedAt).toLocaleDateString()}</span>
                     
                     <!-- Like Button Component -->
-                    <button id="likeArticleBtn" onclick="handleLike('${post._id}')" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); padding: 6px 12px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600;">
+                    <button id="likeArticleBtn" onclick="handleLike('${post._id}')" ${hasLiked ? 'data-liked="true" style="background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 6px 12px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600;"' : 'data-liked="false" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); padding: 6px 12px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600;"'}>
                         <i class="fa-solid fa-heart" style="color: var(--accent-color);"></i> 
                         <span id="likeCount">${post.likes || 0}</span> Likes
                     </button>
@@ -68,19 +70,37 @@ async function renderSingleArticle(slug) {
     }
 }
 
+function checkIfLiked(postId) {
+    const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+    return likedPosts.includes(postId);
+}
+
+function markAsLiked(postId) {
+    const likedPosts = JSON.parse(localStorage.getItem('liked_posts') || '[]');
+    if (!likedPosts.includes(postId)) {
+        likedPosts.push(postId);
+        localStorage.setItem('liked_posts', JSON.stringify(likedPosts));
+    }
+}
+
 async function handleLike(postId) {
     const likeBtn = document.getElementById('likeArticleBtn');
     const likeCountSpan = document.getElementById('likeCount');
-    if (!likeBtn || likeBtn.dataset.liked === "true") return;
+    if (!likeBtn || likeBtn.dataset.liked === "true") {
+        showToast("You've already liked this piece of fine journalism!");
+        return;
+    }
 
     // Optimistically update UI immediately for instant feedback
     likeBtn.dataset.liked = "true";
     likeBtn.style.borderColor = "var(--accent-color)";
+    likeBtn.style.color = "var(--accent-color)";
     let currentLikes = parseInt(likeCountSpan.textContent) || 0;
     likeCountSpan.textContent = currentLikes + 1;
+    markAsLiked(postId);
 
     try {
-        const response = await fetch('/api/like', {
+        const response = await fetch('/api/like-post', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ postId })
@@ -94,6 +114,8 @@ async function handleLike(postId) {
         // Revert UI if server request fails
         likeCountSpan.textContent = currentLikes;
         likeBtn.dataset.liked = "false";
+        likeBtn.style.borderColor = "var(--border-color)";
+        likeBtn.style.color = "var(--text-primary)";
     }
 }
 
