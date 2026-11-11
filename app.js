@@ -51,7 +51,7 @@ async function renderSingleArticle(slug) {
 
         const hasLiked = checkIfLiked(post._id);
 
-        // Check all possible image properties from posts and community pitches safely outside the template string
+        // Check all possible image properties safely outside the template string
         const imageSource = post.imageUrl || post.imageURL || post.image || (post.image?.asset?._ref ? post.image.asset._ref : '');
         const imageHtml = imageSource ? `
             <img src="${imageSource}" alt="Article image" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;" onerror="this.style.display='none'">
