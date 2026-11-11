@@ -950,18 +950,23 @@ h1, h2, h3, h4, .article-headline {
     
     .nav-card {
         padding: 10px;
+        display: flex;
         flex-direction: column;
+        justify-content: space-between; /* Pushes image to top, text block to bottom */
         text-align: center;
         align-items: center;
     }
 
-    .next-card {
-        text-align: center;
-        justify-content: flex-start;
+    /* Force the inner text div to always stay at the bottom of the card */
+    .nav-card > div:not(:first-child),
+    .nav-card div {
+        order: 2;
+        width: 100%;
     }
 
-    /* Force both images to be identical size and on top */
+    /* Force the image to always stay at the very top */
     .nav-card img {
+        order: 1;
         width: 100%;
         height: 80px;
         object-fit: cover;
@@ -979,7 +984,6 @@ h1, h2, h3, h4, .article-headline {
         font-size: 0.65rem;
     }
 }
-
 /* ==========================================
    EXACT BEE-STYLE SINGLE LINE MOBILE HEADER
    ========================================== */
