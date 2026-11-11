@@ -51,7 +51,7 @@
                 <a href="/" class="site-title-link">
                     <div class="brand-logo-wrapper">
                         <!-- Custom Stylized Pomegranate Icon -->
-                        <svg class="pomegranate-icon" viewBox="0 0 100 100" width="38" height="38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="pomegranate-icon" viewBox="0 0 100 100" width="42" height="42" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <!-- Crown / Sepal top -->
                             <path d="M40 18 L50 6 L60 18 L68 12 L64 24 L36 24 L32 12 Z" fill="#8B0000" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round"/>
                             <!-- Main Pomegranate Body -->
@@ -86,14 +86,30 @@
 
         <!-- Navigation Categories -->
         <nav class="main-nav">
-            <ul>
-                <li><a href="/?category=all" class="nav-link active" data-category="all">Home</a></li>
-                <li><a href="/?category=politics" class="nav-link" data-category="politics">Politics</a></li>
-                <li><a href="/?category=tech" class="nav-link" data-category="tech">Tech & AI</a></li>
-                <li><a href="/?category=culture" class="nav-link" data-category="culture">Culture</a></li>
-                <li><a href="/?category=opinion" class="nav-link" data-category="opinion">Opinion</a></li>
-                <li><a href="/?category=pitches" class="nav-link" data-category="pitches">Community Pitches</a></li>
-            </ul>
+            <div class="nav-inner-container">
+                <!-- Compact Brand Logo that slides into view on the left when scrolled -->
+                <div class="nav-left-brand">
+                    <a href="/" class="site-title-link">
+                        <div class="brand-logo-wrapper">
+                            <svg class="pomegranate-icon" viewBox="0 0 100 100" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M40 18 L50 6 L60 18 L68 12 L64 24 L36 24 L32 12 Z" fill="#8B0000" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round"/>
+                                <circle cx="50" cy="56" r="36" fill="#8B0000" stroke="#1A1A1A" stroke-width="4"/>
+                                <path d="M35 48 C35 40, 65 40, 65 48 C65 65, 35 65, 35 48 Z" fill="#D4AF37" opacity="0.9"/>
+                            </svg>
+                            <span class="title-main-compact">Pompous Pomegranate</span>
+                        </div>
+                    </a>
+                </div>
+
+                <ul>
+                    <li><a href="/?category=all" class="nav-link active" data-category="all">Home</a></li>
+                    <li><a href="/?category=politics" class="nav-link" data-category="politics">Politics</a></li>
+                    <li><a href="/?category=tech" class="nav-link" data-category="tech">Tech & AI</a></li>
+                    <li><a href="/?category=culture" class="nav-link" data-category="culture">Culture</a></li>
+                    <li><a href="/?category=opinion" class="nav-link" data-category="opinion">Opinion</a></li>
+                    <li><a href="/?category=pitches" class="nav-link" data-category="pitches">Community Pitches</a></li>
+                </ul>
+            </div>
         </nav>
     </header>
 
