@@ -63,9 +63,9 @@ export default async function handler(req, res) {
                   <div class="title-box">
                     "${articleTitle}"
                   </div>
-                  <p>Our editors are moving forward with your piece. You can view your live article slug and updates using the link below:</p>
+                  <p>Our editors are moving forward with your piece. You can view your live article using the link below:</p>
                   <div class="button-container">
-                    <a href="${articleUrl}" class="btn">View Article Dashboard</a>
+                    <a href="${articleUrl}" class="btn">View Article</a>
                   </div>
                 </div>
                 <div class="footer">
