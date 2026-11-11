@@ -409,7 +409,7 @@ function renderFeed(searchTerm = '') {
                     <img src="${pitchImage}" alt="Article thumbnail">
                 </div>
                 <div class="card-content">
-                    <div class="article-meta">${formatDate(article.publishedAt)}</div>
+                    <div class="article-meta"><i class="fa-regular fa-clock"></i> ${formatDate(article.publishedAt)}</div>
                     <h3 class="article-headline">${pitchTitle}</h3>
                     <p class="article-excerpt">${pitchExcerpt}</p>
                 </div>
