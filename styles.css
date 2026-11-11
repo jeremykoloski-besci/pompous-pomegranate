@@ -861,7 +861,54 @@ h1, h2, h3, h4, .article-headline {
         justify-content: flex-start;
     }
 }
+/* ==========================================
+   ELEGANT ARTICLE SHARE BAR (Onion Style)
+   ========================================== */
+.article-share-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 15px 0 25px 0;
+    padding: 12px 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
 
+.share-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+}
+
+.share-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.share-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.share-btn:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
 /* ==========================================
    11. FOOTER STYLES
    ========================================== */
