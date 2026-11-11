@@ -53,28 +53,14 @@ async function renderSingleArticle(slug) {
             `;
         }
 
-        // Also ensure sidebar widgets fetch and populate their data (Trending, Fact Check)
-        if (typeof fetchArticlesFromSanity === 'function' && allPosts.length === 0) {
-            await fetchArticlesFromSanity();
-        }
-
     } catch (err) {
         console.error("Error loading article:", err);
     }
 }
+
 function goHome() {
     window.location.href = '/';
 }
-
-window.addEventListener('DOMContentLoaded', () => {
-    const path = window.location.pathname;
-    console.log("Current path on load:", path);
-    if (path.startsWith('/article/')) {
-        const slug = path.split('/article/')[1];
-        console.log("Extracted slug:", slug);
-        renderSingleArticle(slug);
-    }
-});
 
 // Global application state
 let allPosts = [];
@@ -497,7 +483,8 @@ document.addEventListener('click', (e) => {
     if (e.target.id === 'openContactModal') { e.preventDefault(); openLegalModal('contact'); }
 });
 
-document.addEventListener('DOMContentLoaded', () => {
+// Unified DOMContentLoaded Initialization
+window.addEventListener('DOMContentLoaded', async () => {
     window.scrollTo(0, 0);
     
     if (window.location.hash) {
@@ -579,7 +566,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pitchForm = document.getElementById('pitchForm');
     if (pitchForm) {
-        pitchForm.appendEventListener?.('submit', async (e) => {}); // placeholder guard
         pitchForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const author = document.getElementById('pitchAuthor').value;
@@ -610,7 +596,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    fetchArticlesFromSanity();
+    // 1. Fetch data first so sidebar widgets populate properly everywhere
+    await fetchArticlesFromSanity();
+
+    // 2. Route based on URL path
+    const path = window.location.pathname;
+    console.log("Current path on load:", path);
+    if (path.startsWith('/article/')) {
+        const slug = path.split('/article/')[1];
+        console.log("Extracted slug:", slug);
+        await renderSingleArticle(slug);
+    }
 });
 
 function showToast(message) {
