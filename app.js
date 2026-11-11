@@ -83,6 +83,34 @@ async function renderSingleArticle(slug) {
             <img src="${imageSource}" alt="Article image" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;" onerror="this.style.display='none'">
         ` : '';
 
+        // --- PREVIOUS & NEXT ARTICLE NAVIGATION COMPONENTS ---
+        const prevNav = post.prevPost ? `
+          <a href="/article/${post.prevPost.slug}" class="nav-card prev-card">
+            ${post.prevPost.imageUrl ? `<img src="${urlForSanityImage(post.prevPost.imageUrl)}" alt="">` : ''}
+            <div>
+              <span class="nav-label">&larr; PREVIOUS</span>
+              <h4>${post.prevPost.title}</h4>
+            </div>
+          </a>
+        ` : '<div></div>';
+
+        const nextNav = post.nextPost ? `
+          <a href="/article/${post.nextPost.slug}" class="nav-card next-card">
+            <div>
+              <span class="nav-label">NEXT &rarr;</span>
+              <h4>${post.nextPost.title}</h4>
+            </div>
+            ${post.nextPost.imageUrl ? `<img src="${urlForSanityImage(post.nextPost.imageUrl)}" alt="">` : ''}
+          </a>
+        ` : '<div></div>';
+
+        const paginationHTML = `
+          <div class="article-pagination">
+            ${prevNav}
+            ${nextNav}
+          </div>
+        `;
+
         if (articleView) {
             articleView.innerHTML = `
                 <button onclick="goHome()" style="margin-bottom: 20px; cursor: pointer; padding: 8px 16px; background:var(--text-primary); color:var(--card-bg); border:none; border-radius:4px; font-weight:500;">&larr; Back to Home</button>
@@ -98,6 +126,7 @@ async function renderSingleArticle(slug) {
                 </div>
                 ${imageHtml}
                 <div style="font-size: 18px; color: var(--text-primary); line-height: 1.7;">${htmlContent}</div>
+                ${paginationHTML}
             `;
         }
 
@@ -295,6 +324,66 @@ dynamicStyle.textContent = `
     .article-card.card:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    /* Article Pagination Styles */
+    .article-pagination {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+    .nav-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      padding: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .nav-card:hover {
+      background: var(--bg-color);
+    }
+    .next-card {
+      text-align: right;
+      justify-content: flex-end;
+    }
+    .nav-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent-color);
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .nav-card h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      line-height: 1.3;
+      margin: 0;
+      color: var(--text-primary);
+    }
+    .nav-card img {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    @media (max-width: 640px) {
+      .article-pagination {
+        grid-template-columns: 1fr;
+      }
+      .next-card {
+        text-align: left;
+        justify-content: flex-start;
+      }
     }
 `;
 document.head.appendChild(dynamicStyle);
