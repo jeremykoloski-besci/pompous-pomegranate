@@ -416,6 +416,7 @@ h1, h2, h3, h4, .article-headline {
     transition: transform 0.3s ease;
 }
 
+/* Only scale the image, keep the category badge stable and visible */
 .card-image-wrapper:hover img {
     transform: scale(1.02);
 }
@@ -432,6 +433,7 @@ h1, h2, h3, h4, .article-headline {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border-radius: 3px;
+    z-index: 2; /* Ensures it always stays on top of the image */
 }
 
 .card-content {
