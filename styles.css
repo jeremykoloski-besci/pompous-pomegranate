@@ -953,98 +953,163 @@ h1, h2, h3, h4, .article-headline {
     }
 }
 /* ==========================================
-   11. MOBILE COLLAPSIBLE MENU STYLES
+   MOBILE HEADER & COLLAPSIBLE MENU (Bee Style)
    ========================================== */
 @media (max-width: 900px) {
-    /* Show the hamburger menu button on mobile */
-    .menu-toggle {
+    body {
+        padding-top: 85px; /* Compact top padding for mobile */
+    }
+
+    /* Ensure main header container stays single-line and compact */
+    .header-container {
+        padding: 10px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Hide the full desktop logo area from the main banner on mobile */
+    .header-container .logo-area {
+        display: none !important;
+    }
+
+    /* Show a compact logo on the left of the mobile header */
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .mobile-header-logo {
         display: flex !important;
         align-items: center;
-        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+        color: #fff;
+    }
+
+    .mobile-header-logo .title-main-compact {
+        font-family: 'Zilla Slab', serif;
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: #ffffff;
+        letter-spacing: -0.5px;
+    }
+
+    /* Right side controls: Subscribe button + Hamburger */
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .subscribe-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
+    .menu-toggle {
+        display: flex !important;
         background: none;
         border: none;
         color: var(--header-text);
-        font-size: 1.3rem;
+        font-size: 1.4rem;
         cursor: pointer;
         padding: 5px;
     }
 
-    /* Stack header contents nicely on mobile */
-    .header-container {
-        flex-direction: row;
+    /* Hide the default desktop nav bar */
+    .main-nav {
+        display: none; 
+    }
+
+    /* --- MOBILE DRAWER / DROPDOWN MENU --- */
+    .mobile-menu-drawer {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        max-width: 320px;
+        height: 100vh;
+        background-color: var(--header-bg);
+        box-shadow: -5px 0 25px rgba(0,0,0,0.5);
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 20px;
+        border-left: 2px solid var(--accent-color);
+    }
+
+    .mobile-menu-drawer.open {
+        right: 0;
+    }
+
+    .mobile-menu-header {
+        display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 10px 15px;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .header-left {
-        flex: 0;
-        gap: 10px;
+    .mobile-menu-close {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 1.5rem;
+        cursor: pointer;
     }
 
-    .current-date {
-        display: none; /* Hide date on mobile header to save space like Babylon Bee */
-    }
-
-    .logo-area {
-        flex: 1;
-        text-align: center;
-    }
-
-    .brand-logo-wrapper {
-        justify-content: center;
-        gap: 8px;
-    }
-
-    .title-main {
-        font-size: 1.5rem !important;
-    }
-
-    .site-tagline {
-        display: none; /* Hide tagline on mobile for clean look */
-    }
-
-    /* Collapse the navigation links list by default on mobile */
-    .main-nav .nav-inner-container {
+    .mobile-nav-links {
+        list-style: none;
+        display: flex;
         flex-direction: column;
-        align-items: stretch;
-        padding: 0;
+        gap: 15px;
     }
 
-    .main-nav ul {
-        display: none; /* Hidden by default */
-        flex-direction: column;
-        gap: 0;
-        width: 100%;
-        background-color: var(--header-bg);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 10px 0;
-    }
-
-    /* When toggled open via JS class */
-    .main-nav ul.mobile-open {
-        display: flex !important;
-    }
-
-    .main-nav ul li {
-        text-align: left;
-        width: 100%;
-    }
-
-    .main-nav ul li a {
+    .mobile-nav-links a {
+        color: #ffffff;
+        text-decoration: none;
+        font-size: 1.1rem;
+        font-weight: 600;
         display: block;
-        padding: 12px 20px;
+        padding: 8px 0;
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .main-nav a:hover, .main-nav a.active {
-        border-bottom: none;
-        background-color: rgba(255, 255, 255, 0.05);
+    .mobile-nav-links a:hover,
+    .mobile-nav-links a.active {
         color: var(--gold-color);
     }
-    
-    body {
-        padding-top: 110px; /* Adjust top padding for smaller mobile header */
+
+    /* Overlay backdrop when mobile menu is open */
+    .mobile-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: rgba(0,0,0,0.6);
+        z-index: 1500;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .mobile-backdrop.active {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+/* Hide mobile logo on desktop */
+@media (min-width: 901px) {
+    .mobile-header-logo,
+    .mobile-menu-drawer,
+    .mobile-backdrop {
+        display: none !important;
     }
 }
 /* ==========================================
