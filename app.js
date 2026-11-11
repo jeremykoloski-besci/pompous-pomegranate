@@ -83,33 +83,27 @@ async function renderSingleArticle(slug) {
             <img src="${imageSource}" alt="Article image" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;" onerror="this.style.display='none'">
         ` : '';
 
-        // --- SOCIAL SHARE LINKS GENERATOR ---
+        // --- SOCIAL SHARE LINKS GENERATOR (Onion Style) ---
         const currentUrl = encodeURIComponent(window.location.href);
         const shareTitle = encodeURIComponent(post.title || post.headline || 'The Pompous Pomegranate');
 
         const socialShareHTML = `
-          <div class="article-social-bar" style="display: flex; gap: 12px; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
-              <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px;">Share:</span>
-              
-              <!-- Facebook -->
-              <a href="https://www.facebook.com/sharer/sharer.php?u=${currentUrl}" target="_blank" rel="noopener noreferrer" class="social-share-icon fb" title="Share on Facebook">
-                  <i class="fa-brands fa-facebook-f"></i>
-              </a>
-              
-              <!-- X / Twitter -->
-              <a href="https://twitter.com/intent/tweet?url=${currentUrl}&text=${shareTitle}" target="_blank" rel="noopener noreferrer" class="social-share-icon twitter" title="Share on X">
-                  <i class="fa-brands fa-x-twitter"></i>
-              </a>
-              
-              <!-- Email -->
-              <a href="mailto:?subject=${shareTitle}&body=Check out this satirical piece: ${currentUrl}" class="social-share-icon email" title="Share via Email">
-                  <i class="fa-solid fa-envelope"></i>
-              </a>
-              
-              <!-- Copy Link -->
-              <button onclick="navigator.clipboard.writeText(window.location.href); showToast('Article link copied to clipboard!');" class="social-share-icon copy" title="Copy Link">
-                  <i class="fa-solid fa-link"></i>
-              </button>
+          <div class="article-share-container">
+              <span class="share-label">Share</span>
+              <div class="share-buttons">
+                  <a href="https://www.facebook.com/sharer/sharer.php?u=${currentUrl}" target="_blank" rel="noopener noreferrer" class="share-btn" title="Share on Facebook">
+                      <i class="fa-brands fa-facebook-f"></i>
+                  </a>
+                  <a href="https://twitter.com/intent/tweet?url=${currentUrl}&text=${shareTitle}" target="_blank" rel="noopener noreferrer" class="share-btn" title="Share on X">
+                      <i class="fa-brands fa-x-twitter"></i>
+                  </a>
+                  <a href="mailto:?subject=${shareTitle}&body=Check out this satirical piece: ${currentUrl}" class="share-btn" title="Share via Email">
+                      <i class="fa-solid fa-envelope"></i>
+                  </a>
+                  <button onclick="navigator.clipboard.writeText(window.location.href); showToast('Article link copied to clipboard!');" class="share-btn" title="Copy Link">
+                      <i class="fa-solid fa-link"></i>
+                  </button>
+              </div>
           </div>
         `;
 
