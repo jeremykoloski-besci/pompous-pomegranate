@@ -409,7 +409,7 @@ function renderFeed(searchTerm = '') {
                     <img src="${pitchImage}" alt="Article thumbnail">
                 </div>
                 <div class="card-content">
-                    <div class="article-meta"><i class="fa-regular fa-clock"></i> ${formatDate(article.publishedAt)}</div>
+                    <div class="article-meta">${pitchDate}</div>
                     <h3 class="article-headline">${pitchTitle}</h3>
                     <p class="article-excerpt">${pitchExcerpt}</p>
                 </div>
@@ -458,7 +458,7 @@ function renderFeed(searchTerm = '') {
                 <img src="${postImage}" alt="Article thumbnail">
             </div>
             <div class="card-content">
-                <<div class="article-meta">${formatDate(article.publishedAt)}</div>
+                <div class="article-meta">${postDate}</div>
                 <h3 class="article-headline">${postTitle}</h3>
                 <p class="article-excerpt">${postExcerpt}</p>
             </div>
@@ -492,9 +492,7 @@ function renderFeed(searchTerm = '') {
                     <img src="${pitchImage}" alt="Article thumbnail">
                 </div>
                 <div class="card-content">
-                    <div class="article-meta">
-                        <span><i class="fa-regular fa-clock"></i> ${pitchDate}</span>
-                    </div>
+                    <div class="article-meta">${pitchDate}</div>
                     <h3 class="article-headline">${pitchTitle}</h3>
                     <p class="article-excerpt">${pitchExcerpt}</p>
                 </div>
