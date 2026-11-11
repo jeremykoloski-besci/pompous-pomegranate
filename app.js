@@ -3,6 +3,7 @@ if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
 }
 window.scrollTo(0, 0);
+
 // --- SANITY IMAGE BUILDER HELPER ---
 function urlForSanityImage(source) {
     if (!source) return '';
@@ -620,7 +621,10 @@ document.addEventListener('click', (e) => {
 
 // Unified DOMContentLoaded Initialization
 window.addEventListener('DOMContentLoaded', async () => {
+    // FORCE HARD RESET TO TOP INSTANTLY ON LOAD
     window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
     
     if (window.location.hash) {
         history.replaceState(null, null, window.location.pathname + window.location.search);
@@ -770,6 +774,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     // 1. Fetch data first so sidebar widgets populate properly everywhere
     await fetchArticlesFromSanity();
 
+    // FORCE SCROLL TO TOP AGAIN AFTER SANITY DATA RENDERS TO CATCH ANY LAYOT SHIFTS
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+
     // 2. Route based on URL path
     const path = window.location.pathname;
     console.log("Current path on load:", path);
@@ -777,6 +786,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const slug = path.split('/article/')[1];
         console.log("Extracted slug:", slug);
         await renderSingleArticle(slug);
+        window.scrollTo(0, 0); // Extra check for article view routes
     }
 });
 
