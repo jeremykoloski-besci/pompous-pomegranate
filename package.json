@@ -4,6 +4,6 @@
   "type": "module",
   "dependencies": {
     "@sanity/client": "^6.27.0",
-    "@vercel/og": "^0.6.2"
+    "@resvg/resvg-js": "^2.6.2"
   }
 }
