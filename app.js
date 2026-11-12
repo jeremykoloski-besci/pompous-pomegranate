@@ -164,6 +164,10 @@ async function renderSingleArticle(slug) {
         // Determine the correct category label based on whether it's a pitch or regular post
         const categoryLabel = post.category || (window.allPitches && window.allPitches.some(p => p._id === post._id) ? "Community Pitch" : "General Satire");
 
+        // Determine the category label dynamically (falls back to "SATIRE" or "COMMUNITY PITCH")
+        const isPitch = window.allPitches && window.allPitches.some(p => p._id === post._id);
+        const categoryLabel = post.category ? post.category.toUpperCase() : (isPitch ? "COMMUNITY PITCH" : "SATIRE");
+
         if (articleView) {
             articleView.innerHTML = `
                 <button onclick="goHome()" style="margin-bottom: 16px; cursor: pointer; padding: 6px 12px; background:var(--text-primary); color:var(--card-bg); border:none; border-radius:4px; font-weight:500; font-size: 13px;">&larr; Back to Home</button>
