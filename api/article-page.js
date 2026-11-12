@@ -38,9 +38,12 @@ export default async function handler(req, res) {
         ? `${rawImage}&fm=jpg` 
         : `${rawImage}?fm=jpg`;
 
+      // Strip any trailing file extension (.webp, .jpg, etc.) so Facebook's regex doesn't choke on it
+      const cleanImageUrl = rawImage.replace(/\.[^/.]+$/, '');
+
       const ogImageUrl = `https://www.thepompouspomegranate.com/api/og.png?title=${encodeURIComponent(
         title
-      )}&image=${encodeURIComponent(formattedImageUrl)}`;
+      )}&image=${encodeURIComponent(cleanImageUrl)}`;
       const pageUrl = `https://www.thepompouspomegranate.com/article/${slug}`;
 
       const metaTags = `
