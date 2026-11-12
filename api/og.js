@@ -1,16 +1,40 @@
 export default async function handler(req, res) {
   try {
     const { searchParams } = new URL(req.url, `http://${req.headers.host}`);
-    const title = searchParams.get('title') || 'The Pompous Pomegranate';
-    
-    // Read the passed image parameter, falling back to Unsplash only if missing
-    const imageUrl = searchParams.get('image') || searchParams.get('media') || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
+    const slug = searchParams.get('slug');
+    let title = searchParams.get('title') || 'The Pompous Pomegranate';
+    let imageUrl = 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
+
+    // If a slug is provided, fetch the correct title and image directly from Sanity server-side
+    if (slug) {
+      try {
+        const query = encodeURIComponent(`*[slug.current == "${slug}" || _id == "${slug}"][0]{
+          title,
+          headline,
+          "imageUrl": coalesce(imageUrl, mainImage.asset->url, image.asset->url, coverImage.asset->url)
+        }`);
+        const sanityRes = await fetch(
+          `https://5hfaqqg7.api.sanity.io/v2023-05-03/data/query/production?query=${query}`
+        );
+        const { result: post } = await sanityRes.json();
+        if (post) {
+          title = post.title || post.headline || title;
+          if (post.imageUrl) {
+            imageUrl = post.imageUrl;
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch from Sanity in OG function:', err);
+      }
+    }
 
     // Fetch the article photo and convert to Base64
     const imgRes = await fetch(imageUrl);
     const imgBuffer = Buffer.from(await imgRes.arrayBuffer());
     const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
     const base64Img = `data:${contentType};base64,${imgBuffer.toString('base64')}`;
+
+    // ... (keep your existing word wrapping and SVG generation code below)
 
     // Word wrap headline into lines (~32 chars per line)
     const words = title.split(' ');
