@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@sanity/client": "^6.27.0"
+    "@sanity/client": "^6.27.0",
     "@vercel/og": "^0.6.2"
   }
 }
