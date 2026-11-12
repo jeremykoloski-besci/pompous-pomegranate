@@ -1,10 +1,10 @@
 export default async function handler(req, res) {
   try {
-   const { searchParams } = new URL(req.url, `http://${req.headers.host}`);
+    const { searchParams } = new URL(req.url, `http://${req.headers.host}`);
     const title = searchParams.get('title') || 'The Pompous Pomegranate';
     
-    // Use a clean, reliable Unsplash photo or default satirical banner as the top half
-    const imageUrl = 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
+    // Read the passed image parameter, falling back to Unsplash only if missing
+    const imageUrl = searchParams.get('image') || searchParams.get('media') || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
 
     // Fetch the article photo and convert to Base64
     const imgRes = await fetch(imageUrl);
