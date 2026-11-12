@@ -4,8 +4,6 @@ export const config = {
   runtime: 'nodejs',
 };
 export default async function handler(req, res) {
- res.setHeader('Content-Type', 'text/plain');
-  return res.status(200).send("TEST: NEW CODE IS LIVE");
   try {
     const { searchParams } = new URL(req.url, `http://${req.headers.host}`);
     const title = searchParams.get('title') || 'Local Man Sweats Profusely While Explaining Cryptocurrency';
