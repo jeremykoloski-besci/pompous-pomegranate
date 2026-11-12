@@ -4,16 +4,14 @@ if ('scrollRestoration' in history) {
 }
 window.scrollTo(0, 0);
 
-// --- SANITY IMAGE BUILDER HELPER (Robust crop parser) ---
-function urlForSanityImage(source, targetWidth = 1200, targetHeight = 630) {
+// --- SANITY IMAGE BUILDER HELPER ---
+function urlForSanityImage(source, width = 1200, height = 630) {
     if (!source) return '';
-    
-    // If it's already a plain external URL (like Unsplash)
     if (typeof source === 'string' && (source.startsWith('http://') || source.startsWith('https://'))) {
-        return `${source}?auto=format&fit=crop&w=${targetWidth}&h=${targetHeight}&fm=jpg`;
+        return source;
     }
     
-    // Handle Sanity image object or asset reference
+    // Handle Sanity image object or reference
     const imageAsset = source.asset || source;
     const ref = imageAsset._ref || imageAsset._id;
     if (!ref) return '';
@@ -28,27 +26,12 @@ function urlForSanityImage(source, targetWidth = 1200, targetHeight = 630) {
     const projectId = "5hfaqqg7"; 
     const dataset = "production";
 
+    // Base CDN URL
     let baseUrl = `https://cdn.sanity.io/images/${projectId}/${dataset}/${assetId}-${dimensions}.${extension}`;
     
-    // Check if Sanity applied a manual crop rectangle in the Studio
-    let cropParams = '';
-    if (source.crop) {
-        // Sanity crop object stores percentages (top, bottom, left, right)
-        // We can pass them directly to Sanity's image pipeline if needed, 
-        // but rect=left,top,width,height is the cleanest way:
-        const { left, top, right, bottom } = source.crop;
-        // Parse original dimensions width/height from the ref string (e.g., "1920x1080")
-        const [origW, origH] = dimensions.split('x').map(Number);
-        if (origW && origH) {
-            const cropX = Math.round(left * origW);
-            const cropY = Math.round(top * origH);
-            const cropW = Math.round((1 - left - right) * origW);
-            const cropH = Math.round((1 - top - bottom) * origH);
-            cropParams = `&rect=${cropX},${cropY},${cropW},${cropH}`;
-        }
-    }
-
-    return `${baseUrl}?auto=format&fit=crop&w=${targetWidth}&h=${targetHeight}&fm=jpg${cropParams}`;
+    // If your API passed crop/hotspot object data directly into mainImage, 
+    // Sanity's CDN automatically respects crop if we use crop parameters or if we pass the asset correctly.
+    return `${baseUrl}?auto=format&fit=crop&w=${width}&h=${height}&fm=jpg`;
 }
 
 // --- 1. SINGLE ARTICLE ROUTER (Executes on page load if visiting /article/...) ---
