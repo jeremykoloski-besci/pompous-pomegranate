@@ -17,10 +17,13 @@ export default async function handler(req, res) {
           `https://5hfaqqg7.api.sanity.io/v2023-05-03/data/query/production?query=${query}`
         );
         const { result: post } = await sanityRes.json();
-        if (post) {
+       if (post) {
           title = post.title || post.headline || title;
           if (post.imageUrl) {
-            imageUrl = post.imageUrl;
+            // Force Sanity to output a universally accepted .jpg format server-side
+            imageUrl = post.imageUrl.includes('?') 
+              ? `${post.imageUrl}&fm=jpg` 
+              : `${post.imageUrl}?fm=jpg`;
           }
         }
       } catch (err) {
