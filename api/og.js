@@ -8,13 +8,13 @@ export default async function handler(req, res) {
       searchParams.get('image') ||
       'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
 
-    // Fetch the article photo and convert to Base64 so Resvg embeds it reliably
+    // Fetch the article photo and convert to Base64
     const imgRes = await fetch(imageUrl);
     const imgBuffer = Buffer.from(await imgRes.arrayBuffer());
     const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
     const base64Img = `data:${contentType};base64,${imgBuffer.toString('base64')}`;
 
-    // Wrap headline text into lines (~36 chars per line) for clean layout formatting
+    // Wrap headline text into lines (~36 chars per line)
     const words = title.split(' ');
     const lines = [];
     let currentLine = '';
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
         <!-- White Base Background -->
         <rect width="1200" height="1100" fill="#ffffff"/>
         
-        <!-- Top Article Photo -->
+        <!-- Top Article Photo Area -->
         <rect width="1200" height="680" fill="#18181b"/>
         <image href="${base64Img}" x="0" y="0" width="1200" height="680" preserveAspectRatio="xMidYMid slice" />
 
@@ -62,7 +62,7 @@ export default async function handler(req, res) {
         ${headlineSvg}
 
         <!-- Centered Pomegranate Brand Emblem -->
-        <g transform="translate(572, 995) scale(1.4)">
+        <g transform="translate(572, 985) scale(1.4)">
           <path d="M12 7L14.5 2L18.5 6L22.5 2L25 7H12Z" fill="#991b1b"/>
           <circle cx="18.5" cy="20" r="13" fill="#991b1b"/>
           <circle cx="18.5" cy="20" r="8" fill="#f5b841"/>
