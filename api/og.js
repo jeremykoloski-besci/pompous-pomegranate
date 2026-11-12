@@ -1,10 +1,11 @@
 export default async function handler(req, res) {
   try {
     const { searchParams } = new URL(req.url, `http://${req.headers.host}`);
-    const slug = searchParams.get('slug');
-    let title = searchParams.get('title') || 'The Pompous Pomegranate';
-    let imageUrl = 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
-
+    const title = searchParams.get('title') || 'The Pompous Pomegranate';
+    
+    // Grab the image passed from the article page
+    const imageUrl = searchParams.get('image') || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
+    
     // If a slug is provided, fetch the correct title and image directly from Sanity server-side
     if (slug) {
       try {
