@@ -161,6 +161,9 @@ async function renderSingleArticle(slug) {
           </div>
         `;
 
+        // Determine the correct category label based on whether it's a pitch or regular post
+        const categoryLabel = post.category || (window.allPitches && window.allPitches.some(p => p._id === post._id) ? "Community Pitch" : "General Satire");
+
         if (articleView) {
             articleView.innerHTML = `
                 <button onclick="goHome()" style="margin-bottom: 16px; cursor: pointer; padding: 6px 12px; background:var(--text-primary); color:var(--card-bg); border:none; border-radius:4px; font-weight:500; font-size: 13px;">&larr; Back to Home</button>
@@ -168,7 +171,7 @@ async function renderSingleArticle(slug) {
                 <h1 style="font-size: 28px; line-height: 1.15; margin-bottom: 10px; font-weight: 700; font-family: 'Zilla Slab', serif; color: var(--text-primary);">${post.title || post.headline}</h1>
                 
                 <div style="color: var(--text-secondary); margin-bottom: 14px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
-                    <span style="color: var(--accent-color);">${post.category || 'CULTURE'}</span> &bull; <span>${formatArticleDate(post.publishedAt || post.submittedAt)}</span> &bull; <span>The Pompous Pomegranate</span>
+                    <span style="color: var(--accent-color);">${categoryLabel}</span> &bull; <span>${formatArticleDate(post.publishedAt || post.submittedAt)}</span>
                 </div>
 
                 ${imageHtml}
