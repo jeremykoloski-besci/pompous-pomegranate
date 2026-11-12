@@ -27,9 +27,41 @@ export default async function handler(req, res) {
         post.imageUrl ||
         'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
 
+      if (post) {
+      const title = post.title || post.headline || 'The Pompous Pomegranate';
+      const rawImage =
+        post.imageUrl ||
+        'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
+
+      // Ensure both title and image are passed to the OG generator
       const ogImageUrl = `https://www.thepompouspomegranate.com/api/og?title=${encodeURIComponent(
         title
       )}&image=${encodeURIComponent(rawImage)}`;
+      const pageUrl = `https://www.thepompouspomegranate.com/article/${slug}`;
+
+      const metaTags = `
+        <title>${title} – The Pompous Pomegranate</title>
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content="${title.replace(/"/g, '&quot;')}" />
+        <meta property="og:description" content="100% Verified Satire from The Pompous Pomegranate." />
+        <meta property="og:image" content="${ogImageUrl}" />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="1100" />
+        <meta property="og:url" content="${pageUrl}" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="${title.replace(/"/g, '&quot;')}" />
+        <meta name="twitter:image" content="${ogImageUrl}" />
+      `;
+
+      // Remove any static title, og:, and twitter: tags so old fallbacks don't interfere
+      html = html.replace(/<title>.*?<\/title>/gi, '');
+      html = html.replace(/<meta[^>]*property=["']og:[^"']*["'][^>]*>/gi, '');
+      html = html.replace(/<meta[^>]*name=["']twitter:[^"']*["'][^>]*>/gi, '');
+      
+      // Inject dynamic tags right before </head>
+      html = html.replace('</head>', `${metaTags}\n</head>`);
+    }
       const pageUrl = `https://www.thepompouspomegranate.com/article/${slug}`;
 
       const metaTags = `
