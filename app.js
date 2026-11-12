@@ -161,9 +161,13 @@ async function renderSingleArticle(slug) {
           </div>
         `;
 
-        // Determine the category label dynamically (falls back to "SATIRE" or "COMMUNITY PITCH")
-        const isPitch = window.allPitches && window.allPitches.some(p => p._id === post._id);
-        const categoryLabel = post.category ? post.category.toUpperCase() : (isPitch ? "COMMUNITY PITCH" : "SATIRE");
+        // Check if it's a community pitch by looking at the URL path, fallback properties, or feed array
+        const isPitch = window.location.pathname.includes('/pitch/') || 
+                        (window.allPitches && window.allPitches.some(p => p._id === post._id)) || 
+                        post.category === 'pitch' || 
+                        !post.category;
+
+        const categoryLabel = isPitch ? "COMMUNITY PITCH" : post.category.toUpperCase();
 
         if (articleView) {
             articleView.innerHTML = `
