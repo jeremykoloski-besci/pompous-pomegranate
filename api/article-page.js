@@ -38,13 +38,12 @@ export default async function handler(req, res) {
         ? `${rawImage}&fm=jpg` 
         : `${rawImage}?fm=jpg`;
 
-      // Strip any trailing file extension (.webp, .jpg, etc.) so Facebook's regex doesn't choke on it
+     // Strip any extension (.webp, .jpg, .png) from the Sanity image URL so Facebook's crawler sees zero extensions in the query string
       const cleanImageUrl = rawImage.replace(/\.[^/.]+$/, '');
 
-      // Change the parameter key from 'image' to 'media' so Facebook's crawler ignores its extension
       const ogImageUrl = `https://www.thepompouspomegranate.com/api/og.png?title=${encodeURIComponent(
         title
-      )}&media=${encodeURIComponent(rawImage)}`;
+      )}&media=${encodeURIComponent(cleanImageUrl)}`;
       const pageUrl = `https://www.thepompouspomegranate.com/article/${slug}`;
 
       const metaTags = `
