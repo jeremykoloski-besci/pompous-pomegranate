@@ -1,10 +1,11 @@
 export default async function handler(req, res) {
   try {
-    const { searchParams } = new URL(req.url, `http://${req.headers.host}`);
+   const { searchParams } = new URL(req.url, `http://${req.headers.host}`);
     const title = searchParams.get('title') || 'The Pompous Pomegranate';
-    const imgParam = searchParams.get('img');
+    
+    // Read from 'media' instead of 'image'
     const imageUrl =
-      searchParams.get('image') ||
+      searchParams.get('media') ||
       'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
 
     // Fetch the article photo and convert to Base64
