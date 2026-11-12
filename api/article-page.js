@@ -29,8 +29,13 @@ export default async function handler(req, res) {
 
       const pageUrl = `https://www.thepompouspomegranate.com/article/${slug}`;
 
-     // Pass only the slug so Facebook's crawler sees zero image URLs or file extensions in the query parameters
-      const ogImageUrl = `https://www.thepompouspomegranate.com/api/og.png?slug=${encodeURIComponent(slug)}`;
+    // Force Sanity to output .jpg directly in the tag so it's a standard format
+      const formattedImage = rawImage.includes('?') ? `${rawImage}&fm=jpg` : `${rawImage}?fm=jpg`;
+
+      // Pass both title and formatted image toog.png
+      const ogImageUrl = `https://www.thepompouspomegranate.com/api/og.png?title=${encodeURIComponent(
+        title
+      )}&image=${encodeURIComponent(formattedImage)}`;
 
       const metaTags = `
         <title>${title} – The Pompous Pomegranate</title>
