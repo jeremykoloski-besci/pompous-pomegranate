@@ -45,7 +45,6 @@ export default async function handler(req, res) {
         <meta property="og:title" content="${title.replace(/"/g, '&quot;')}" />
         <meta property="og:description" content="100% Verified Satire from The Pompous Pomegranate." />
         <meta property="og:image" content="${ogImageUrl}" />
-        <meta property="og:image:type" content="image/png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="1100" />
         <meta property="og:url" content="${pageUrl}" />
