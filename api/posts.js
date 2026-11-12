@@ -25,6 +25,7 @@ export default async function handler(req, res) {
           slug,
           body,
           "author": author->name,
+          mainImage,
           "imageUrl": mainImage.asset->url,
           "likes": coalesce(likes, 0),
           publishedAt
@@ -33,6 +34,7 @@ export default async function handler(req, res) {
           _id,
           title,
           slug,
+          mainImage,
           "imageUrl": mainImage.asset->url,
           publishedAt
         },
@@ -82,7 +84,8 @@ export default async function handler(req, res) {
           slug: { current: pSlug },
           body: bodyText,
           author: p.author || "Anonymous Pomp",
-          imageUrl: p.image || p.mainImage || p.photo || p.picture || null,
+          mainImage: p.mainImage || p.image || null,
+          imageUrl: p.image || p.mainImage?.asset->url || p.photo || p.picture || null,
           likes: 0,
           publishedAt: p.submittedAt || p._createdAt
         };
@@ -105,8 +108,8 @@ export default async function handler(req, res) {
         const nextPost = currentIndex > 0 ? unifiedFeed[currentIndex - 1] : null;
         const prevPost = currentIndex >= 0 && currentIndex < unifiedFeed.length - 1 ? unifiedFeed[currentIndex + 1] : null;
 
-        result.prevPost = prevPost ? { title: prevPost.title, slug: prevPost.slug?.current, imageUrl: prevPost.imageUrl } : null;
-        result.nextPost = nextPost ? { title: nextPost.title, slug: nextPost.slug?.current, imageUrl: nextPost.imageUrl } : null;
+        result.prevPost = prevPost ? { title: prevPost.title, slug: prevPost.slug?.current, imageUrl: prevPost.imageUrl, mainImage: prevPost.mainImage } : null;
+        result.nextPost = nextPost ? { title: nextPost.title, slug: nextPost.slug?.current, imageUrl: nextPost.imageUrl, mainImage: nextPost.mainImage } : null;
       }
 
       return res.status(200).json({ result });
@@ -121,6 +124,7 @@ export default async function handler(req, res) {
         body,
         "category": categories[0]->title,
         "author": author->name,
+        mainImage,
         "imageUrl": mainImage.asset->url,
         "likes": coalesce(likes, 0),
         publishedAt
