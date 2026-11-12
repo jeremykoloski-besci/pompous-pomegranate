@@ -33,10 +33,12 @@ export default async function handler(req, res) {
         post.imageUrl ||
         'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
 
-      // Ensure both title and image are passed to the OG generator
+      // Base64 encode the raw image URL so Facebook's crawler ignores its extension
+      const encodedImage = Buffer.from(rawImage).toString('base64');
+
       const ogImageUrl = `https://www.thepompouspomegranate.com/api/og.png?title=${encodeURIComponent(
         title
-      )}&image=${encodeURIComponent(rawImage)}`;
+      )}&img=${encodedImage}`;
       const pageUrl = `https://www.thepompouspomegranate.com/article/${slug}`;
 
       const metaTags = `
