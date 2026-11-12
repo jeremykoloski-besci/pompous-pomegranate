@@ -34,7 +34,7 @@ export default async function handler(req, res) {
         'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
 
       // Ensure both title and image are passed to the OG generator
-      const ogImageUrl = `https://www.thepompouspomegranate.com/api/og?title=${encodeURIComponent(
+      const ogImageUrl = `https://www.thepompouspomegranate.com/api/og.png?title=${encodeURIComponent(
         title
       )}&image=${encodeURIComponent(rawImage)}`;
       const pageUrl = `https://www.thepompouspomegranate.com/article/${slug}`;
