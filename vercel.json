@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/api/og.png", "destination": "/api/og" },
     { "source": "/article/:slug", "destination": "/api/article-page" }
   ]
 }
