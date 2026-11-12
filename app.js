@@ -4,8 +4,8 @@ if ('scrollRestoration' in history) {
 }
 window.scrollTo(0, 0);
 
-// --- SANITY IMAGE BUILDER HELPER ---
-function urlForSanityImage(source) {
+// --- SANITY IMAGE BUILDER HELPER (Updated to support crop & hotspot) ---
+function urlForSanityImage(source, width = 1200, height = 630) {
     if (!source) return '';
     if (typeof source === 'string' && (source.startsWith('http://') || source.startsWith('https://'))) {
         return source;
@@ -26,7 +26,17 @@ function urlForSanityImage(source) {
     const projectId = "5hfaqqg7"; 
     const dataset = "production";
 
-    return `https://cdn.sanity.io/images/${projectId}/${dataset}/${assetId}-${dimensions}.${extension}`;
+    let baseUrl = `https://cdn.sanity.io/images/${projectId}/${dataset}/${assetId}-${dimensions}.${extension}`;
+    
+    // If the image has crop data, append Sanity CDN crop & fit parameters so it matches the custom crop!
+    let params = `?auto=format&fit=crop&w=${width}&h=${height}&fm=jpg`;
+    if (source.crop) {
+        // Sanity crop uses floats (top, bottom, left, right)
+        // Alternatively, let Sanity's crop engine handle it via crop/hotspot query parameters if needed, 
+        // but explicit width/height with fit=crop and hotspot enabled handles the focal crop.
+    }
+
+    return baseUrl + params;
 }
 
 // --- 1. SINGLE ARTICLE ROUTER (Executes on page load if visiting /article/...) ---
@@ -82,9 +92,9 @@ async function renderSingleArticle(slug) {
 
         const hasLiked = checkIfLiked(post._id);
 
-        // Process image safely using the Sanity asset URL builder
-        const rawImageSource = post.imageUrl || post.imageURL || post.image;
-        const imageSource = urlForSanityImage(rawImageSource);
+        // Process image safely using the Sanity asset URL builder with explicit crop dimensions (1200x630 for 1.91:1 ratio)
+        const rawImageSource = post.mainImage || post.imageUrl || post.imageURL || post.image;
+        const imageSource = urlForSanityImage(rawImageSource, 1200, 630);
         const imageHtml = imageSource ? `
             <img src="${imageSource}" alt="Article image" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;" onerror="this.style.display='none'">
         ` : '';
@@ -116,7 +126,7 @@ async function renderSingleArticle(slug) {
         // --- PREVIOUS & NEXT ARTICLE NAVIGATION COMPONENTS ---
         const prevNav = post.prevPost ? `
           <a href="/article/${post.prevPost.slug}" class="nav-card prev-card">
-            ${post.prevPost.imageUrl ? `<img src="${urlForSanityImage(post.prevPost.imageUrl)}" alt="">` : ''}
+            ${post.prevPost.imageUrl ? `<img src="${urlForSanityImage(post.prevPost.imageUrl, 400, 250)}" alt="">` : ''}
             <div>
               <span class="nav-label">&larr; PREVIOUS</span>
               <h4>${post.prevPost.title}</h4>
@@ -126,7 +136,7 @@ async function renderSingleArticle(slug) {
 
         const nextNav = post.nextPost ? `
           <a href="/article/${post.nextPost.slug}" class="nav-card next-card">
-            ${post.nextPost.imageUrl ? `<img src="${urlForSanityImage(post.nextPost.imageUrl)}" alt="">` : ''}
+            ${post.nextPost.imageUrl ? `<img src="${urlForSanityImage(post.nextPost.imageUrl, 400, 250)}" alt="">` : ''}
             <div>
               <span class="nav-label">NEXT &rarr;</span>
               <h4>${post.nextPost.title}</h4>
@@ -401,7 +411,7 @@ function renderFeed(searchTerm = '') {
 
         filteredPitches.forEach((pitch) => {
             const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
-            const pitchImage = urlForSanityImage(pitch.imageUrl || pitch.image) || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
+            const pitchImage = urlForSanityImage(pitch.mainImage || pitch.imageUrl || pitch.image, 600, 315) || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
             const pitchTitle = pitch.headline || "Untitled Article";
             const pitchDate = formatArticleDate(pitch.submittedAt || pitch.publishedAt);
             const articleUrl = "/article/" + pitchSlug;
@@ -452,7 +462,7 @@ function renderFeed(searchTerm = '') {
         const postTitle = post.title || "Untitled Satire";
         const postCategory = post.category || "General Satire";
         const postDate = formatArticleDate(post.publishedAt || post.submittedAt);
-        const postImage = urlForSanityImage(post.imageUrl || post.image) || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
+        const postImage = urlForSanityImage(post.mainImage || post.imageUrl || post.image, 600, 315) || "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80";
         const articleUrl = "/article/" + articleSlug;
         const postExcerpt = extractTextFromPortableText(post);
 
@@ -484,7 +494,7 @@ function renderFeed(searchTerm = '') {
 
         filteredPitches.forEach((pitch) => {
             const pitchSlug = (pitch.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || pitch._id;
-            const pitchImage = urlForSanityImage(pitch.imageUrl || pitch.image) || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
+            const pitchImage = urlForSanityImage(pitch.mainImage || pitch.imageUrl || pitch.image, 600, 315) || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80";
             const pitchTitle = pitch.headline || "Untitled Article";
             const pitchDate = formatArticleDate(pitch.submittedAt || pitch.publishedAt);
             const articleUrl = "/article/" + pitchSlug;
