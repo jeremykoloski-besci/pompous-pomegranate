@@ -25,11 +25,6 @@ export default async function handler(req, res) {
           slug,
           body,
           "author": author->name,
-          "mainImage": {
-            "asset": mainImage.asset,
-            "crop": mainImage.crop,
-            "hotspot": mainImage.hotspot
-          },
           "imageUrl": mainImage.asset->url,
           "likes": coalesce(likes, 0),
           publishedAt
@@ -38,11 +33,6 @@ export default async function handler(req, res) {
           _id,
           title,
           slug,
-          "mainImage": {
-            "asset": mainImage.asset,
-            "crop": mainImage.crop,
-            "hotspot": mainImage.hotspot
-          },
           "imageUrl": mainImage.asset->url,
           publishedAt
         },
@@ -73,7 +63,6 @@ export default async function handler(req, res) {
       let rawPosts = data.result?.allPosts || [];
       let rawPitches = data.result?.pitches || [];
 
-      // Format community pitches into standard post shapes so they can share prev/next navigation seamlessly
       let formattedPitches = rawPitches.map(p => {
         let bodyText = "";
         const raw = p.body;
@@ -92,17 +81,14 @@ export default async function handler(req, res) {
           slug: { current: pSlug },
           body: bodyText,
           author: p.author || "Anonymous Pomp",
-          mainImage: p.mainImage || p.image || null,
-          imageUrl: p.image || p.mainImage?.asset->url || p.photo || p.picture || null,
+          imageUrl: p.image || p.photo || p.picture || null,
           likes: 0,
           publishedAt: p.submittedAt || p._createdAt
         };
       });
 
-      // Combine both regular posts and community pitches into a unified chronological feed
       let unifiedFeed = [...rawPosts, ...formattedPitches].sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
 
-      // Match community pitch if not found in official posts
       if (!result && rawPitches) {
         const matchingPitch = formattedPitches.find(p => p.slug.current === slugParam);
         if (matchingPitch) {
@@ -112,12 +98,11 @@ export default async function handler(req, res) {
 
       if (result && unifiedFeed.length > 0) {
         const currentIndex = unifiedFeed.findIndex(p => p.slug?.current === slugParam);
-        
         const nextPost = currentIndex > 0 ? unifiedFeed[currentIndex - 1] : null;
         const prevPost = currentIndex >= 0 && currentIndex < unifiedFeed.length - 1 ? unifiedFeed[currentIndex + 1] : null;
 
-        result.prevPost = prevPost ? { title: prevPost.title, slug: prevPost.slug?.current, imageUrl: prevPost.imageUrl, mainImage: prevPost.mainImage } : null;
-        result.nextPost = nextPost ? { title: nextPost.title, slug: nextPost.slug?.current, imageUrl: nextPost.imageUrl, mainImage: nextPost.mainImage } : null;
+        result.prevPost = prevPost ? { title: prevPost.title, slug: prevPost.slug?.current, imageUrl: prevPost.imageUrl } : null;
+        result.nextPost = nextPost ? { title: nextPost.title, slug: nextPost.slug?.current, imageUrl: nextPost.imageUrl } : null;
       }
 
       return res.status(200).json({ result });
@@ -132,11 +117,6 @@ export default async function handler(req, res) {
         body,
         "category": categories[0]->title,
         "author": author->name,
-        "mainImage": {
-          "asset": mainImage.asset,
-          "crop": mainImage.crop,
-          "hotspot": mainImage.hotspot
-        },
         "imageUrl": mainImage.asset->url,
         "likes": coalesce(likes, 0),
         publishedAt
