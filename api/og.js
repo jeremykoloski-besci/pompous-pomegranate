@@ -1,47 +1,125 @@
-export default async function handler(req, res) {
+import { ImageResponse } from '@vercel/og';
+
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(req) {
   try {
-    const { searchParams } = new URL(req.url, `http://${req.headers.host}`);
+    const { searchParams } = new URL(req.url);
     const title = searchParams.get('title') || 'The Pompous Pomegranate';
-    const imageUrl = searchParams.get('image') || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
+    const imageUrl =
+      searchParams.get('image') ||
+      'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
 
-    // Return a clean HTML page with Open Graph or an SVG image response, 
-    // or redirect/render a lightweight layout card.
-    // Alternatively, we can output an SVG directly which platforms accept as images:
-    
-    const svgContent = `
-      <svg width="1200" height="1100" viewBox="0 0 1200 1100" xmlns="http://www.w3.org/2000/svg">
-        <style>
-          .title { font-family: Georgia, serif; font-size: 42px; font-weight: bold; fill: #1a1a1a; }
-          .badge-text { font-family: sans-serif; font-size: 16px; font-weight: 800; fill: #111111; }
-        </style>
-        <!-- Background -->
-        <rect width="1200" height="1100" fill="#ffffff"/>
-        
-        <!-- Top Image Area Background -->
-        <rect width="1200" height="680" fill="#18181b"/>
-        
-        <!-- Gold Corner Badge -->
-        <g transform="translate(900, 600)">
-          <rect width="270" height="60" rx="4" fill="#f5b841" />
-          <text x="20" y="25" class="badge-text">Read the article at</text>
-          <text x="20" y="45" class="badge-text">ThePompousPomegranate.com</text>
-        </g>
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#ffffff',
+            fontFamily: 'Georgia, serif',
+          }}
+        >
+          {/* TOP SECTION: Article Photo + Bottom-Right Gold Badge */}
+          <div
+            style={{
+              display: 'flex',
+              position: 'relative',
+              width: '100%',
+              height: '62%',
+              backgroundColor: '#18181b',
+            }}
+          >
+            <img
+              src={imageUrl}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
 
-        <!-- Bottom White Panel Title -->
-        <foreignObject x="60" y="740" width="1080" height="240">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: Georgia, serif; font-size: 42px; font-weight: bold; color: #1a1a1a; line-height: 1.2; text-align: center; display: flex; align-items: center; justify-content: center; height: 100%;">
-            ${title}
+            {/* Gold Corner Watermark Badge */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                position: 'absolute',
+                bottom: '20px',
+                right: '20px',
+                backgroundColor: '#f5b841',
+                color: '#111111',
+                padding: '8px 14px',
+                borderRadius: '4px',
+                fontFamily: 'sans-serif',
+                fontSize: '18px',
+                fontWeight: 800,
+                lineHeight: 1.2,
+                boxShadow: '0 4px 10px rgba(0,0,0,0.35)',
+              }}
+            >
+              <span>Read the article at</span>
+              <span>ThePompousPomegranate.com</span>
+            </div>
           </div>
-        </foreignObject>
-      </svg>
-    `;
 
-    res.setHeader('Content-Type', 'image/svg+xml');
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-    return res.status(200).send(svgContent);
+          {/* BOTTOM SECTION: White Box + Centered Headline + Pomegranate Icon */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+              height: '38%',
+              padding: '32px 50px 28px 50px',
+              backgroundColor: '#ffffff',
+              textAlign: 'center',
+            }}
+          >
+            {/* Article Headline */}
+            <div
+              style={{
+                display: 'flex',
+                fontSize: title.length > 75 ? '36px' : '44px',
+                fontWeight: 700,
+                color: '#1a1a1a',
+                lineHeight: 1.2,
+                justifyContent: 'center',
+              }}
+            >
+              {title}
+            </div>
 
-  } catch (err) {
-    console.error('OG Generation Error:', err);
-    return res.status(500).send('Error generating image');
+            {/* Centered Pomegranate Brand Emblem */}
+            <svg
+              width="54"
+              height="54"
+              viewBox="0 0 64 64"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M24 14L27 7L32 12L37 7L40 14H24Z" fill="#991b1b" />
+              <circle cx="32" cy="36" r="21" fill="#991b1b" />
+              <circle cx="32" cy="36" r="13" fill="#f5b841" />
+              <circle cx="28" cy="33" r="2.5" fill="#991b1b" />
+              <circle cx="36" cy="33" r="2.5" fill="#991b1b" />
+              <circle cx="32" cy="40" r="2.5" fill="#991b1b" />
+            </svg>
+          </div>
+        </div>
+      ),
+      {
+        width: 1200,
+        height: 1100,
+      }
+    );
+  } catch (e) {
+    console.error('OG Image Error:', e.message);
+    return new Response('Failed to generate OG image', { status: 500 });
   }
 }
