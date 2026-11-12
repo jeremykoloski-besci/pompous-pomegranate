@@ -29,8 +29,8 @@ export default async function handler(req, res) {
 
       const pageUrl = `https://www.thepompouspomegranate.com/article/${slug}`;
 
-      // Pass only the title—let the OG function handle the image server-side
-      const ogImageUrl = `https://www.thepompouspomegranate.com/api/og.png?title=${encodeURIComponent(title)}`;
+     // Pass only the slug so Facebook's crawler sees zero image URLs or file extensions in the query parameters
+      const ogImageUrl = `https://www.thepompouspomegranate.com/api/og.png?slug=${encodeURIComponent(slug)}`;
 
       const metaTags = `
         <title>${title} – The Pompous Pomegranate</title>
