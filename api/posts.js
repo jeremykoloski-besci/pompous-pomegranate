@@ -24,7 +24,7 @@ export default async function handler(req, res) {
           title,
           slug,
           body,
-          "author": author->name,
+          "category": categories[0]->title,
           "imageUrl": mainImage.asset->url,
           "likes": coalesce(likes, 0),
           publishedAt
@@ -33,6 +33,7 @@ export default async function handler(req, res) {
           _id,
           title,
           slug,
+          "category": categories[0]->title,
           "imageUrl": mainImage.asset->url,
           publishedAt
         },
