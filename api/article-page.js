@@ -38,13 +38,8 @@ export default async function handler(req, res) {
         ? `${rawImage}&fm=jpg` 
         : `${rawImage}?fm=jpg`;
 
-     // Strip any extension (.webp, .jpg, .png) from the Sanity image URL so Facebook's crawler sees zero extensions in the query string
-      const cleanImageUrl = rawImage.replace(/\.[^/.]+$/, '');
-
-      const ogImageUrl = `https://www.thepompouspomegranate.com/api/og.png?title=${encodeURIComponent(
-        title
-      )}&media=${encodeURIComponent(cleanImageUrl)}`;
-      const pageUrl = `https://www.thepompouspomegranate.com/article/${slug}`;
+     // Pass only the title—let the OG function handle the image server-side
+      const ogImageUrl = `https://www.thepompouspomegranate.com/api/og.png?title=${encodeURIComponent(title)}`;
 
       const metaTags = `
         <title>${title} – The Pompous Pomegranate</title>
