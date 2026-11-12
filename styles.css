@@ -76,7 +76,7 @@ body {
 }
 @media (max-width: 768px) {
     body {
-        padding-top: 260px; /* Adjust this value up if it still overlaps on mobile */
+        padding-top: 460px; /* Adjust this value up if it still overlaps on mobile */
     }
 }
 
