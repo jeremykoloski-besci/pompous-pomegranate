@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
     const base64Img = `data:${contentType};base64,${imgBuffer.toString('base64')}`;
 
-    // Wrap headline text into lines (~36 chars per line) for clean SVG rendering
+    // Wrap headline text into lines (~36 chars per line) for clean layout formatting
     const words = title.split(' ');
     const lines = [];
     let currentLine = '';
@@ -48,24 +48,17 @@ export default async function handler(req, res) {
 
     const svg = `
       <svg width="1200" height="1100" viewBox="0 0 1200 1100" xmlns="http://www.w3.org/2000/svg">
-        <!-- White Base -->
+        <!-- White Base Background -->
         <rect width="1200" height="1100" fill="#ffffff"/>
         
         <!-- Top Article Photo -->
         <rect width="1200" height="680" fill="#18181b"/>
         <image href="${base64Img}" x="0" y="0" width="1200" height="680" preserveAspectRatio="xMidYMid slice" />
 
-        <!-- Gold Corner Watermark Badge (Babylon Bee style) -->
-        <g transform="translate(865, 595)">
-          <rect width="305" height="66" rx="6" fill="#f5b841" />
-          <text x="18" y="27" font-family="sans-serif" font-size="16" font-weight="800" fill="#111111">Read the article at</text>
-          <text x="18" y="49" font-family="sans-serif" font-size="16" font-weight="800" fill="#111111">ThePompousPomegranate.com</text>
-        </g>
-
         <!-- Bottom White Panel -->
         <rect y="680" width="1200" height="420" fill="#ffffff"/>
 
-        <!-- Headline Lines -->
+        <!-- Dynamic Headline Lines -->
         ${headlineSvg}
 
         <!-- Centered Pomegranate Brand Emblem -->
@@ -80,7 +73,6 @@ export default async function handler(req, res) {
       </svg>
     `;
 
-    // Convert SVG into a real PNG buffer
     const resvg = new Resvg(svg, {
       fitTo: { mode: 'width', value: 1200 },
     });
