@@ -29,10 +29,8 @@ export default async function handler(req, res) {
 
       const pageUrl = `https://www.thepompouspomegranate.com/article/${slug}`;
 
-      // Pass BOTH title and image to your OG endpoint so the split-screen renders the article photo
-      const ogImageUrl = `https://www.thepompouspomegranate.com/api/og.png?title=${encodeURIComponent(
-        title
-      )}&image=${encodeURIComponent(rawImage)}`;
+      // Pass only the title—let the OG function handle the image server-side
+      const ogImageUrl = `https://www.thepompouspomegranate.com/api/og.png?title=${encodeURIComponent(title)}`;
 
       const metaTags = `
         <title>${title} – The Pompous Pomegranate</title>
