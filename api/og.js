@@ -1,12 +1,12 @@
 export default async function handler(req, res) {
   try {
     const { searchParams } = new URL(req.url, `http://${req.headers.host}`);
-    const title = searchParams.get('title') || 'The Pompous Pomegranate';
+    const slug = searchParams.get('slug');
     
-    // Grab the image passed from the article page
-    const imageUrl = searchParams.get('image') || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
-    
-    // If a slug is provided, fetch the correct title and image directly from Sanity server-side
+    let title = 'The Pompous Pomegranate';
+    let imageUrl = 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
+
+    // Fetch the correct article data directly from Sanity using the slug
     if (slug) {
       try {
         const query = encodeURIComponent(`*[slug.current == "${slug}" || _id == "${slug}"][0]{
@@ -18,29 +18,27 @@ export default async function handler(req, res) {
           `https://5hfaqqg7.api.sanity.io/v2023-05-03/data/query/production?query=${query}`
         );
         const { result: post } = await sanityRes.json();
-       if (post) {
+        if (post) {
           title = post.title || post.headline || title;
           if (post.imageUrl) {
-            // Force Sanity to output a universally accepted .jpg format server-side
-            imageUrl = post.imageUrl.includes('?') 
-              ? `${post.imageUrl}&fm=jpg` 
-              : `${post.imageUrl}?fm=jpg`;
+            imageUrl = post.imageUrl;
           }
         }
       } catch (err) {
-        console.error('Failed to fetch from Sanity in OG function:', err);
+        console.error('Sanity fetch error in OG:', err);
       }
     }
 
-    // Fetch the article photo and convert to Base64
-    const imgRes = await fetch(imageUrl);
+    // Force Sanity image to output as a clean JPG stream
+    const fetchImageUrl = imageUrl.includes('?') ? `${imageUrl}&fm=jpg` : `${imageUrl}?fm=jpg`;
+
+    // Fetch the photo and convert to Base64 for the SVG canvas
+    const imgRes = await fetch(fetchImageUrl);
     const imgBuffer = Buffer.from(await imgRes.arrayBuffer());
     const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
     const base64Img = `data:${contentType};base64,${imgBuffer.toString('base64')}`;
 
-    // ... (keep your existing word wrapping and SVG generation code below)
-
-    // Word wrap headline into lines (~32 chars per line)
+    // Word wrap headline into lines
     const words = title.split(' ');
     const lines = [];
     let currentLine = '';
@@ -90,7 +88,6 @@ export default async function handler(req, res) {
       </svg>
     `;
 
-    // Return the SVG directly with image/svg+xml header (Facebook and social crawlers natively support SVG, and modern servers render it instantly without compilation crashes)
     res.setHeader('Content-Type', 'image/svg+xml');
     res.setHeader('Cache-Control', 'public, max-age=86400');
     return res.status(200).send(svgMarkup);
