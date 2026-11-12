@@ -108,7 +108,9 @@ async function renderSingleArticle(slug) {
         const rawImageSource = post.mainImage || post.imageUrl || post.imageURL || post.image;
         const imageSource = urlForSanityImage(rawImageSource, 1200, 630);
         const imageHtml = imageSource ? `
-            <img src="${imageSource}" alt="Article image" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 6px; margin-bottom: 24px;" onerror="this.style.display='none'">
+            <div style="width: 100%; aspect-ratio: 1.91 / 1; overflow: hidden; border-radius: 6px; margin-bottom: 24px;">
+                <img src="${imageSource}" alt="Article image" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.style.display='none'">
+            </div>
         ` : '';
 
         // --- SOCIAL SHARE LINKS GENERATOR (Onion Style) ---
