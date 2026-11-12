@@ -75,7 +75,7 @@ body {
     background-color: var(--bg-color);
     color: var(--text-primary);
     line-height: 1.6;
-    padding-top: 230px;
+    padding-top: 250px;
     transition: padding-top 0.3s ease;
 }
 
