@@ -35,7 +35,7 @@ html, body {
 }
 @media (max-width: 768px) {
     body {
-        padding-top: 260px !important; /* Adjust this value up if it still overlaps on mobile */
+        padding-top: 100px !important; /* Adjust this value up if it still overlaps on mobile */
     }
 }
 :root {
