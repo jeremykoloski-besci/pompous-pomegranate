@@ -3,7 +3,7 @@ import { Resvg } from '@resvg/resvg-js';
 export default async function handler(req, res) {
   try {
     const { searchParams } = new URL(req.url, `http://${req.headers.host}`);
-    const title = searchParams.get('title') || 'Local Man Sweats Profusely While Explaining Cryptocurrency to a Golden Retriever';
+    const title = searchParams.get('title') || 'Local Man Sweats Profusely While Explaining Cryptocurrency';
     const imageUrl =
       searchParams.get('image') ||
       'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80';
@@ -14,12 +14,38 @@ export default async function handler(req, res) {
     const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
     const base64Img = `data:${contentType};base64,${imgBuffer.toString('base64')}`;
 
-    // Clean up XML special characters
-    const safeTitle = title
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+    // Simple word wrapping for native SVG text
+    const words = title.split(' ');
+    const lines = [];
+    let currentLine = '';
+    for (const word of words) {
+      if ((currentLine + ' ' + word).trim().length <= 32) {
+        currentLine = (currentLine + ' ' + word).trim();
+      } else {
+        if (currentLine) lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+
+    const escapeXml = (str) =>
+      str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+
+    // Calculate starting Y position based on line count to keep it perfectly centered vertically in the white panel
+    const startY = lines.length === 1 ? 810 : lines.length === 2 ? 785 : 755;
+    const headlineSvg = lines
+      .slice(0, 3)
+      .map(
+        (line, i) =>
+          `<text x="600" y="${startY + i * 52}" text-anchor="middle" font-family="Georgia, serif" font-size="42" font-weight="bold" fill="#1a1a1a">${escapeXml(
+            line
+          )}</text>`
+      )
+      .join('');
 
     const svg = `
       <svg width="1200" height="1100" viewBox="0 0 1200 1100" xmlns="http://www.w3.org/2000/svg">
@@ -33,15 +59,11 @@ export default async function handler(req, res) {
         <!-- Bottom White Panel -->
         <rect y="680" width="1200" height="420" fill="#ffffff"/>
 
-        <!-- Headline inside the White Panel -->
-        <foreignObject x="80" y="720" width="1040" height="220">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: Georgia, serif; font-size: 42px; font-weight: bold; color: #1a1a1a; line-height: 1.25; text-align: center; display: flex; align-items: center; justify-content: center; height: 100%;">
-            ${safeTitle}
-          </div>
-        </foreignObject>
+        <!-- Native SVG Headline Text -->
+        ${headlineSvg}
 
         <!-- Pomegranate Brand Emblem at bottom center -->
-        <g transform="translate(572, 970) scale(1.4)">
+        <g transform="translate(572, 975) scale(1.4)">
           <path d="M12 7L14.5 2L18.5 6L22.5 2L25 7H12Z" fill="#991b1b"/>
           <circle cx="18.5" cy="20" r="13" fill="#991b1b"/>
           <circle cx="18.5" cy="20" r="8" fill="#f5b841"/>
