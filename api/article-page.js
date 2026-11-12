@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     const query = encodeURIComponent(`*[slug.current == "${slug}" || _id == "${slug}"][0]{
       title,
       headline,
-      "imageUrl": coalesce(imageUrl, image.asset->url)
+      "imageUrl": coalesce(imageUrl, mainImage.asset->url, image.asset->url, coverImage.asset->url)
     }`);
 
     const sanityRes = await fetch(
@@ -38,6 +38,7 @@ export default async function handler(req, res) {
         <meta property="og:title" content="${title.replace(/"/g, '&quot;')}" />
         <meta property="og:description" content="100% Verified Satire from The Pompous Pomegranate." />
         <meta property="og:image" content="${ogImageUrl}" />
+        <meta property="og:image:type" content="image/png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="1100" />
         <meta property="og:url" content="${pageUrl}" />
@@ -46,8 +47,12 @@ export default async function handler(req, res) {
         <meta name="twitter:image" content="${ogImageUrl}" />
       `;
 
-      // Remove any static title/og tags and inject dynamic ones right before </head>
-      html = html.replace(/<title>.*?<\/title>/i, '');
+      // Remove any static title, og:, and twitter: tags so old fallbacks don't interfere
+      html = html.replace(/<title>.*?<\/title>/gi, '');
+      html = html.replace(/<meta[^>]*property=["']og:[^"']*["'][^>]*>/gi, '');
+      html = html.replace(/<meta[^>]*name=["']twitter:[^"']*["'][^>]*>/gi, '');
+      
+      // Inject dynamic tags right before </head>
       html = html.replace('</head>', `${metaTags}\n</head>`);
     }
   } catch (err) {
